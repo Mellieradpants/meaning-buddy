@@ -136,10 +136,66 @@ export interface RiskFlag {
 
 const NEGATION = /\b(no|not|never|can'?t|don'?t|won'?t|cannot|doesn'?t|isn'?t|aren'?t|wasn'?t|weren'?t)\b/i;
 const QUANTIFIERS = /\b(all|none|always|never|some|many|few|every|each)\b/i;
-const CERTAINTY_STRONG = /\b(is|are|will|shall|must)\b/i;
-const CERTAINTY_WEAK = /\b(may|might|could|likely|possibly|perhaps|probably)\b/i;
-const OBLIGATION_STRONG = /\b(must|required|shall|mandatory)\b/i;
-const OBLIGATION_WEAK = /\b(should|can|may|optional|recommended)\b/i;
+
+// Ranked scales: higher = stronger
+const CERTAINTY_RANK: Record<string, number> = {
+  must: 5, shall: 5, will: 4, is: 3, are: 3,
+  likely: 2, probably: 2, may: 1, might: 1, could: 1, possibly: 0, perhaps: 0,
+};
+const OBLIGATION_RANK: Record<string, number> = {
+  must: 5, required: 5, mandatory: 5, shall: 4,
+  should: 2, recommended: 2, can: 1, may: 1, optional: 0,
+};
+const QUANTIFIER_RANK: Record<string, number> = {
+  all: 5, every: 5, each: 5, always: 5,
+  most: 4, many: 3, several: 2, some: 2,
+  few: 1, none: 0, never: 0,
+};
+
+function classifySubstitution(o: string, r: string): { snippet: string; reason: string } | null {
+  const ol = o.toLowerCase().replace(/[.,;:!?]$/, '');
+  const rl = r.toLowerCase().replace(/[.,;:!?]$/, '');
+
+  // Certainty
+  if (ol in CERTAINTY_RANK && rl in CERTAINTY_RANK && ol !== rl) {
+    const diff = CERTAINTY_RANK[rl] - CERTAINTY_RANK[ol];
+    if (diff !== 0) {
+      return {
+        snippet: `"${o}" → "${r}"`,
+        reason: diff > 0 ? "Certainty strengthened" : "Certainty weakened",
+      };
+    }
+  }
+
+  // Obligation
+  if (ol in OBLIGATION_RANK && rl in OBLIGATION_RANK && ol !== rl) {
+    const diff = OBLIGATION_RANK[rl] - OBLIGATION_RANK[ol];
+    if (diff !== 0) {
+      return {
+        snippet: `"${o}" → "${r}"`,
+        reason: diff > 0 ? "Obligation strengthened" : "Obligation weakened",
+      };
+    }
+  }
+
+  // Quantifier / scope
+  if (ol in QUANTIFIER_RANK && rl in QUANTIFIER_RANK && ol !== rl) {
+    const diff = QUANTIFIER_RANK[rl] - QUANTIFIER_RANK[ol];
+    if (diff !== 0) {
+      return {
+        snippet: `"${o}" → "${r}"`,
+        reason: diff > 0 ? "Scope broadened" : "Scope narrowed",
+      };
+    }
+  }
+
+  // Proper noun near-match
+  if ((isProperNoun(o) || isProperNoun(r)) && editDistance(o, r) <= 2 && o !== r) {
+    return { snippet: `"${o}" → "${r}"`, reason: "Proper noun near-match — possible misspelling" };
+  }
+
+  return null;
+}
 
 function isProperNoun(word: string): boolean {
   return /^[A-Z][a-z]/.test(word) && word.length > 1;
@@ -158,20 +214,10 @@ export function detectRisks(original: string, revised: string, diff: DiffResult)
     if (QUANTIFIERS.test(w)) flags.push({ snippet: `Removed: "${w}"`, reason: "Quantifier removed — changes scope" });
   }
 
-  // Check substitutions
+  // Check substitutions using ranked classification
   for (const { original: o, revised: r } of diff.substitutions) {
-    if (CERTAINTY_STRONG.test(o) && CERTAINTY_WEAK.test(r))
-      flags.push({ snippet: `"${o}" → "${r}"`, reason: "Certainty downgraded — weakens assertion" });
-    if (CERTAINTY_WEAK.test(o) && CERTAINTY_STRONG.test(r))
-      flags.push({ snippet: `"${o}" → "${r}"`, reason: "Certainty upgraded — strengthens assertion" });
-    if (OBLIGATION_STRONG.test(o) && OBLIGATION_WEAK.test(r))
-      flags.push({ snippet: `"${o}" → "${r}"`, reason: "Obligation weakened" });
-    if (OBLIGATION_WEAK.test(o) && OBLIGATION_STRONG.test(r))
-      flags.push({ snippet: `"${o}" → "${r}"`, reason: "Obligation strengthened" });
-    if (isProperNoun(o) || isProperNoun(r)) {
-      if (editDistance(o, r) <= 2 && o !== r)
-        flags.push({ snippet: `"${o}" → "${r}"`, reason: "Proper noun near-match — possible misspelling" });
-    }
+    const risk = classifySubstitution(o, r);
+    if (risk) flags.push(risk);
   }
 
   // Sentence-level negation/quantifier changes
