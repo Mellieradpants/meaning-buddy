@@ -26,6 +26,31 @@ export interface DiffResult {
   substitutions: { original: string; revised: string }[];
 }
 
+// Semantic relationship groups for substitution detection
+const SEMANTIC_GROUPS: string[][] = [
+  // Obligation
+  ['must', 'required', 'shall', 'mandatory', 'should', 'can', 'may', 'optional', 'recommended'],
+  // Certainty
+  ['is', 'are', 'will', 'shall', 'must', 'may', 'might', 'could', 'likely', 'possibly', 'perhaps', 'probably'],
+  // Quantifiers / scope
+  ['all', 'every', 'each', 'always', 'none', 'never', 'some', 'many', 'few', 'most', 'several', 'any'],
+  // Negation
+  ['no', 'not', 'never', "can't", "don't", "won't", 'cannot', "doesn't", "isn't", "aren't", "wasn't", "weren't"],
+  // Temporal
+  ['before', 'after', 'during', 'until', 'since', 'while'],
+  // Inclusion/exclusion
+  ['include', 'exclude', 'except', 'only', 'also', 'additionally'],
+];
+
+function areSemanticRelated(a: string, b: string): boolean {
+  const al = a.toLowerCase(), bl = b.toLowerCase();
+  if (editDistance(al, bl) <= 2) return true;
+  for (const group of SEMANTIC_GROUPS) {
+    if (group.includes(al) && group.includes(bl)) return true;
+  }
+  return false;
+}
+
 export function computeDiff(original: string, revised: string): DiffResult {
   const origSentences = splitSentences(original);
   const revSentences = splitSentences(revised);
@@ -43,20 +68,61 @@ export function computeDiff(original: string, revised: string): DiffResult {
     const origSet = new Set(origTokens.map(t => t.toLowerCase()));
     const revSet = new Set(revTokens.map(t => t.toLowerCase()));
 
-    for (const t of revTokens) {
-      if (!origSet.has(t.toLowerCase())) added.push(t);
+    // Collect raw added/removed for this sentence
+    const sentAdded: { word: string; pos: number }[] = [];
+    const sentRemoved: { word: string; pos: number }[] = [];
+
+    for (let j = 0; j < revTokens.length; j++) {
+      if (!origSet.has(revTokens[j].toLowerCase())) sentAdded.push({ word: revTokens[j], pos: j });
     }
-    for (const t of origTokens) {
-      if (!revSet.has(t.toLowerCase())) removed.push(t);
+    for (let j = 0; j < origTokens.length; j++) {
+      if (!revSet.has(origTokens[j].toLowerCase())) sentRemoved.push({ word: origTokens[j], pos: j });
     }
 
-    // Substitutions: align by position
+    // Also detect positional substitutions (same position, different word, close edit distance)
     const minLen = Math.min(origTokens.length, revTokens.length);
     for (let j = 0; j < minLen; j++) {
       const o = origTokens[j], r = revTokens[j];
       if (o.toLowerCase() !== r.toLowerCase() && editDistance(o.toLowerCase(), r.toLowerCase()) <= 3) {
-        substitutions.push({ original: o, revised: r });
+        // Only add if not already captured as added/removed pair
+        const alreadyCaptured = sentRemoved.some(x => x.word === o) && sentAdded.some(x => x.word === r);
+        if (!alreadyCaptured) {
+          substitutions.push({ original: o, revised: r });
+        }
       }
+    }
+
+    // Match removed→added as substitutions when semantically related and near same position
+    const matchedAdded = new Set<number>();
+    const matchedRemoved = new Set<number>();
+
+    for (let ri = 0; ri < sentRemoved.length; ri++) {
+      let bestIdx = -1;
+      let bestDist = Infinity;
+      for (let ai = 0; ai < sentAdded.length; ai++) {
+        if (matchedAdded.has(ai)) continue;
+        const rw = sentRemoved[ri].word, aw = sentAdded[ai].word;
+        if (areSemanticRelated(rw, aw)) {
+          const posDist = Math.abs(sentRemoved[ri].pos - sentAdded[ai].pos);
+          if (posDist < bestDist) {
+            bestDist = posDist;
+            bestIdx = ai;
+          }
+        }
+      }
+      if (bestIdx !== -1) {
+        substitutions.push({ original: sentRemoved[ri].word, revised: sentAdded[bestIdx].word });
+        matchedRemoved.add(ri);
+        matchedAdded.add(bestIdx);
+      }
+    }
+
+    // Remaining unmatched go to added/removed
+    for (let ri = 0; ri < sentRemoved.length; ri++) {
+      if (!matchedRemoved.has(ri)) removed.push(sentRemoved[ri].word);
+    }
+    for (let ai = 0; ai < sentAdded.length; ai++) {
+      if (!matchedAdded.has(ai)) added.push(sentAdded[ai].word);
     }
   }
 
