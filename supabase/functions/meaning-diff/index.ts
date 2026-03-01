@@ -27,13 +27,16 @@ Return ONLY valid JSON (no markdown):
 
     const userPrompt = `ORIGINAL:\n${original}\n\nREVISED:\n${revised}`;
 
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
-    console.log('LOVABLE_API_KEY length:', lovableApiKey?.length, 'prefix:', lovableApiKey?.substring(0, 10));
+    const geminiKey = Deno.env.get('GeminiApiKey');
+    if (!geminiKey) {
+      return new Response(
+        JSON.stringify({ error: 'GeminiApiKey secret is not configured.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // Try Google Generative Language API with the key
-    const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${lovableApiKey}`;
-    console.log('Trying Google Generative Language API...');
-    
+    const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiKey}`;
+
     const googleResponse = await fetch(googleUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,58 +49,25 @@ Return ONLY valid JSON (no markdown):
       }),
     });
 
-    const googleText = await googleResponse.text();
-    console.log('Google API response:', googleResponse.status, googleText.substring(0, 300));
-
-    if (googleResponse.ok) {
-      const googleResult = JSON.parse(googleText);
-      const content = googleResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      let jsonStr = content;
-      const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (match) jsonStr = match[1].trim();
-      const parsed = JSON.parse(jsonStr);
-      return new Response(JSON.stringify(parsed), {
-        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    if (!googleResponse.ok) {
+      const errText = await googleResponse.text();
+      console.error('Gemini API error:', googleResponse.status, errText);
+      return new Response(
+        JSON.stringify({ error: 'AI analysis failed.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // If Google fails, try OpenAI-compatible format with Bearer token
-    console.log('Trying OpenAI-compatible with Bearer...');
-    const openaiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${lovableApiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gemini-2.5-flash-preview-05-20',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        max_tokens: 4096,
-      }),
+    const googleResult = await googleResponse.json();
+    const content = googleResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (match) jsonStr = match[1].trim();
+    const parsed = JSON.parse(jsonStr);
+
+    return new Response(JSON.stringify(parsed), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
-
-    const openaiText = await openaiResponse.text();
-    console.log('OpenAI-compat response:', openaiResponse.status, openaiText.substring(0, 300));
-
-    if (openaiResponse.ok) {
-      const result = JSON.parse(openaiText);
-      const content = result.choices?.[0]?.message?.content || '';
-      let jsonStr = content;
-      const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (match) jsonStr = match[1].trim();
-      const parsed = JSON.parse(jsonStr);
-      return new Response(JSON.stringify(parsed), {
-        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    return new Response(
-      JSON.stringify({ error: 'AI analysis failed. No working endpoint found.' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     console.error('Error:', error);
     return new Response(
