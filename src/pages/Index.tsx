@@ -40,6 +40,7 @@ const Index = () => {
       ["Modal weakened", "Obligation ↓"],
       ["Condition added", "Conditions +"],
       ["Condition removed", "Conditions −"],
+      ["Condition modified", "Conditions ~"],
       ["Enforcement introduced", "Enforcement +"],
     ];
     const impactCounts: Record<string, number> = {};
@@ -197,6 +198,7 @@ const Index = () => {
               ["Modal weakened", "Obligation ↓"],
               ["Condition added", "Conditions +"],
               ["Condition removed", "Conditions −"],
+              ["Condition modified", "Conditions ~"],
               ["Enforcement introduced", "Enforcement +"],
             ];
             risks.forEach(r => {

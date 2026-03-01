@@ -220,11 +220,13 @@ export function detectRisks(original: string, revised: string, diff: DiffResult)
     if (risk) flags.push(risk);
   }
 
-  // Sentence-level negation/quantifier changes
+  // Sentence-level checks
   const origSentences = original.split(/(?<=[.!?])\s+/);
   const revSentences = revised.split(/(?<=[.!?])\s+/);
   const minS = Math.min(origSentences.length, revSentences.length);
+  const CONDITION = /\b(if|unless|except|only if|provided that|subject to|when)\b/i;
   for (let i = 0; i < minS; i++) {
+    // Negation
     const oNeg = NEGATION.test(origSentences[i]);
     const rNeg = NEGATION.test(revSentences[i]);
     if (oNeg !== rNeg) {
@@ -232,6 +234,31 @@ export function detectRisks(original: string, revised: string, diff: DiffResult)
         snippet: `Sentence ${i + 1}: negation ${oNeg ? 'removed' : 'added'}`,
         reason: "Sentence-level negation change — meaning may be inverted"
       });
+    }
+    // Condition detection
+    const oCond = CONDITION.test(origSentences[i]);
+    const rCond = CONDITION.test(revSentences[i]);
+    if (!oCond && rCond) {
+      flags.push({ snippet: `Sentence ${i + 1}: condition added`, reason: "Condition added" });
+    } else if (oCond && !rCond) {
+      flags.push({ snippet: `Sentence ${i + 1}: condition removed`, reason: "Condition removed" });
+    } else if (oCond && rCond) {
+      const oMatch = origSentences[i].match(CONDITION)![0].toLowerCase();
+      const rMatch = revSentences[i].match(CONDITION)![0].toLowerCase();
+      if (oMatch !== rMatch) {
+        flags.push({ snippet: `Sentence ${i + 1}: "${oMatch}" → "${rMatch}"`, reason: "Condition modified" });
+      }
+    }
+  }
+  // Also check extra revised sentences for conditions
+  for (let i = minS; i < revSentences.length; i++) {
+    if (CONDITION.test(revSentences[i])) {
+      flags.push({ snippet: `Sentence ${i + 1}: condition added`, reason: "Condition added" });
+    }
+  }
+  for (let i = minS; i < origSentences.length; i++) {
+    if (CONDITION.test(origSentences[i])) {
+      flags.push({ snippet: `Sentence ${i + 1}: condition removed`, reason: "Condition removed" });
     }
   }
 
