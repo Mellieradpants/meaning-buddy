@@ -12,6 +12,9 @@ const Landing = () => {
         <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
           Meaning Diff compares two versions of a document and flags when wording changes actually change what it means, including shifts in scope, obligation, conditions, or definitions.
         </p>
+        <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
+          Paste the original version on the left and the revised version on the right, then click Compare.
+        </p>
       </header>
 
       <section className="mb-10">
