@@ -70,7 +70,7 @@ const Index = () => {
           Detect meaning-altering changes in text
         </p>
         <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
-          This tool compares two versions of a document and highlights when wording changes actually change what it means — shifts in scope, obligation, conditions, or definitions.
+          This tool compares two versions of a document and flags wording changes that alter meaning — including shifts in scope, obligation, conditions, or definitions.
         </p>
       </header>
 
