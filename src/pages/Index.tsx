@@ -31,6 +31,30 @@ const Index = () => {
     text += "\n=== PROPAGATION RISK FLAGS ===\n";
     if (risks.length === 0) text += "No risks detected.\n";
     risks.forEach(r => { text += `⚠ ${r.snippet} — ${r.reason}\n`; });
+    const impactRules: [string, string][] = [
+      ["Scope narrowed", "Scope ↓"],
+      ["Scope widened", "Scope ↑"],
+      ["Certainty increased", "Obligation ↑"],
+      ["Modal strengthened", "Obligation ↑"],
+      ["Certainty decreased", "Obligation ↓"],
+      ["Modal weakened", "Obligation ↓"],
+      ["Condition added", "Conditions +"],
+      ["Condition removed", "Conditions −"],
+      ["Enforcement introduced", "Enforcement +"],
+    ];
+    const impactCounts: Record<string, number> = {};
+    risks.forEach(r => {
+      for (const [pattern, label] of impactRules) {
+        if (r.reason.includes(pattern)) {
+          impactCounts[label] = (impactCounts[label] || 0) + 1;
+        }
+      }
+    });
+    const impactEntries = Object.entries(impactCounts);
+    if (impactEntries.length > 0) {
+      text += "\n=== IMPACT SUMMARY ===\n";
+      impactEntries.forEach(([label, count]) => { text += `${label} (${count})\n`; });
+    }
     navigator.clipboard.writeText(text);
     toast.success("Results copied to clipboard");
   };
@@ -160,6 +184,43 @@ const Index = () => {
               </div>
             )}
           </section>
+
+          {/* Impact Summary */}
+          {(() => {
+            const counts: Record<string, number> = {};
+            const rules: [string, string][] = [
+              ["Scope narrowed", "Scope ↓"],
+              ["Scope widened", "Scope ↑"],
+              ["Certainty increased", "Obligation ↑"],
+              ["Modal strengthened", "Obligation ↑"],
+              ["Certainty decreased", "Obligation ↓"],
+              ["Modal weakened", "Obligation ↓"],
+              ["Condition added", "Conditions +"],
+              ["Condition removed", "Conditions −"],
+              ["Enforcement introduced", "Enforcement +"],
+            ];
+            risks.forEach(r => {
+              for (const [pattern, label] of rules) {
+                if (r.reason.includes(pattern)) {
+                  counts[label] = (counts[label] || 0) + 1;
+                }
+              }
+            });
+            const entries = Object.entries(counts);
+            if (entries.length === 0) return null;
+            return (
+              <section className="rounded-lg border bg-card p-5">
+                <h2 className="text-lg font-bold mb-3 font-mono">Impact Summary</h2>
+                <div className="flex flex-wrap gap-3">
+                  {entries.map(([label, count]) => (
+                    <span key={label} className="inline-block px-3 py-1 rounded-md text-sm font-mono font-medium bg-secondary text-secondary-foreground">
+                      {label} ({count})
+                    </span>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
         </div>
       )}
     </div>
