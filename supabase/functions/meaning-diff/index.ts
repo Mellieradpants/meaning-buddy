@@ -18,94 +18,88 @@ Deno.serve(async (req) => {
       );
     }
 
-    const prompt = `You are a legal and policy document analyst. Compare the two versions of text below and determine whether the revisions change the meaning in any substantive way.
+    const systemPrompt = `You are a legal and policy document analyst. Compare two text versions and determine if revisions change meaning substantively.
 
-Focus on changes in:
-- **Scope**: Who or what is affected (broader or narrower)
-- **Obligation**: What is required, permitted, or prohibited (stronger or weaker)
-- **Condition**: When or under what circumstances something applies (added, removed, modified)
-- **Definition**: How key terms are defined (expanded, narrowed, altered)
-- **Rights**: What rights are granted or removed
-- **Liability**: Responsibility, indemnification, or penalties
+Focus on: Scope, Obligation, Condition, Definition, Rights, Liability.
 
-For each finding, classify:
-- type: one of "scope", "obligation", "condition", "definition", "rights", "liability", "no_change"
-- severity: "high" (fundamentally changes meaning), "medium" (notable shift), "low" (minor nuance change), "none" (no meaningful change)
-- summary: one-sentence description of what changed
-- detail: fuller explanation if needed (empty string if not)
-- originalSnippet: the relevant text from the original
-- revisedSnippet: the relevant text from the revision
+Return ONLY valid JSON (no markdown):
+{"overallVerdict":"meaningful_change or no_meaningful_change","overallSummary":"...","findings":[{"type":"scope|obligation|condition|definition|rights|liability|no_change","severity":"high|medium|low|none","summary":"...","detail":"...","originalSnippet":"...","revisedSnippet":"..."}]}`;
 
-Also provide:
-- overallVerdict: "meaningful_change" or "no_meaningful_change"
-- overallSummary: a plain summary of whether and how the meaning changed
+    const userPrompt = `ORIGINAL:\n${original}\n\nREVISED:\n${revised}`;
 
-Return ONLY valid JSON in this exact format:
-{
-  "overallVerdict": "meaningful_change" | "no_meaningful_change",
-  "overallSummary": "...",
-  "findings": [
-    {
-      "type": "scope" | "obligation" | "condition" | "definition" | "rights" | "liability" | "no_change",
-      "severity": "high" | "medium" | "low" | "none",
-      "summary": "...",
-      "detail": "...",
-      "originalSnippet": "...",
-      "revisedSnippet": "..."
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    console.log('LOVABLE_API_KEY length:', lovableApiKey?.length, 'prefix:', lovableApiKey?.substring(0, 10));
+
+    // Try Google Generative Language API with the key
+    const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${lovableApiKey}`;
+    console.log('Trying Google Generative Language API...');
+    
+    const googleResponse = await fetch(googleUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: systemPrompt + '\n\n' + userPrompt }] }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          maxOutputTokens: 4096,
+        },
+      }),
+    });
+
+    const googleText = await googleResponse.text();
+    console.log('Google API response:', googleResponse.status, googleText.substring(0, 300));
+
+    if (googleResponse.ok) {
+      const googleResult = JSON.parse(googleText);
+      const content = googleResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      let jsonStr = content;
+      const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (match) jsonStr = match[1].trim();
+      const parsed = JSON.parse(jsonStr);
+      return new Response(JSON.stringify(parsed), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
-  ]
-}
 
-ORIGINAL:
-${original}
-
-REVISED:
-${revised}`;
-
-    // Use Lovable AI (proxied through Supabase AI gateway)
-    const response = await fetch('https://api.supabase.com/v1/ai/chat', {
+    // If Google fails, try OpenAI-compatible format with Bearer token
+    console.log('Trying OpenAI-compatible with Bearer...');
+    const openaiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('SUPABASE_AUTH_TOKEN')}`,
-        'X-Supabase-Project-Ref': Deno.env.get('SUPABASE_PROJECT_REF') || '',
+        'Authorization': `Bearer ${lovableApiKey}`,
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gemini-2.5-flash-preview-05-20',
         messages: [
-          { role: 'user', content: prompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
         ],
         max_tokens: 4096,
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI API error:', response.status, errorText);
-      return new Response(
-        JSON.stringify({ error: 'AI analysis failed. Please try again.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const openaiText = await openaiResponse.text();
+    console.log('OpenAI-compat response:', openaiResponse.status, openaiText.substring(0, 300));
 
-    const aiResult = await response.json();
-    const content = aiResult.choices?.[0]?.message?.content || '';
-    
-    // Extract JSON from the response (handle markdown code blocks)
-    let jsonStr = content;
-    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1].trim();
+    if (openaiResponse.ok) {
+      const result = JSON.parse(openaiText);
+      const content = result.choices?.[0]?.message?.content || '';
+      let jsonStr = content;
+      const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (match) jsonStr = match[1].trim();
+      const parsed = JSON.parse(jsonStr);
+      return new Response(JSON.stringify(parsed), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
-
-    const parsed = JSON.parse(jsonStr);
 
     return new Response(
-      JSON.stringify(parsed),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'AI analysis failed. No working endpoint found.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in meaning-diff function:', error);
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: 'An error occurred while processing the comparison.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
