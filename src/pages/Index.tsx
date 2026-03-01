@@ -62,12 +62,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-7xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-mono">
+      <header className="mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-mono">
           Meaning Diff
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Compare text revisions and detect meaning-altering changes.
+          Detect meaning-altering changes in text
+        </p>
+        <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
+          This tool compares two versions of a document and highlights when wording changes actually change what it means — shifts in scope, obligation, conditions, or definitions.
         </p>
       </header>
 
