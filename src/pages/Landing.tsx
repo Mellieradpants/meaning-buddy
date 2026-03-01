@@ -54,6 +54,13 @@ const Landing = () => {
         </p>
       </section>
 
+      <section className="mb-10">
+        <h2 className="text-lg font-semibold font-mono mb-3">How it decides something changed</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          The tool looks for edits that shift who is affected, what is required, when it applies, or how strong the obligation is. It focuses on changes in scope, conditions, definitions, and force — not just wording differences.
+        </p>
+      </section>
+
       <button
         onClick={() => navigate("/tool")}
         className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
