@@ -5,8 +5,8 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-3xl mx-auto">
-      <header className="mb-14">
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight font-mono leading-snug">
+      <header className="mb-11">
+        <h1 className="font-semibold tracking-tight font-mono text-[1.75rem] md:text-[2.25rem]" style={{ lineHeight: 1.2 }}>
           Structural Language Comparison Tool
         </h1>
         <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
