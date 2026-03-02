@@ -281,14 +281,26 @@ const Index = () => {
         <p>Results will appear below showing detected structural change types and a side-by-side comparison of modified lines.</p>
       </div>
 
-      {/* Compare Button */}
-      <div className="flex justify-center mb-10">
+      {/* Compare & Clear Buttons */}
+      <div className="flex justify-center gap-3 mb-10">
         <button
           onClick={handleCompare}
           disabled={loading}
           className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-[hsl(209,38%,23%)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Comparing…" : "Compare"}
+        </button>
+        <button
+          onClick={() => {
+            setOriginal("");
+            setRevised("");
+            setResult(null);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          disabled={loading}
+          className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Clear
         </button>
       </div>
 
