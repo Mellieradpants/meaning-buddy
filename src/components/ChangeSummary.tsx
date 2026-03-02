@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
-import { parsePageMarkers, findPageForSnippet } from "@/lib/pageParser";
+import { extractPageFromEvidence } from "@/lib/pageParser";
 import { toast } from "sonner";
 
 interface CategoryResult {
@@ -9,7 +9,6 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
-  pageReference?: string;
 }
 
 interface ChangeSummaryProps {
@@ -24,35 +23,25 @@ function truncateSnippet(text: string, max = 80): string {
   return oneLine.length > max ? oneLine.slice(0, max) + "…" : oneLine;
 }
 
-function buildMarkdownSummary(
-  categories: CategoryResult[],
-  originalText: string,
-  revisedText: string
-): string {
+function buildMarkdownSummary(categories: CategoryResult[]): string {
   const changed = categories.filter((c) => c.status === "changed");
   if (changed.length === 0) return "No structural changes detected.";
 
-  const origMapping = parsePageMarkers(originalText);
-  const revMapping = parsePageMarkers(revisedText);
-
   const lines = changed.map((cat) => {
-    let pageRef: string;
+    const orig = extractPageFromEvidence(cat.originalEvidence);
+    const rev = extractPageFromEvidence(cat.revisedEvidence);
 
-    // Prefer API-provided pageReference
-    if (cat.pageReference) {
-      pageRef = `Page ${cat.pageReference}`;
-    } else {
-      // Fall back to client-side page marker detection
-      pageRef = findPageForSnippet(cat.originalEvidence, originalText, origMapping);
-      if (pageRef === "N/A") {
-        pageRef = findPageForSnippet(cat.revisedEvidence, revisedText, revMapping);
-      }
-    }
+    // Use the original page ref if available, fall back to revised
+    const pageRef = orig.page && orig.page !== "not provided"
+      ? orig.page
+      : rev.page && rev.page !== "not provided"
+        ? rev.page
+        : "Page: not provided";
 
     const categoryLabel = CATEGORIES[cat.category] || cat.category;
     const shortLabel = cat.label.replace(/_/g, " ");
-    const origSnippet = truncateSnippet(cat.originalEvidence);
-    const revSnippet = truncateSnippet(cat.revisedEvidence);
+    const origSnippet = truncateSnippet(orig.text);
+    const revSnippet = truncateSnippet(rev.text);
 
     let entry = `- ${pageRef} — ${categoryLabel} — ${shortLabel}`;
     if (origSnippet) entry += `\n  - Original: "${origSnippet}"`;
@@ -65,14 +54,12 @@ function buildMarkdownSummary(
 
 export default function ChangeSummary({
   categories,
-  originalText,
-  revisedText,
 }: ChangeSummaryProps) {
   const changed = categories.filter((c) => c.status === "changed");
 
   const markdown = useMemo(
-    () => buildMarkdownSummary(categories, originalText, revisedText),
-    [categories, originalText, revisedText]
+    () => buildMarkdownSummary(categories),
+    [categories]
   );
 
   const handleCopy = async () => {
