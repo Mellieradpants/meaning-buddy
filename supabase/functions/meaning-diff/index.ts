@@ -162,6 +162,8 @@ Return ONLY valid JSON (no markdown):
       });
 
       if (!resp.ok) {
+        const errBody = await resp.text();
+        console.error(`upstream_error: status=${resp.status} body=${errBody.slice(0, 500)}`);
         return { ok: false, reason: 'upstream_error' };
       }
 
@@ -215,7 +217,8 @@ Return ONLY valid JSON (no markdown):
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error(error instanceof SyntaxError ? 'invalid_json' : 'unexpected_error');
+    const errorCategory = error instanceof SyntaxError ? 'invalid_json' : 'unexpected_error';
+    console.error(`${errorCategory}: ${error instanceof Error ? error.message : String(error)}`);
     return new Response(
       JSON.stringify({ error: 'An error occurred while processing the comparison.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
