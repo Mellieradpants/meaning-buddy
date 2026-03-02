@@ -15,6 +15,7 @@ import {
   type CategoryKey,
 } from "@/lib/taxonomy";
 import SummaryTable from "@/components/SummaryTable";
+import ChangeSummary from "@/components/ChangeSummary";
 
 interface CategoryResult {
   category: CategoryKey;
@@ -349,6 +350,15 @@ const Index = () => {
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Change Summary (Markdown) */}
+          {changedCategories.length > 0 && (
+            <ChangeSummary
+              categories={result.categories}
+              originalText={original}
+              revisedText={revised}
+            />
           )}
 
           {/* Summary Table */}
