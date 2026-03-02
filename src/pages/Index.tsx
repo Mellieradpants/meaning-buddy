@@ -1,38 +1,27 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 
-interface Finding {
-  type: "scope" | "obligation" | "condition" | "definition" | "rights" | "liability" | "no_change";
-  severity: "high" | "medium" | "low" | "none";
-  summary: string;
-  detail: string;
-  originalSnippet: string;
-  revisedSnippet: string;
+interface CategoryResult {
+  category: "modality_shift" | "actor_power_shift" | "scope_change" | "threshold_shift" | "action_domain_shift" | "obligation_removal";
+  status: "changed" | "unchanged";
+  label: string;
+  originalEvidence: string;
+  revisedEvidence: string;
 }
 
 interface DiffResult {
   overallVerdict: "meaningful_change" | "no_meaningful_change";
-  overallSummary: string;
-  findings: Finding[];
+  categories: CategoryResult[];
 }
 
-const severityColors: Record<string, { border: string; bg: string; badge: string }> = {
-  high: { border: "border-red-400", bg: "bg-red-50 dark:bg-red-950/20", badge: "bg-red-100 text-red-800 border-red-200" },
-  medium: { border: "border-amber-400", bg: "bg-amber-50 dark:bg-amber-950/20", badge: "bg-amber-100 text-amber-800 border-amber-200" },
-  low: { border: "border-blue-400", bg: "bg-blue-50 dark:bg-blue-950/20", badge: "bg-blue-100 text-blue-800 border-blue-200" },
-  none: { border: "border-border", bg: "bg-card", badge: "bg-secondary text-secondary-foreground border-border" },
-};
-
-const typeLabels: Record<string, string> = {
-  scope: "Scope",
-  obligation: "Obligation",
-  condition: "Condition",
-  definition: "Definition",
-  rights: "Rights",
-  liability: "Liability",
-  no_change: "No Change",
+const categoryLabels: Record<string, string> = {
+  modality_shift: "Modality Shift",
+  actor_power_shift: "Actor Power Shift",
+  scope_change: "Scope Change",
+  threshold_shift: "Threshold / Standard Shift",
+  action_domain_shift: "Action Domain Shift",
+  obligation_removal: "Obligation Removal",
 };
 
 const Index = () => {
@@ -75,6 +64,9 @@ const Index = () => {
     }
   };
 
+  const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
+  const unchangedCategories = result?.categories.filter(c => c.status === "unchanged") || [];
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-5xl mx-auto">
       <header className="mb-8">
@@ -82,7 +74,7 @@ const Index = () => {
           Meaning Diff
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Compare two versions. See if the meaning changed.
+          Structural semantic change detection. No interpretation. No commentary.
         </p>
       </header>
 
@@ -144,72 +136,70 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Summary */}
-          <div className="rounded-lg border bg-card p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Summary
-            </h2>
-            <p className="text-sm leading-relaxed text-card-foreground">
-              {result.overallSummary}
-            </p>
-          </div>
-
-          {/* Findings */}
-          {result.findings.length > 0 && (
+          {/* Changed Categories */}
+          {changedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-                Findings ({result.findings.length})
+                Changes Detected ({changedCategories.length})
               </h2>
               <div className="space-y-4">
-                {result.findings.map((finding, i) => {
-                  const colors = severityColors[finding.severity] || severityColors.none;
-                  return (
-                    <div
-                      key={i}
-                      className={`rounded-lg border-l-4 ${colors.border} ${colors.bg} p-5`}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${colors.badge}`}
-                        >
-                          {finding.severity.toUpperCase()}
-                        </span>
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
-                          {typeLabels[finding.type] || finding.type}
-                        </span>
-                      </div>
+                {changedCategories.map((cat, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg border-l-4 border-red-400 bg-red-50 dark:bg-red-950/20 p-5"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-red-100 text-red-800 border-red-200">
+                        CHANGED
+                      </span>
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
+                        {categoryLabels[cat.category] || cat.category}
+                      </span>
+                    </div>
 
-                      <p className="text-sm font-medium text-foreground mb-2">
-                        {finding.summary}
-                      </p>
+                    <p className="text-sm font-mono font-medium text-foreground mb-3">
+                      {cat.label.replace(/_/g, " ")}
+                    </p>
 
-                      {finding.detail && (
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {finding.detail}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                      <div className="rounded-md border bg-background p-3">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                          Original
+                        </div>
+                        <p className="text-xs font-mono text-foreground leading-relaxed">
+                          {cat.originalEvidence}
                         </p>
-                      )}
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                        <div className="rounded-md border bg-background p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                            Original
-                          </div>
-                          <p className="text-xs font-mono text-foreground leading-relaxed">
-                            {finding.originalSnippet}
-                          </p>
+                      </div>
+                      <div className="rounded-md border bg-background p-3">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                          Revised
                         </div>
-                        <div className="rounded-md border bg-background p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                            Revised
-                          </div>
-                          <p className="text-xs font-mono text-foreground leading-relaxed">
-                            {finding.revisedSnippet}
-                          </p>
-                        </div>
+                        <p className="text-xs font-mono text-foreground leading-relaxed">
+                          {cat.revisedEvidence}
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Unchanged Categories */}
+          {unchangedCategories.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Unchanged ({unchangedCategories.length})
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {unchangedCategories.map((cat, i) => (
+                  <span
+                    key={i}
+                    className="inline-block px-3 py-1.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border"
+                  >
+                    {categoryLabels[cat.category] || cat.category}
+                  </span>
+                ))}
               </div>
             </div>
           )}
