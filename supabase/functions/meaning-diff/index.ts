@@ -91,8 +91,7 @@ Return ONLY valid JSON (no markdown):
     });
 
     if (!googleResponse.ok) {
-      const errText = await googleResponse.text();
-      console.error('Gemini API error:', googleResponse.status, errText);
+      console.error('Gemini API error: upstream service returned non-OK status');
       return new Response(
         JSON.stringify({ error: 'Analysis service temporarily unavailable. Please try again.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
