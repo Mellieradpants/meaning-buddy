@@ -144,6 +144,12 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Instruction */}
+      <div className="text-sm text-muted-foreground mb-4 text-center space-y-1">
+        <p>After pasting both versions, click Compare.</p>
+        <p>Results will appear below showing detected structural change types and a side-by-side comparison of modified lines.</p>
+      </div>
+
       {/* Compare Button */}
       <div className="flex justify-center mb-10">
         <button
