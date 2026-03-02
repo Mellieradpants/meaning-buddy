@@ -5,31 +5,50 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-3xl mx-auto">
-      <header className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-mono">
-          Meaning Diff
+      <header className="mb-14">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-mono">
+          Language Structure Comparison
         </h1>
         <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
-          Meaning Diff flags wording changes that alter obligations, scope, timeframes, definitions, or authority.
+          Structural change detection for revised documents.
         </p>
 
-        <div className="flex flex-wrap gap-3 mt-6">
+        <div className="mt-8">
           <button
             onClick={() => navigate("/tool")}
             className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
           >
             Open the tool
           </button>
-          <a
-            href="#how-it-works"
-            className="px-5 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-          >
-            How it works
-          </a>
         </div>
       </header>
 
-      <section className="mb-10">
+      <section className="mb-12">
+        <h2 className="text-lg font-semibold font-mono mb-3">What it does</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+          Language Structure Comparison compares two versions of text and flags structural changes that alter obligation strength, scope, authority, thresholds, action type, or removed duties.
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          It does not evaluate intent or provide legal advice. It identifies structural differences.
+        </p>
+      </section>
+
+      <section id="how-it-works" className="mb-12 scroll-mt-8">
+        <h2 className="text-lg font-semibold font-mono mb-3">How it works</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+          The tool evaluates six categories of structural change:
+        </p>
+        <ul className="text-sm text-muted-foreground space-y-1.5">
+          <li>• Modality shift — changes in obligation strength (e.g., "shall" → "may")</li>
+          <li>• Actor power shift — changes in who holds authority</li>
+          <li>• Scope change — changes in who or what is covered</li>
+          <li>• Threshold / standard shift — numeric or qualitative standard changes</li>
+          <li>• Action domain shift — changes in the type of required action</li>
+          <li>• Obligation removal — deleted or weakened duties</li>
+        </ul>
+      </section>
+
+      <section className="mb-12">
         <h2 className="text-lg font-semibold font-mono mb-3">Example</h2>
         <div className="rounded-lg border bg-card p-4 font-mono text-sm space-y-3">
           <div>
@@ -47,53 +66,27 @@ const Landing = () => {
           <ul className="text-sm text-foreground space-y-1.5">
             <li className="flex items-start gap-2">
               <span className="text-destructive mt-0.5">•</span>
-              <span><span className="font-medium">Modality shift</span> — "shall provide" → "may provide" (mandatory to discretionary)</span>
+              <span><span className="font-medium">Modality shift</span> — "shall provide" → "may provide"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive mt-0.5">•</span>
-              <span><span className="font-medium">Scope change</span> — "all full-time employees" → "eligible employees" (scope redefined)</span>
+              <span><span className="font-medium">Scope change</span> — "all full-time employees" → "eligible employees"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive mt-0.5">•</span>
-              <span><span className="font-medium">Threshold shift</span> — "within 30 days" → "within a reasonable timeframe" (ambiguity introduced)</span>
+              <span><span className="font-medium">Threshold shift</span> — "within 30 days" → "within a reasonable timeframe"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-destructive mt-0.5">•</span>
-              <span><span className="font-medium">Obligation removal</span> — duty weakened from mandatory to discretionary</span>
+              <span><span className="font-medium">Obligation removal</span> — mandatory duty weakened</span>
             </li>
           </ul>
         </div>
       </section>
 
-      <section id="how-it-works" className="mb-10 scroll-mt-8">
-        <h2 className="text-lg font-semibold font-mono mb-3">How it works</h2>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-          Paste the original version on the left and the revised version on the right, then click Compare. The tool checks six categories of structural change:
-        </p>
-        <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-          <li>Modality shift (obligation strength)</li>
-          <li>Actor power shift (who holds authority)</li>
-          <li>Scope change (who or what is covered)</li>
-          <li>Threshold / standard shift (numeric or qualitative bar)</li>
-          <li>Action domain shift (type of required action)</li>
-          <li>Obligation removal (deleted or weakened duties)</li>
-        </ul>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold font-mono mb-3">Best used for</h2>
-        <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-          <li>Draft legislation</li>
-          <li>Policy revisions</li>
-          <li>Contracts</li>
-          <li>Terms of service</li>
-          <li>Internal rule changes</li>
-        </ul>
-      </section>
-
       <section className="mb-10 rounded-lg border border-border bg-muted/50 p-4">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          <span className="font-medium text-foreground">Privacy note:</span> API keys are stored as server-side secrets. Do not paste sensitive personal data.
+          API keys are stored server-side. Do not paste sensitive personal data.
         </p>
       </section>
     </div>
