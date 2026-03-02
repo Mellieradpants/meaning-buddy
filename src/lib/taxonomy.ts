@@ -17,16 +17,6 @@ export const CATEGORIES = {
 
 export type CategoryKey = keyof typeof CATEGORIES;
 
-/** Human-readable dropdown labels for sample scenarios (keyed by CategoryKey). */
-export const SCENARIO_LABELS: Record<CategoryKey, string> = {
-  modality_shift: "Mandatory → Discretionary",
-  action_domain_shift: "Action Domain Shift",
-  threshold_shift: "Threshold Change",
-  actor_power_shift: "Responsibility Shift",
-  obligation_removal: "Obligation Removal",
-  scope_change: "Scope Narrowed",
-};
-
 /** Plain-language phrases used in the auto-generated summary sentence. */
 export const SUMMARY_PHRASES: Record<CategoryKey, string> = {
   modality_shift: "changes mandatory language to discretionary language",
