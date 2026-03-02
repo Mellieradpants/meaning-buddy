@@ -1,3 +1,29 @@
+const VALID_CATEGORIES = new Set([
+  'modality_shift', 'actor_power_shift', 'scope_change',
+  'threshold_shift', 'action_domain_shift', 'obligation_removal',
+]);
+const VALID_STATUSES = new Set(['changed', 'unchanged']);
+const VALID_VERDICTS = new Set(['meaningful_change', 'no_meaningful_change']);
+
+function validateOutput(data: unknown): data is {
+  overallVerdict: string;
+  categories: Array<{ category: string; status: string; label: string; originalEvidence: string; revisedEvidence: string }>;
+} {
+  if (!data || typeof data !== 'object') return false;
+  const obj = data as Record<string, unknown>;
+  if (!VALID_VERDICTS.has(obj.overallVerdict as string)) return false;
+  if (!Array.isArray(obj.categories)) return false;
+  for (const cat of obj.categories) {
+    if (!cat || typeof cat !== 'object') return false;
+    if (!VALID_CATEGORIES.has(cat.category)) return false;
+    if (!VALID_STATUSES.has(cat.status)) return false;
+    if (typeof cat.label !== 'string' || !cat.label) return false;
+    if (typeof cat.originalEvidence !== 'string') return false;
+    if (typeof cat.revisedEvidence !== 'string') return false;
+  }
+  return true;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -154,6 +180,15 @@ Return ONLY valid JSON (no markdown):
     // Strip trailing commas before } or ] (common LLM JSON issue)
     jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
     const parsed = JSON.parse(jsonStr);
+
+    // Validate output matches expected schema to prevent prompt injection manipulation
+    if (!validateOutput(parsed)) {
+      console.error('Output validation failed: response does not match expected schema');
+      return new Response(
+        JSON.stringify({ error: 'Analysis produced an unexpected result. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(JSON.stringify(parsed), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
