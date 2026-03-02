@@ -129,8 +129,46 @@ const Index = () => {
         </button>
       </div>
 
+      {/* Loading Skeleton */}
+      {loading && (
+        <div className="space-y-6 animate-pulse">
+          {/* Verdict skeleton */}
+          <div className="h-10 w-64 rounded-lg bg-muted" />
+
+          {/* Category chips skeleton */}
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-7 rounded-full bg-muted" style={{ width: `${80 + i * 20}px` }} />
+            ))}
+          </div>
+
+          {/* Detail cards skeleton */}
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-20 rounded-full bg-muted" />
+                  <div className="h-5 w-28 rounded-full bg-muted" />
+                </div>
+                <div className="h-4 w-48 rounded bg-muted" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="rounded-md border border-border bg-background p-3 space-y-2">
+                    <div className="h-3 w-16 rounded bg-muted" />
+                    <div className="h-3 w-full rounded bg-muted" />
+                  </div>
+                  <div className="rounded-md border border-border bg-background p-3 space-y-2">
+                    <div className="h-3 w-16 rounded bg-muted" />
+                    <div className="h-3 w-full rounded bg-muted" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Results */}
-      {result && (
+      {!loading && result && (
         <div className="space-y-6">
           {/* Verdict Badge */}
           <div className="flex items-center gap-3">
