@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -24,11 +24,15 @@ const categoryLabels: Record<string, string> = {
   obligation_removal: "Obligation Removal",
 };
 
+const SAMPLE_ORIGINAL = "The Organization shall conduct periodic audits and maintain internal compliance controls designed to ensure adherence to policy.";
+const SAMPLE_REVISED = "The Organization may conduct periodic audits and implement internal compliance controls designed to promote adherence to policy.";
+
 const Index = () => {
   const [original, setOriginal] = useState("");
   const [revised, setRevised] = useState("");
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLDivElement>(null);
 
   const handleCompare = async () => {
     if (!original.trim() || !revised.trim()) {
@@ -78,6 +82,12 @@ const Index = () => {
     }
   };
 
+  const handleLoadSample = () => {
+    setOriginal(SAMPLE_ORIGINAL);
+    setRevised(SAMPLE_REVISED);
+    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
   const unchangedCategories = result?.categories.filter(c => c.status === "unchanged") || [];
 
@@ -92,35 +102,44 @@ const Index = () => {
     <div className="min-h-dvh bg-background p-6 md:p-10 max-w-5xl mx-auto">
       <header className="mb-8">
         <h1 className="font-semibold tracking-tight font-mono text-[1.75rem] md:text-[2.25rem]" style={{ lineHeight: 1.2 }}>
-          Structural Language Comparison Tool
+          Compare Two Versions of a Section
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Structural semantic change detection. No interpretation. No commentary.
+        <p className="text-muted-foreground text-sm mt-2">
+          Paste the earlier version on the left and the revised version on the right.
         </p>
+        <p className="text-muted-foreground text-xs mt-1">
+          This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
+        </p>
+        <button
+          onClick={handleLoadSample}
+          className="mt-3 px-4 py-1.5 rounded-md border border-border bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
+        >
+          Load Sample Text
+        </button>
       </header>
 
       {/* Input Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div ref={inputRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Original
+            Original (earlier version)
           </label>
           <textarea
             value={original}
             onChange={(e) => setOriginal(e.target.value)}
             className="w-full h-64 md:h-80 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="Paste original text here…"
+            placeholder="Paste the earlier version here…"
           />
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Revised
+            Revised (updated version)
           </label>
           <textarea
             value={revised}
             onChange={(e) => setRevised(e.target.value)}
             className="w-full h-64 md:h-80 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="Paste revised text here…"
+            placeholder="Paste the updated version here…"
           />
         </div>
       </div>
