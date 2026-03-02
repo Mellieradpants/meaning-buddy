@@ -24,6 +24,7 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
+  operationalEffect?: string;
 }
 
 interface DiffResult {
@@ -328,6 +329,17 @@ const Index = () => {
                     <p className="text-sm font-mono font-medium text-foreground mb-3">
                       {cat.label.replace(/_/g, " ")}
                     </p>
+
+                    {cat.operationalEffect && cat.operationalEffect !== "No change detected." && (
+                      <div className="rounded-md border border-border bg-muted/50 p-3 mb-3">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                          Operational Effect
+                        </div>
+                        <p className="text-xs text-foreground leading-relaxed">
+                          {cat.operationalEffect}
+                        </p>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                       <div className="rounded-md border border-border bg-background p-3">
