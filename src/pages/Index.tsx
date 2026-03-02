@@ -159,14 +159,14 @@ const Index = () => {
           This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
         </p>
         <div className="mt-3 w-64">
-          <Select value={selectedScenario} onValueChange={handleLoadScenario}>
+          <Select value={selectedScenario} onValueChange={(v) => handleLoadScenario(v as CategoryKey)}>
             <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-              <SelectValue placeholder="Load Sample Scenario" />
+              <SelectValue placeholder="Load Sample (by category)" />
             </SelectTrigger>
             <SelectContent>
-              {(Object.keys(SCENARIO_LABELS) as CategoryKey[]).map((key) => (
+              {(Object.entries(CATEGORIES) as [CategoryKey, string][]).map(([key, label]) => (
                 <SelectItem key={key} value={key} className="text-xs">
-                  {SCENARIO_LABELS[key]}
+                  {label}
                 </SelectItem>
               ))}
             </SelectContent>
