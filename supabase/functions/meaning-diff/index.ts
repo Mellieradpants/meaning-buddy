@@ -12,7 +12,7 @@ const VALID_VERDICTS = new Set(['meaningful_change', 'no_meaningful_change']);
 
 function validateOutput(data: unknown): data is {
   overallVerdict: string;
-  categories: Array<{ category: string; status: string; label: string; originalEvidence: string; revisedEvidence: string }>;
+  categories: Array<{ category: string; status: string; label: string; originalEvidence: string; revisedEvidence: string; pageReference: string }>;
 } {
   if (!data || typeof data !== 'object') return false;
   const obj = data as Record<string, unknown>;
@@ -25,6 +25,8 @@ function validateOutput(data: unknown): data is {
     if (typeof cat.label !== 'string' || !cat.label) return false;
     if (typeof cat.originalEvidence !== 'string') return false;
     if (typeof cat.revisedEvidence !== 'string') return false;
+    if (cat.pageReference !== undefined && typeof cat.pageReference !== 'string') return false;
+    if (cat.pageReference === undefined) cat.pageReference = '';
   }
   return true;
 }
@@ -82,6 +84,32 @@ TAXONOMY CATEGORIES:
 6. EXPLICIT OBLIGATION REMOVAL – Removal of a previously explicit duty without equivalent replacement.
    Labels: obligation_removed, obligation_weakened, unchanged.
 
+PAGE REFERENCE DETECTION:
+Also detect page markers if present in the text. Page markers may appear as:
+- "Page 3"
+- "Page 3 of 12"
+- "– 3 –"
+- A standalone number in header or footer position
+
+If a structural change occurs on a page that contains a detectable page marker, include the page number as a string in the field "pageReference".
+If no page marker is detectable, return "pageReference": "".
+Do not guess page numbers. Only extract page numbers explicitly present in the text.
+
+Return ONLY valid JSON (no markdown):
+{
+  "overallVerdict": "meaningful_change or no_meaningful_change",
+  "categories": [
+    {
+      "category": "modality_shift|actor_power_shift|scope_change|threshold_shift|action_domain_shift|obligation_removal",
+      "status": "changed|unchanged",
+      "label": "",
+      "originalEvidence": "",
+      "revisedEvidence": "",
+      "pageReference": ""
+    }
+  ]
+}
+
 Call the report_analysis function with your findings.`;
 
 const analysisTool = {
@@ -109,9 +137,10 @@ const analysisTool = {
               status: { type: "string", enum: ["changed", "unchanged"] },
               label: { type: "string", description: "The specific label from the taxonomy." },
               originalEvidence: { type: "string", description: "Quote from the original text." },
-              revisedEvidence: { type: "string", description: "Quote from the revised text." }
+              revisedEvidence: { type: "string", description: "Quote from the revised text." },
+              pageReference: { type: "string", description: "Page number from detected page markers, or empty string if none found." }
             },
-            required: ["category", "status", "label", "originalEvidence", "revisedEvidence"],
+            required: ["category", "status", "label", "originalEvidence", "revisedEvidence", "pageReference"],
             additionalProperties: false
           }
         }
