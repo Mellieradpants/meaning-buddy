@@ -17,6 +17,7 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
+  operationalEffect?: string;
 }
 
 interface SummaryTableProps {
@@ -40,15 +41,16 @@ function getPageDisplay(cat: CategoryResult): string {
 }
 
 function toMarkdownTable(categories: CategoryResult[]): string {
-  const header = "| Page / Section | Category | Status | Original | Revised |";
-  const divider = "| --- | --- | --- | --- | --- |";
+  const header = "| Page / Section | Category | Status | Original | Revised | Operational Effect |";
+  const divider = "| --- | --- | --- | --- | --- | --- |";
   const rows = categories.map((cat) => {
     const page = getPageDisplay(cat);
     const category = CATEGORIES[cat.category] || cat.category;
     const status = cat.status === "changed" ? "Changed" : "Unchanged";
     const orig = truncate(extractPageFromEvidence(cat.originalEvidence).text, 120).replace(/\|/g, "\\|");
     const rev = truncate(extractPageFromEvidence(cat.revisedEvidence).text, 120).replace(/\|/g, "\\|");
-    return `| ${page} | ${category} | ${status} | ${orig} | ${rev} |`;
+    const effect = (cat.operationalEffect || "—").replace(/\|/g, "\\|");
+    return `| ${page} | ${category} | ${status} | ${orig} | ${rev} | ${truncate(effect, 120)} |`;
   });
   return [header, divider, ...rows].join("\n");
 }
@@ -147,6 +149,7 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
               <TableHead className="whitespace-nowrap">Status</TableHead>
               <TableHead className="whitespace-nowrap">Original Snippet</TableHead>
               <TableHead className="whitespace-nowrap">Revised Snippet</TableHead>
+              <TableHead className="whitespace-nowrap">Operational Effect</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -177,6 +180,11 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
                     {truncate(revParsed.text)}
+                  </TableCell>
+                  <TableCell className="max-w-[220px] text-xs text-foreground leading-relaxed">
+                    {cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                      ? truncate(cat.operationalEffect, 100)
+                      : "—"}
                   </TableCell>
                 </TableRow>
               );

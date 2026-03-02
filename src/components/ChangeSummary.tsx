@@ -9,6 +9,7 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
+  operationalEffect?: string;
 }
 
 interface ChangeSummaryProps {
@@ -46,6 +47,9 @@ function buildMarkdownSummary(categories: CategoryResult[]): string {
     let entry = `- ${pageRef} — ${categoryLabel} — ${shortLabel}`;
     if (origSnippet) entry += `\n  - Original: "${origSnippet}"`;
     if (revSnippet) entry += `\n  - Revised: "${revSnippet}"`;
+    if (cat.operationalEffect && cat.operationalEffect !== "No change detected.") {
+      entry += `\n  - Effect: ${truncateSnippet(cat.operationalEffect, 120)}`;
+    }
     return entry;
   });
 
