@@ -11,7 +11,6 @@ import {
 import {
   CATEGORIES,
   SAMPLE_SCENARIOS,
-  SCENARIO_LABELS,
   SUMMARY_PHRASES,
   type CategoryKey,
 } from "@/lib/taxonomy";
