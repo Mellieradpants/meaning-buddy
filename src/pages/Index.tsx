@@ -146,8 +146,10 @@ const Index = () => {
 
   return (
     <div className="min-h-dvh bg-background p-6 md:p-10 max-w-5xl mx-auto">
-      <header className="mb-8">
-        <h1 className="font-semibold tracking-tight font-mono text-[1.75rem] md:text-[2.25rem]" style={{ lineHeight: 1.2 }}>
+      <header className="mb-8 space-y-1">
+        <p className="text-sm font-medium text-primary">Meaning Diff</p>
+        <p className="text-xl font-semibold text-foreground">Structural Language Comparison</p>
+        <h1 className="font-semibold tracking-tight font-mono text-[1.75rem] md:text-[2.25rem] !mt-3" style={{ lineHeight: 1.2 }}>
           Compare Two Versions of a Section
         </h1>
         <p className="text-muted-foreground text-sm mt-2">
