@@ -71,7 +71,7 @@ Return ONLY valid JSON (no markdown):
     const geminiKey = Deno.env.get('GeminiApiKey');
     if (!geminiKey) {
       return new Response(
-        JSON.stringify({ error: 'GeminiApiKey secret is not configured.' }),
+        JSON.stringify({ error: 'Analysis service is not properly configured.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -109,7 +109,7 @@ Return ONLY valid JSON (no markdown):
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Edge function error: an unexpected error occurred during processing');
     return new Response(
       JSON.stringify({ error: 'An error occurred while processing the comparison.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
