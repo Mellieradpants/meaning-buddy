@@ -1,96 +1,106 @@
 /**
- * Page-marker parser.
- * Detects "Page X", "--- Page X ---", "=== Page X ===" markers in text
- * and assigns each line to its most recent page marker.
+ * Page-marker parser and normalizer.
+ *
+ * Detects various page marker formats and normalizes them to [[PAGE=<n>]] tags.
+ * Also provides utilities for checking page marker presence and extracting
+ * page references from evidence strings.
  */
 
-const PAGE_MARKER_RE = /^(?:[-=]{2,}\s*)?Page\s+(\d+)(?:\s*[-=]{2,})?$/i;
+/**
+ * Patterns that match page markers (case-insensitive, allow surrounding whitespace).
+ * Each pattern captures the page number in group 1.
+ */
+const PAGE_PATTERNS: RegExp[] = [
+  // "Page 12", "PAGE 12", "page 12"
+  /^\s*page\s+(\d+)(?:\s+of\s+\d+)?\s*$/i,
+  // "p. 12", "p 12"
+  /^\s*p\.?\s+(\d+)\s*$/i,
+  // "— 12 —", "– 12 –", "- 12 -"  (various dash styles)
+  /^\s*[—–\-]+\s*(\d+)\s*[—–\-]+\s*$/,
+  // "(12/143)" -> page 12
+  /^\s*\(\s*(\d+)\s*\/\s*\d+\s*\)\s*$/,
+];
 
-export interface PageMapping {
-  /** Map from 1-based line number to page label (e.g. "Page 3") or null */
-  lineToPage: Map<number, string | null>;
-  /** Whether any page markers were found */
-  hasPageMarkers: boolean;
-}
-
-export function parsePageMarkers(text: string): PageMapping {
-  const lines = text.split("\n");
-  const lineToPage = new Map<number, string | null>();
-  let currentPage: string | null = null;
-  let hasPageMarkers = false;
-
-  for (let i = 0; i < lines.length; i++) {
-    const lineNum = i + 1;
-    const match = lines[i].trim().match(PAGE_MARKER_RE);
-    if (match) {
-      currentPage = `Page ${match[1]}`;
-      hasPageMarkers = true;
-    }
-    lineToPage.set(lineNum, currentPage);
+/**
+ * Check if a single line matches any page marker pattern.
+ * Returns the page number string if matched, or null.
+ */
+function matchPageMarker(line: string): string | null {
+  for (const pattern of PAGE_PATTERNS) {
+    const m = line.match(pattern);
+    if (m) return m[1];
   }
-
-  return { lineToPage, hasPageMarkers };
+  return null;
 }
 
 /**
- * Given an evidence snippet and the full source text, find the page reference.
- * Returns "Page X" if page markers exist, or "N/A (Lines X–Y)" as fallback.
+ * Returns true if ANY line in the text matches a page marker pattern.
  */
-export function findPageForSnippet(
-  snippet: string,
-  sourceText: string,
-  pageMapping: PageMapping
-): string {
-  if (!snippet || !sourceText) return "N/A";
+export function hasPageMarkers(text: string): boolean {
+  if (!text) return false;
+  const lines = text.split("\n");
+  for (const line of lines) {
+    if (matchPageMarker(line.trim()) !== null) return true;
+  }
+  return false;
+}
 
-  const normalizedSnippet = snippet.replace(/\s+/g, " ").trim().toLowerCase();
-  const lines = sourceText.split("\n");
+/**
+ * Normalizes page markers in text to canonical [[PAGE=<n>]] tags.
+ * Lines that match a page marker pattern are replaced entirely;
+ * all other lines are left unchanged.
+ */
+export function normalizePages(text: string): string {
+  if (!text) return text;
+  const lines = text.split("\n");
+  const result: string[] = [];
 
-  // Try to find the snippet in the source text
-  let bestStartLine = -1;
-  let bestEndLine = -1;
-
-  // Search line by line for a substring match
-  const fullNormalized = sourceText.replace(/\s+/g, " ").trim().toLowerCase();
-  const idx = fullNormalized.indexOf(normalizedSnippet.slice(0, Math.min(60, normalizedSnippet.length)));
-
-  if (idx !== -1) {
-    // Map character position back to line number
-    let charCount = 0;
-    for (let i = 0; i < lines.length; i++) {
-      const lineLen = lines[i].length + 1; // +1 for newline
-      if (charCount + lineLen > idx && bestStartLine === -1) {
-        bestStartLine = i + 1;
-      }
-      const snippetEnd = idx + normalizedSnippet.length;
-      if (charCount + lineLen >= snippetEnd && bestEndLine === -1) {
-        bestEndLine = i + 1;
-      }
-      charCount += lineLen;
+  for (const line of lines) {
+    const pageNum = matchPageMarker(line.trim());
+    if (pageNum !== null) {
+      result.push(`[[PAGE=${pageNum}]]`);
+    } else {
+      result.push(line);
     }
   }
 
-  // Fallback: search each line for partial match
-  if (bestStartLine === -1) {
-    const words = normalizedSnippet.split(" ").slice(0, 5).join(" ");
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].toLowerCase().includes(words)) {
-        bestStartLine = i + 1;
-        bestEndLine = Math.min(i + 3, lines.length);
-        break;
-      }
-    }
+  return result.join("\n");
+}
+
+/**
+ * Extract page reference from an evidence string that starts with
+ * "Page <n>:", "Page: not provided:", or "Page: unknown:".
+ * Returns the display string (e.g. "Page 3") or "not provided" or "unknown".
+ */
+export function extractPageFromEvidence(evidence: string): {
+  page: string;
+  text: string;
+} {
+  if (!evidence) return { page: "", text: evidence };
+
+  const pageMatch = evidence.match(/^Page\s+(\d+):\s*/i);
+  if (pageMatch) {
+    return {
+      page: `Page ${pageMatch[1]}`,
+      text: evidence.slice(pageMatch[0].length),
+    };
   }
 
-  if (bestStartLine === -1) return "N/A";
-
-  const page = pageMapping.lineToPage.get(bestStartLine);
-  if (page) return page;
-
-  // No page marker — use line range fallback
-  if (bestEndLine === -1) bestEndLine = bestStartLine;
-  if (bestStartLine === bestEndLine) {
-    return `N/A (Line ${bestStartLine})`;
+  const notProvided = evidence.match(/^Page:\s*not provided:\s*/i);
+  if (notProvided) {
+    return {
+      page: "not provided",
+      text: evidence.slice(notProvided[0].length),
+    };
   }
-  return `N/A (Lines ${bestStartLine}–${bestEndLine})`;
+
+  const unknown = evidence.match(/^Page:\s*unknown:\s*/i);
+  if (unknown) {
+    return {
+      page: "unknown",
+      text: evidence.slice(unknown[0].length),
+    };
+  }
+
+  return { page: "", text: evidence };
 }

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
+import { extractPageFromEvidence } from "@/lib/pageParser";
 import {
   Table,
   TableHeader,
@@ -16,7 +17,6 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
-  pageReference?: string;
 }
 
 interface SummaryTableProps {
@@ -31,15 +31,23 @@ function truncate(text: string, max = 80): string {
   return text.length > max ? text.slice(0, max) + "…" : text;
 }
 
+function getPageDisplay(cat: CategoryResult): string {
+  const orig = extractPageFromEvidence(cat.originalEvidence);
+  const rev = extractPageFromEvidence(cat.revisedEvidence);
+  if (orig.page && orig.page !== "not provided") return orig.page;
+  if (rev.page && rev.page !== "not provided") return rev.page;
+  return "—";
+}
+
 function toMarkdownTable(categories: CategoryResult[]): string {
   const header = "| Page / Section | Category | Status | Original | Revised |";
   const divider = "| --- | --- | --- | --- | --- |";
   const rows = categories.map((cat) => {
-    const page = cat.pageReference ? `Page ${cat.pageReference}` : "—";
+    const page = getPageDisplay(cat);
     const category = CATEGORIES[cat.category] || cat.category;
     const status = cat.status === "changed" ? "Changed" : "Unchanged";
-    const orig = truncate(cat.originalEvidence, 120).replace(/\|/g, "\\|");
-    const rev = truncate(cat.revisedEvidence, 120).replace(/\|/g, "\\|");
+    const orig = truncate(extractPageFromEvidence(cat.originalEvidence).text, 120).replace(/\|/g, "\\|");
+    const rev = truncate(extractPageFromEvidence(cat.revisedEvidence).text, 120).replace(/\|/g, "\\|");
     return `| ${page} | ${category} | ${status} | ${orig} | ${rev} |`;
   });
   return [header, divider, ...rows].join("\n");
@@ -66,8 +74,11 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
         const la = CATEGORIES[a.category] || a.category;
         const lb = CATEGORIES[b.category] || b.category;
         cmp = la.localeCompare(lb);
+      } else if (sortKey === "page") {
+        const pa = getPageDisplay(a);
+        const pb = getPageDisplay(b);
+        cmp = pa.localeCompare(pb, undefined, { numeric: true });
       }
-      // page is always "—", so no-op for page sort
       return sortDir === "desc" ? -cmp : cmp;
     });
     return arr;
@@ -139,33 +150,37 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sorted.map((cat, i) => (
-              <TableRow key={i}>
-                <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                  {cat.pageReference ? `Page ${cat.pageReference}` : "—"}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-xs font-medium text-foreground">
-                  {CATEGORIES[cat.category] || cat.category}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                      cat.status === "changed"
-                        ? "bg-[hsl(var(--changed-bg))] text-[hsl(var(--changed))] border-[hsl(38,50%,80%)]"
-                        : "bg-[hsl(var(--unchanged-bg))] text-[hsl(var(--unchanged))] border-border"
-                    }`}
-                  >
-                    {cat.status === "changed" ? "Changed" : "Unchanged"}
-                  </span>
-                </TableCell>
-                <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
-                  {truncate(cat.originalEvidence)}
-                </TableCell>
-                <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
-                  {truncate(cat.revisedEvidence)}
-                </TableCell>
-              </TableRow>
-            ))}
+            {sorted.map((cat, i) => {
+              const origParsed = extractPageFromEvidence(cat.originalEvidence);
+              const revParsed = extractPageFromEvidence(cat.revisedEvidence);
+              return (
+                <TableRow key={i}>
+                  <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                    {getPageDisplay(cat)}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-xs font-medium text-foreground">
+                    {CATEGORIES[cat.category] || cat.category}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                        cat.status === "changed"
+                          ? "bg-[hsl(var(--changed-bg))] text-[hsl(var(--changed))] border-[hsl(38,50%,80%)]"
+                          : "bg-[hsl(var(--unchanged-bg))] text-[hsl(var(--unchanged))] border-border"
+                      }`}
+                    >
+                      {cat.status === "changed" ? "Changed" : "Unchanged"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
+                    {truncate(origParsed.text)}
+                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
+                    {truncate(revParsed.text)}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
