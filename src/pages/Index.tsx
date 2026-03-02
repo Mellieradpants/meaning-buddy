@@ -55,10 +55,26 @@ const Index = () => {
         return;
       }
 
-      setResult(data as DiffResult);
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      toast.error("Something went wrong.");
+      // Normalize: API may return old "findings" format or new "categories" format
+      const raw = data as any;
+      if (raw.categories) {
+        setResult(raw as DiffResult);
+      } else if (raw.findings) {
+        // Map old format to new
+        const mapped: DiffResult = {
+          overallVerdict: raw.overallVerdict,
+          categories: raw.findings.map((f: any) => ({
+            category: f.type || "scope_change",
+            status: f.type === "no_change" ? "unchanged" : "changed",
+            label: f.summary || f.type,
+            originalEvidence: f.originalSnippet || "",
+            revisedEvidence: f.revisedSnippet || "",
+          })),
+        };
+        setResult(mapped);
+      } else {
+        setResult(raw as DiffResult);
+      }
     } finally {
       setLoading(false);
     }
