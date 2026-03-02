@@ -56,3 +56,10 @@
     font-family: var(--font-sans);
   }
 }
+
+@layer utilities {
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
