@@ -6,8 +6,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-3xl mx-auto">
       <header className="mb-14">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-mono">
-          Language Structure Comparison
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-mono" style={{ fontWeight: 700 }}>
+          Structural Language Comparison Tool
         </h1>
         <p className="text-muted-foreground text-sm mt-3 max-w-2xl leading-relaxed">
           Structural change detection for revised documents.
@@ -16,7 +16,7 @@ const Landing = () => {
         <div className="mt-8">
           <button
             onClick={() => navigate("/tool")}
-            className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-[hsl(209,38%,23%)] transition-colors"
           >
             Open the tool
           </button>
@@ -50,7 +50,7 @@ const Landing = () => {
 
       <section className="mb-12">
         <h2 className="text-lg font-semibold font-mono mb-3">Example</h2>
-        <div className="rounded-lg border bg-card p-4 font-mono text-sm space-y-3">
+        <div className="rounded-lg border border-border bg-card p-4 font-mono text-sm space-y-3">
           <div>
             <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Original</span>
             <span className="text-foreground">The employer shall provide health insurance to all full-time employees within 30 days of their start date.</span>
@@ -61,23 +61,29 @@ const Landing = () => {
           </div>
         </div>
 
-        <div className="mt-4 rounded-lg border bg-card p-4">
+        <div className="mt-4 rounded-lg border border-border bg-card p-4">
           <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Detected changes</span>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Modality Shift</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Scope Change</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Threshold Shift</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Obligation Removal</span>
+          </div>
           <ul className="text-sm text-foreground space-y-1.5">
             <li className="flex items-start gap-2">
-              <span className="text-destructive mt-0.5">•</span>
+              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
               <span><span className="font-medium">Modality shift</span> — "shall provide" → "may provide"</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive mt-0.5">•</span>
+              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
               <span><span className="font-medium">Scope change</span> — "all full-time employees" → "eligible employees"</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive mt-0.5">•</span>
+              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
               <span><span className="font-medium">Threshold shift</span> — "within 30 days" → "within a reasonable timeframe"</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-destructive mt-0.5">•</span>
+              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
               <span><span className="font-medium">Obligation removal</span> — mandatory duty weakened</span>
             </li>
           </ul>
