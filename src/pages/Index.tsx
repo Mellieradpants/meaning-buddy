@@ -55,12 +55,10 @@ const Index = () => {
         return;
       }
 
-      // Normalize: API may return old "findings" format or new "categories" format
       const raw = data as any;
       if (raw.categories) {
         setResult(raw as DiffResult);
       } else if (raw.findings) {
-        // Map old format to new
         const mapped: DiffResult = {
           overallVerdict: raw.overallVerdict,
           categories: raw.findings.map((f: any) => ({
@@ -86,8 +84,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-5xl mx-auto">
       <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-mono">
-          Meaning Diff
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-mono" style={{ fontWeight: 700 }}>
+          Structural Language Comparison Tool
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
           Structural semantic change detection. No interpretation. No commentary.
@@ -103,7 +101,7 @@ const Index = () => {
           <textarea
             value={original}
             onChange={(e) => setOriginal(e.target.value)}
-            className="w-full h-64 md:h-80 p-4 rounded-lg border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-64 md:h-80 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Paste original text here…"
           />
         </div>
@@ -114,7 +112,7 @@ const Index = () => {
           <textarea
             value={revised}
             onChange={(e) => setRevised(e.target.value)}
-            className="w-full h-64 md:h-80 p-4 rounded-lg border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-64 md:h-80 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Paste revised text here…"
           />
         </div>
@@ -125,7 +123,7 @@ const Index = () => {
         <button
           onClick={handleCompare}
           disabled={loading}
-          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-[hsl(209,38%,23%)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Comparing…" : "Compare"}
         </button>
@@ -139,20 +137,38 @@ const Index = () => {
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border ${
                 result.overallVerdict === "meaningful_change"
-                  ? "bg-red-50 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-300 dark:border-red-800"
-                  : "bg-green-50 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800"
+                  ? "bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border-[hsl(38,50%,80%)]"
+                  : "bg-[hsl(210,25%,94%)] text-[hsl(211,13%,52%)] border-border"
               }`}
             >
               <span className="text-lg">
                 {result.overallVerdict === "meaningful_change" ? "⚠" : "✓"}
               </span>
               {result.overallVerdict === "meaningful_change"
-                ? "Meaning Changed"
+                ? "Structural Change Detected"
                 : "No Meaningful Change"}
             </div>
           </div>
 
-          {/* Changed Categories */}
+          {/* Category Chips */}
+          {result.categories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {result.categories.map((cat, i) => (
+                <span
+                  key={i}
+                  className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                    cat.status === "changed"
+                      ? "bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border-[hsl(38,50%,80%)]"
+                      : "bg-[hsl(210,25%,94%)] text-[hsl(211,13%,52%)] border-border"
+                  }`}
+                >
+                  {categoryLabels[cat.category] || cat.category}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Changed Categories Detail */}
           {changedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
@@ -162,10 +178,10 @@ const Index = () => {
                 {changedCategories.map((cat, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border-l-4 border-red-400 bg-red-50 dark:bg-red-950/20 p-5"
+                    className="rounded-lg border border-border bg-card p-5"
                   >
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-red-100 text-red-800 border-red-200">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">
                         CHANGED
                       </span>
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
@@ -178,7 +194,7 @@ const Index = () => {
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                      <div className="rounded-md border bg-background p-3">
+                      <div className="rounded-md border border-border bg-background p-3">
                         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                           Original
                         </div>
@@ -186,7 +202,7 @@ const Index = () => {
                           {cat.originalEvidence}
                         </p>
                       </div>
-                      <div className="rounded-md border bg-background p-3">
+                      <div className="rounded-md border border-border bg-background p-3">
                         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                           Revised
                         </div>
@@ -211,7 +227,7 @@ const Index = () => {
                 {unchangedCategories.map((cat, i) => (
                   <span
                     key={i}
-                    className="inline-block px-3 py-1.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border"
+                    className="inline-block px-3 py-1.5 rounded-full text-xs font-medium bg-[hsl(210,25%,94%)] text-[hsl(211,13%,52%)] border border-border"
                   >
                     {categoryLabels[cat.category] || cat.category}
                   </span>

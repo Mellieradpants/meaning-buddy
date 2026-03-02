@@ -6,42 +6,39 @@
 
 @layer base {
   :root {
-    --background: 220 16% 96%;
-    --foreground: 220 20% 10%;
+    --background: 210 25% 97%;
+    --foreground: 207 24% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 207 24% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 207 24% 16%;
 
-    --primary: 220 70% 50%;
+    --primary: 209 34% 30%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 209 38% 23%;
 
-    --secondary: 220 14% 90%;
-    --secondary-foreground: 220 20% 10%;
+    --secondary: 210 31% 92%;
+    --secondary-foreground: 207 24% 16%;
 
-    --muted: 220 14% 92%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 210 25% 94%;
+    --muted-foreground: 209 14% 37%;
 
-    --accent: 220 14% 90%;
-    --accent-foreground: 220 20% 10%;
+    --accent: 210 31% 92%;
+    --accent-foreground: 207 24% 16%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 62% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --added: 142 60% 40%;
-    --added-bg: 142 60% 94%;
-    --removed: 0 72% 51%;
-    --removed-bg: 0 72% 95%;
-    --substituted: 36 90% 50%;
-    --substituted-bg: 36 90% 94%;
-    --risk: 0 72% 51%;
-    --risk-bg: 0 60% 96%;
+    --changed: 38 72% 42%;
+    --changed-bg: 38 50% 94%;
+    --unchanged: 211 13% 52%;
+    --unchanged-bg: 210 25% 94%;
 
-    --border: 220 13% 87%;
-    --input: 220 13% 87%;
-    --ring: 220 70% 50%;
+    --border: 210 31% 88%;
+    --input: 210 31% 88%;
+    --ring: 209 34% 30%;
 
     --radius: 0.5rem;
 
