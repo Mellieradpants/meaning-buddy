@@ -142,59 +142,80 @@ Return ONLY valid JSON (no markdown):
     }
 
     const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
-
-    const googleResponse = await fetch(googleUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ parts: [{ text: userPrompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          maxOutputTokens: 4096,
-        },
-      }),
+    const requestBody = JSON.stringify({
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: userPrompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        maxOutputTokens: 4096,
+      },
     });
 
-    if (!googleResponse.ok) {
-      console.error('Upstream API returned non-OK status');
+    const FAIL_CLOSED_ERROR = 'Could not produce a valid structured comparison. Try simplifying the input.';
+
+    // Attempt model call, parse, and validate. Returns parsed result or a failure reason string.
+    async function attemptAnalysis(): Promise<{ ok: true; data: unknown } | { ok: false; reason: string }> {
+      const resp = await fetch(googleUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+      });
+
+      if (!resp.ok) {
+        return { ok: false, reason: 'upstream_error' };
+      }
+
+      const result = await resp.json();
+      const content = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!content) {
+        return { ok: false, reason: 'empty_response' };
+      }
+
+      let jsonStr = content.trim();
+      const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (match) jsonStr = match[1].trim();
+      jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        return { ok: false, reason: 'invalid_json' };
+      }
+
+      if (!validateOutput(parsed)) {
+        return { ok: false, reason: 'schema_invalid' };
+      }
+
+      return { ok: true, data: parsed };
+    }
+
+    // First attempt
+    let result = await attemptAnalysis();
+
+    // Single retry on parse/validation failure
+    if (!result.ok && (result.reason === 'invalid_json' || result.reason === 'schema_invalid')) {
+      console.error(result.reason);
+      result = await attemptAnalysis();
+    }
+
+    if (!result.ok) {
+      console.error(result.reason);
+      const status = (result.reason === 'invalid_json' || result.reason === 'schema_invalid') ? 422 : 500;
+      const message = status === 422
+        ? FAIL_CLOSED_ERROR
+        : 'Analysis service temporarily unavailable. Please try again.';
       return new Response(
-        JSON.stringify({ error: 'Analysis service temporarily unavailable. Please try again.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: message }),
+        { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const googleResult = await googleResponse.json();
-    const content = googleResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!content) {
-      console.error('Empty response from upstream API');
-      return new Response(
-        JSON.stringify({ error: 'Analysis service returned an empty response. Please try again.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    let jsonStr = content.trim();
-    // Strip markdown code fences if present
-    const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (match) jsonStr = match[1].trim();
-    // Strip trailing commas before } or ] (common LLM JSON issue)
-    jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
-    const parsed = JSON.parse(jsonStr);
-
-    // Validate output matches expected schema to prevent prompt injection manipulation
-    if (!validateOutput(parsed)) {
-      console.error('Output validation failed: response does not match expected schema');
-      return new Response(
-        JSON.stringify({ error: 'Analysis produced an unexpected result. Please try again.' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(JSON.stringify(parsed), {
+    return new Response(JSON.stringify(result.data), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Edge function error:', error instanceof SyntaxError ? 'JSON parse failure' : 'unexpected error');
+    console.error(error instanceof SyntaxError ? 'invalid_json' : 'unexpected_error');
     return new Response(
       JSON.stringify({ error: 'An error occurred while processing the comparison.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
