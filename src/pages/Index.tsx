@@ -152,13 +152,22 @@ const Index = () => {
   const [revised, setRevised] = useState("");
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState<string>("");
   const inputRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
 
   const handleCompare = async () => {
     if (!original.trim() || !revised.trim()) {
       toast.error("Please enter text in both fields.");
       return;
     }
+
+    // Cancel any in-flight request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const currentRequestId = ++requestIdRef.current;
 
     setLoading(true);
     setResult(null);
@@ -167,6 +176,9 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke("meaning-diff", {
         body: { original, revised },
       });
+
+      // If this request was superseded by a reset/new request, discard
+      if (currentRequestId !== requestIdRef.current) return;
 
       if (error) {
         console.error("Edge function error:", error);
@@ -198,11 +210,28 @@ const Index = () => {
         setResult(raw as DiffResult);
       }
     } finally {
-      setLoading(false);
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
+  const handleClear = () => {
+    // Invalidate any in-flight request
+    requestIdRef.current++;
+    abortRef.current?.abort();
+    abortRef.current = null;
+
+    setOriginal("");
+    setRevised("");
+    setResult(null);
+    setLoading(false);
+    setSelectedScenario("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleLoadScenario = (key: string) => {
+    setSelectedScenario(key);
     const scenario = SAMPLE_SCENARIOS[key];
     if (scenario) {
       setOriginal(scenario.original);
@@ -234,7 +263,7 @@ const Index = () => {
           This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
         </p>
         <div className="mt-3 w-64">
-          <Select onValueChange={handleLoadScenario}>
+          <Select value={selectedScenario} onValueChange={handleLoadScenario}>
             <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
               <SelectValue placeholder="Load Sample Scenario" />
             </SelectTrigger>
@@ -291,14 +320,8 @@ const Index = () => {
           {loading ? "Comparing…" : "Compare"}
         </button>
         <button
-          onClick={() => {
-            setOriginal("");
-            setRevised("");
-            setResult(null);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          disabled={loading}
-          className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleClear}
+          className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           Clear
         </button>
