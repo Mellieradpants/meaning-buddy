@@ -84,7 +84,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-5xl mx-auto">
       <header className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-mono" style={{ fontWeight: 700 }}>
+        <h1 className="font-semibold tracking-tight font-mono text-[1.75rem] md:text-[2.25rem]" style={{ lineHeight: 1.2 }}>
           Structural Language Comparison Tool
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
