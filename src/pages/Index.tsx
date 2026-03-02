@@ -156,7 +156,7 @@ const Index = () => {
         <p className="text-muted-foreground text-sm mt-2">
           Paste the earlier version on the left and the revised version on the right.
         </p>
-        <p className="text-muted-foreground text-xs mt-1">
+        <p className="text-muted-foreground text-sm mt-1">
           This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
         </p>
         <div className="mt-3 w-64">
