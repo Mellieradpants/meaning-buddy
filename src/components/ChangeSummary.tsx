@@ -9,6 +9,7 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
+  pageReference?: string;
 }
 
 interface ChangeSummaryProps {
@@ -35,10 +36,17 @@ function buildMarkdownSummary(
   const revMapping = parsePageMarkers(revisedText);
 
   const lines = changed.map((cat) => {
-    // Try original text first for page reference, fall back to revised
-    let pageRef = findPageForSnippet(cat.originalEvidence, originalText, origMapping);
-    if (pageRef === "N/A") {
-      pageRef = findPageForSnippet(cat.revisedEvidence, revisedText, revMapping);
+    let pageRef: string;
+
+    // Prefer API-provided pageReference
+    if (cat.pageReference) {
+      pageRef = `Page ${cat.pageReference}`;
+    } else {
+      // Fall back to client-side page marker detection
+      pageRef = findPageForSnippet(cat.originalEvidence, originalText, origMapping);
+      if (pageRef === "N/A") {
+        pageRef = findPageForSnippet(cat.revisedEvidence, revisedText, revMapping);
+      }
     }
 
     const categoryLabel = CATEGORIES[cat.category] || cat.category;

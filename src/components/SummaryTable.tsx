@@ -16,6 +16,7 @@ interface CategoryResult {
   label: string;
   originalEvidence: string;
   revisedEvidence: string;
+  pageReference?: string;
 }
 
 interface SummaryTableProps {
@@ -34,7 +35,7 @@ function toMarkdownTable(categories: CategoryResult[]): string {
   const header = "| Page / Section | Category | Status | Original | Revised |";
   const divider = "| --- | --- | --- | --- | --- |";
   const rows = categories.map((cat) => {
-    const page = "—";
+    const page = cat.pageReference ? `Page ${cat.pageReference}` : "—";
     const category = CATEGORIES[cat.category] || cat.category;
     const status = cat.status === "changed" ? "Changed" : "Unchanged";
     const orig = truncate(cat.originalEvidence, 120).replace(/\|/g, "\\|");
@@ -141,7 +142,7 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
             {sorted.map((cat, i) => (
               <TableRow key={i}>
                 <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                  —
+                  {cat.pageReference ? `Page ${cat.pageReference}` : "—"}
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-xs font-medium text-foreground">
                   {CATEGORIES[cat.category] || cat.category}
