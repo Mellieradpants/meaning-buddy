@@ -14,6 +14,7 @@ import {
   SUMMARY_PHRASES,
   type CategoryKey,
 } from "@/lib/taxonomy";
+import SummaryTable from "@/components/SummaryTable";
 
 interface CategoryResult {
   category: CategoryKey;
@@ -348,6 +349,11 @@ const Index = () => {
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Summary Table */}
+          {changedCategories.length > 0 && (
+            <SummaryTable categories={result.categories} />
           )}
 
           {/* Unchanged Categories */}
