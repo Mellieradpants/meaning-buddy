@@ -121,7 +121,8 @@ Return ONLY valid JSON (no markdown):
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt + '\n\n' + userPrompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ parts: [{ text: userPrompt }] }],
         generationConfig: {
           responseMimeType: 'application/json',
           maxOutputTokens: 4096,
@@ -130,7 +131,7 @@ Return ONLY valid JSON (no markdown):
     });
 
     if (!googleResponse.ok) {
-      console.error('Gemini API error: upstream service returned non-OK status');
+      console.error('Upstream API returned non-OK status');
       return new Response(
         JSON.stringify({ error: 'Analysis service temporarily unavailable. Please try again.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -139,16 +140,26 @@ Return ONLY valid JSON (no markdown):
 
     const googleResult = await googleResponse.json();
     const content = googleResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    let jsonStr = content;
-    const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (!content) {
+      console.error('Empty response from upstream API');
+      return new Response(
+        JSON.stringify({ error: 'Analysis service returned an empty response. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    let jsonStr = content.trim();
+    // Strip markdown code fences if present
+    const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (match) jsonStr = match[1].trim();
+    // Strip trailing commas before } or ] (common LLM JSON issue)
+    jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
     const parsed = JSON.parse(jsonStr);
 
     return new Response(JSON.stringify(parsed), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Edge function error: an unexpected error occurred during processing');
+    console.error('Edge function error:', error instanceof SyntaxError ? 'JSON parse failure' : 'unexpected error');
     return new Response(
       JSON.stringify({ error: 'An error occurred while processing the comparison.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
