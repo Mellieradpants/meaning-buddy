@@ -18,6 +18,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (typeof original !== 'string' || typeof revised !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Inputs must be strings.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const MAX_LENGTH = 10000;
+    if (original.length > MAX_LENGTH || revised.length > MAX_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Text must not exceed ${MAX_LENGTH} characters.` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const systemPrompt = `You are a structural semantic analyst. Compare two text versions using ONLY the following taxonomy. No narrative commentary. No policy interpretation. No value judgment. Only structural analysis.
 
 TAXONOMY CATEGORIES:
@@ -79,7 +94,7 @@ Return ONLY valid JSON (no markdown):
       const errText = await googleResponse.text();
       console.error('Gemini API error:', googleResponse.status, errText);
       return new Response(
-        JSON.stringify({ error: 'AI analysis failed.', detail: errText }),
+        JSON.stringify({ error: 'Analysis service temporarily unavailable. Please try again.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
