@@ -126,14 +126,13 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleLoadScenario = (key: string) => {
+  const handleLoadScenario = (key: CategoryKey) => {
     setSelectedScenario(key);
     const scenario = SAMPLE_SCENARIOS[key];
-    if (scenario) {
-      setOriginal(scenario.original);
-      setRevised(scenario.revised);
-      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    setOriginal(scenario.original);
+    setRevised(scenario.revised);
+    setResult(null);
+    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
