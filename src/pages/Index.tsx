@@ -126,31 +126,25 @@ function generateSummary(categories: CategoryResult[]): string {
   const changed = categories.filter(c => c.status === "changed");
   if (changed.length === 0) return "No structural changes were detected between the two versions.";
 
-  const descriptions: string[] = changed.map(c => {
-    const label = c.label.replace(/_/g, " ");
-    switch (c.category) {
-      case "modality_shift":
-        return `changes mandatory language to discretionary language (${label})`;
-      case "actor_power_shift":
-        return `shifts decision-making authority between parties (${label})`;
-      case "scope_change":
-        return `modifies the scope of what is covered (${label})`;
-      case "threshold_shift":
-        return `adjusts the standards or thresholds required (${label})`;
-      case "action_domain_shift":
-        return `changes the type of actions required (${label})`;
-      case "obligation_removal":
-        return `removes or weakens a previously stated obligation (${label})`;
-      default:
-        return `includes a structural change (${label})`;
-    }
-  });
+  // Deduplicate by category
+  const uniqueCategories = [...new Set(changed.map(c => c.category))];
 
-  if (descriptions.length === 1) {
-    return `This revision ${descriptions[0]}.`;
+  const phraseMap: Record<string, string> = {
+    modality_shift: "changes mandatory language to discretionary language",
+    actor_power_shift: "shifts decision-making authority between parties",
+    scope_change: "modifies the scope of what is covered",
+    threshold_shift: "adjusts the standards or thresholds required",
+    action_domain_shift: "changes the type of actions required",
+    obligation_removal: "removes or weakens a previously stated obligation",
+  };
+
+  const phrases = uniqueCategories.map(c => phraseMap[c] || "includes a structural change");
+
+  if (phrases.length === 1) {
+    return `This revision ${phrases[0]}.`;
   }
-  const last = descriptions.pop();
-  return `This revision ${descriptions.join(", ")} and ${last}.`;
+  const last = phrases.pop();
+  return `This revision ${phrases.join(", ")} and ${last}.`;
 }
 
 const Index = () => {
