@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -81,8 +81,15 @@ const Index = () => {
   const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
   const unchangedCategories = result?.categories.filter(c => c.status === "unchanged") || [];
 
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="min-h-dvh bg-background p-6 md:p-10 max-w-5xl mx-auto">
       <header className="mb-8">
         <h1 className="font-semibold tracking-tight font-mono text-[1.75rem] md:text-[2.25rem]" style={{ lineHeight: 1.2 }}>
           Structural Language Comparison Tool
