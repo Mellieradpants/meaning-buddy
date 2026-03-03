@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
 import { extractPageFromEvidence } from "@/lib/pageParser";
+import { sanitizeEvidence } from "@/lib/sanitize";
 import {
   Table,
   TableHeader,
@@ -47,8 +48,8 @@ function toMarkdownTable(categories: CategoryResult[]): string {
     const page = getPageDisplay(cat);
     const category = CATEGORIES[cat.category] || cat.category;
     const status = cat.status === "changed" ? "Changed" : "Unchanged";
-    const orig = truncate(extractPageFromEvidence(cat.originalEvidence).text, 120).replace(/\|/g, "\\|");
-    const rev = truncate(extractPageFromEvidence(cat.revisedEvidence).text, 120).replace(/\|/g, "\\|");
+    const orig = truncate(sanitizeEvidence(extractPageFromEvidence(cat.originalEvidence).text), 120).replace(/\|/g, "\\|");
+    const rev = truncate(sanitizeEvidence(extractPageFromEvidence(cat.revisedEvidence).text), 120).replace(/\|/g, "\\|");
     const effect = (cat.operationalEffect || "—").replace(/\|/g, "\\|");
     return `| ${page} | ${category} | ${status} | ${orig} | ${rev} | ${truncate(effect, 120)} |`;
   });
@@ -176,10 +177,10 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
                     </span>
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
-                    {truncate(origParsed.text)}
+                    {truncate(sanitizeEvidence(origParsed.text))}
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
-                    {truncate(revParsed.text)}
+                    {truncate(sanitizeEvidence(revParsed.text))}
                   </TableCell>
                   <TableCell className="max-w-[220px] text-xs text-foreground leading-relaxed">
                     {cat.operationalEffect && cat.operationalEffect !== "No change detected."

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { extractPageFromEvidence } from "@/lib/pageParser";
+import { sanitizeEvidence } from "@/lib/sanitize";
 import { toast } from "sonner";
 import {
   Select,
@@ -347,7 +348,7 @@ const Index = () => {
                           Original
                         </div>
                         <p className="text-xs font-mono text-foreground leading-relaxed">
-                          {cat.originalEvidence}
+                          {sanitizeEvidence(cat.originalEvidence)}
                         </p>
                       </div>
                       <div className="rounded-md border border-border bg-background p-3">
@@ -355,7 +356,7 @@ const Index = () => {
                           Revised
                         </div>
                         <p className="text-xs font-mono text-foreground leading-relaxed">
-                          {cat.revisedEvidence}
+                          {sanitizeEvidence(cat.revisedEvidence)}
                         </p>
                       </div>
                     </div>
