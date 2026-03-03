@@ -227,10 +227,10 @@ Writing rules for operationalEffect:
 - Use short subject–verb sentences. Keep each sentence under 20 words.
 - Use simple verbs: remove, add, allow, limit, require, no longer require, expand, narrow, replace.
 - One structural change per sentence. If two independent changes occur, write two separate short sentences.
-- ABSOLUTE BAN on passive voice. Before finalizing each operationalEffect, re-read it and check: does any sentence contain "is replaced by", "are replaced by", "is removed", "is no longer required", "are gone", or "are no longer"? If yes, REWRITE that sentence in active voice before returning.
+- ABSOLUTE BAN on passive voice AND on the phrase "are gone" / "is gone". Before finalizing each operationalEffect, re-read it and check: does any sentence contain "is replaced by", "are replaced by", "is removed", "is no longer required", "are gone", "is gone", or any form of "X are/is gone"? If yes, REWRITE that sentence in active voice before returning.
   - Instead of "X is replaced by Y" → write "The company no longer requires X. It now uses Y instead."
   - Instead of "X are replaced by Y" → write "X no longer apply. The company now uses Y."
-  - Instead of "X are gone" → write "X no longer exist" or "The company no longer sets X."
+  - Instead of "X are gone" or "X is gone" → write "X no longer exist" or "The company no longer requires X."
 - Do NOT stack noun phrases (e.g., avoid "verification of environmental data against records and invoices"). Break them into simpler phrases.
 - Do NOT use abstract, policy-style, or formal language. Write like you are explaining to a coworker.
 - Do NOT speculate about motive, fairness, downstream consequences, or intent.
@@ -245,7 +245,7 @@ When terms differ structurally (e.g., "board presentation" vs "informal briefing
 Good examples:
 "The company no longer requires formal audits. Internal teams now review data as time allows."
 "Updates no longer require formal board presentations. Management may share updates informally instead."
-"The requirement for third-party verification is gone. The operations team now handles reviews internally."
+"Third-party verification no longer applies. The operations team now handles reviews internally."
 "The company no longer sets formal quantitative targets. Management now identifies general priorities instead."
 "Fixed deadlines for data follow-up no longer apply. The team now follows up when resources allow."
 
