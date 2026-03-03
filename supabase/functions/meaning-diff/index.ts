@@ -227,24 +227,28 @@ Writing rules for operationalEffect:
 - Use short subject–verb sentences. Keep each sentence under 20 words.
 - Use simple verbs: remove, add, allow, limit, require, no longer require, expand, narrow, replace.
 - One structural change per sentence. If two independent changes occur, write two separate short sentences.
-- Do NOT use passive voice like "is replaced by" or "is no longer required." Use active voice: "X replaces Y" or "X no longer requires Y."
+- ABSOLUTE BAN on passive voice. NEVER write "X is replaced by Y" or "X are replaced by Y" or "X is removed" or "X is no longer required." Instead, rewrite as: "The company no longer requires X. Y is now used instead." or "X no longer applies. The company now does Y."
 - Do NOT stack noun phrases (e.g., avoid "verification of environmental data against records and invoices"). Break them into simpler phrases.
 - Do NOT use abstract, policy-style, or formal language. Write like you are explaining to a coworker.
 - Do NOT speculate about motive, fairness, downstream consequences, or intent.
 - Do NOT use evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," or "broader protections." State only the factual before-and-after difference.
 - The reader should understand what changed in one read without re-parsing.
 
-When terms differ structurally (e.g., "board presentation" vs "informal briefing"):
+When terms differ structurally (e.g., "board presentation" vs "informal briefing", "formal audit" vs "internal review"):
 - Do NOT describe it as a synonym swap or simple replacement.
 - State the structural requirement that is removed and what is now permitted instead.
+- Focus on what the organization no longer has to do, and what it may do instead.
 
 Good examples:
-"Formal audits are removed. The company now gives feedback only if it has time."
+"The company no longer requires formal audits. Internal teams now review data as time allows."
 "Updates no longer require formal board presentations. Management may share updates informally instead."
+"The requirement for third-party verification is gone. The operations team now handles reviews internally."
 
-Bad examples (DO NOT write like this):
+Bad examples (DO NOT write like this — these use passive voice):
 "Formal auditing and verification is replaced by best-effort feedback as resources allow."
 "Formal reports are replaced by informal briefings."
+"Formal audited reports are replaced by informal website updates."
+"Detailed data verification is replaced by best-effort reviews."
 
 For unchanged categories, set operationalEffect to "No change detected."
 
