@@ -182,6 +182,17 @@ TAXONOMY CATEGORIES:
 5. ACTION DOMAIN SHIFT – Change in the type or category of required action.
    Labels: domain_substituted, domain_expanded, domain_narrowed, unchanged.
 
+STRUCTURAL PROPERTY EVALUATION (MANDATORY):
+
+When two terms appear semantically similar (e.g., "board presentation" vs "informal briefing", "audit" vs "review", "formal report" vs "summary"), do NOT treat them as simple wording substitutions. Evaluate whether the terms differ in ANY of these structural properties:
+- Required formality (formal governance step vs informal communication)
+- Documentation requirement (written report vs verbal update)
+- Oversight trigger (board-level review vs management discretion)
+- Enforcement or approval requirement (binding approval vs optional input)
+- Authority level involved (board vs management vs individual)
+
+If ANY structural property changes, classify the change under the appropriate category (Action Domain Shift if the required action type changes, Actor Power Shift if authority level changes, or both if applicable). Do NOT dismiss the change as stylistic or cosmetic.
+
 6. EXPLICIT OBLIGATION REMOVAL – Removal of a previously explicit duty without equivalent replacement.
    Labels: obligation_removed, obligation_weakened, unchanged.
 
@@ -223,11 +234,17 @@ Writing rules for operationalEffect:
 - Do NOT use evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," or "broader protections." State only the factual before-and-after difference.
 - The reader should understand what changed in one read without re-parsing.
 
-Good example:
-"Formal audits are removed. The company now gives feedback only if it has time."
+When terms differ structurally (e.g., "board presentation" vs "informal briefing"):
+- Do NOT describe it as a synonym swap or simple replacement.
+- State the structural requirement that is removed and what is now permitted instead.
 
-Bad example (DO NOT write like this):
+Good examples:
+"Formal audits are removed. The company now gives feedback only if it has time."
+"Updates no longer require formal board presentations. Management may share updates informally instead."
+
+Bad examples (DO NOT write like this):
 "Formal auditing and verification is replaced by best-effort feedback as resources allow."
+"Formal reports are replaced by informal briefings."
 
 For unchanged categories, set operationalEffect to "No change detected."
 
