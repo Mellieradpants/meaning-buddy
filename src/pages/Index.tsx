@@ -13,7 +13,6 @@ import {
 import {
   CATEGORIES,
   SAMPLE_SCENARIOS,
-  SUMMARY_PHRASES,
   type CategoryKey,
 } from "@/lib/taxonomy";
 import SummaryTable from "@/components/SummaryTable";
@@ -33,19 +32,8 @@ interface DiffResult {
   categories: CategoryResult[];
 }
 
-function generateSummary(categories: CategoryResult[]): string {
-  const changed = categories.filter(c => c.status === "changed");
-  if (changed.length === 0) return "No structural changes were detected between the two versions.";
 
-  const uniqueCategories = [...new Set(changed.map(c => c.category))];
-  const phrases = uniqueCategories.map(c => SUMMARY_PHRASES[c] || "includes a structural change");
 
-  if (phrases.length === 1) {
-    return `This revision ${phrases[0]}.`;
-  }
-  const last = phrases.pop();
-  return `This revision ${phrases.join(", ")} and ${last}.`;
-}
 
 const Index = () => {
   const [original, setOriginal] = useState("");
@@ -284,9 +272,11 @@ const Index = () => {
           </div>
 
           {/* Plain-Language Summary */}
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {generateSummary(result.categories)}
-          </p>
+          {changedCategories.length === 0 && (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              No substantive structural changes detected.
+            </p>
+          )}
 
           {/* Category Chips */}
           {result.categories.length > 0 && (
