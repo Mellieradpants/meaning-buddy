@@ -47,12 +47,12 @@ const Landing = () => {
           The tool evaluates six categories of structural change:
         </p>
         <ul className="text-sm text-muted-foreground space-y-1.5">
-          <li>• Modality shift — changes in obligation strength (e.g., "shall" → "may")</li>
-          <li>• Actor power shift — changes in who holds authority</li>
-          <li>• Scope change — changes in who or what is covered</li>
-          <li>• Threshold / standard shift — numeric or qualitative standard changes</li>
-          <li>• Action domain shift — changes in the type of required action</li>
-          <li>• Obligation removal — deleted or weakened duties</li>
+          <li>• Modality Shift — Change in how strong a rule is. For example, a requirement ("shall") becoming optional ("may").</li>
+          <li>• Scope Change — Change in who or what the rule applies to.</li>
+          <li>• Actor Power Shift — Change in who has the authority or responsibility.</li>
+          <li>• Action Domain Shift — Change in the type of action required.</li>
+          <li>• Threshold / Standard Shift — Change in a measurable requirement such as time, quantity, or duration.</li>
+          <li>• Obligation Removal — A duty or requirement that has been deleted or weakened.</li>
         </ul>
       </section>
 
@@ -67,6 +67,10 @@ const Landing = () => {
             <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Revised</span>
             <span className="text-foreground">The employer may provide health insurance to eligible employees within a reasonable timeframe.</span>
           </div>
+          <div className="border-t border-border pt-3">
+            <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Operational Effect</span>
+            <span className="text-foreground">Health insurance is no longer guaranteed. The employer can now decide whether to offer it. Coverage no longer extends to all full-time employees — only those deemed eligible. The fixed 30-day deadline no longer applies. The employer can now take as long as it considers reasonable.</span>
+          </div>
         </div>
 
         <div className="mt-4 rounded-lg border border-border bg-card p-4">
@@ -80,19 +84,19 @@ const Landing = () => {
           <ul className="text-sm text-foreground space-y-1.5">
             <li className="flex items-start gap-2">
               <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
-              <span><span className="font-medium">Modality shift</span> — "shall provide" → "may provide"</span>
+              <span><span className="font-medium">Modality Shift</span> — "shall provide" → "may provide"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
-              <span><span className="font-medium">Scope change</span> — "all full-time employees" → "eligible employees"</span>
+              <span><span className="font-medium">Scope Change</span> — "all full-time employees" → "eligible employees"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
-              <span><span className="font-medium">Threshold shift</span> — "within 30 days" → "within a reasonable timeframe"</span>
+              <span><span className="font-medium">Threshold Shift</span> — "within 30 days" → "within a reasonable timeframe"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
-              <span><span className="font-medium">Obligation removal</span> — mandatory duty weakened</span>
+              <span><span className="font-medium">Obligation Removal</span> — mandatory duty weakened to discretionary</span>
             </li>
           </ul>
         </div>
