@@ -155,8 +155,10 @@ RULES:
 - Do NOT provide abstract summaries.
 - Do NOT describe categories without quoting text.
 - Every interpretation must be grounded in visible source language.
+- Only report changes that alter obligations, scope, thresholds, authority, definitions, enforcement mechanisms, timelines, or applicability.
+- IGNORE purely stylistic, formatting, or non-substantive wording changes.
 - Collapse unchanged portions with ellipses (…) so only the changed fragment is emphasized.
-- If a change cannot be clearly grounded in the provided text, explicitly state that it cannot be determined.
+- If a change cannot be clearly grounded in the provided text, explicitly state that it cannot be determined rather than inferring.
 
 TAXONOMY CATEGORIES:
 
@@ -199,7 +201,7 @@ Examples:
 
 OPERATIONAL EFFECT (MANDATORY):
 
-For each changed category, the operationalEffect field MUST contain a concrete statement explaining what is now required, permitted, removed, expanded, restricted, or modified. This must be specific and auditable, not abstract.
+For each changed category, the operationalEffect field MUST contain a concrete statement describing who is now required, permitted, restricted, expanded, or otherwise affected, and what action changes as a result. This must be specific and auditable, not abstract.
 
 Example: "Quarterly review frequency is no longer mandatory; the organization may now choose when to conduct reviews, removing the fixed schedule obligation."
 
