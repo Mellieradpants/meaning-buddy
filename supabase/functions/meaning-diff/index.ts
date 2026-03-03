@@ -168,6 +168,7 @@ TAXONOMY CATEGORIES:
 1. MODALITY SHIFT – Change in deontic force (obligation, permission, prohibition, intention).
    Trigger terms: must, shall, will, may, may not, intends to, reasonable efforts, subject to, required to.
    Labels: mandatory_to_discretionary, discretionary_to_mandatory, firm_to_intent, duty_to_best_efforts, unchanged.
+   IMPORTANT: Modality Shift applies ONLY when the deontic operator itself changes (e.g., "shall" → "may", "must" → "should", removal of mandatory language). Do NOT classify as Modality Shift if the obligation word remains the same but the required action changes. In those cases, classify under Action Domain Shift or the appropriate structural category.
 
 2. ACTOR POWER SHIFT – Change in which party holds decision authority or control.
    Labels: unilateral_to_conditional, conditional_to_unilateral, authority_transferred, authority_restricted, unchanged.
