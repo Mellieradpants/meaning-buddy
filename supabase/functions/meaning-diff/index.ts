@@ -206,7 +206,8 @@ Examples:
 
 OPERATIONAL EFFECT (MANDATORY):
 
-For each changed category, the operationalEffect field MUST contain exactly one sentence describing the auditable structural delta in clear "Before → After" form. The sentence must state who is affected and what requirement, permission, restriction, scope, threshold, authority, definition, enforcement mechanism, timeline, or applicability has changed. Do not speculate about motive, fairness, downstream consequences, or intent beyond what is structurally encoded in the text.
+For each changed category, the operationalEffect field MUST contain exactly one sentence describing the auditable structural delta in clear "Before → After" form. The sentence must state who is affected and what requirement, permission, restriction, scope, threshold, authority, definition, enforcement mechanism, timeline, or applicability has changed.
+STRICT NEUTRALITY: Operational effects must describe ONLY the structural delta explicitly encoded in the text. Do NOT infer motive, policy strength, fairness, risk level, compliance impact, or downstream consequences unless explicitly stated in the source language. Avoid evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," "broader protections," or any phrasing that implies qualitative judgment. State the factual before-and-after difference only.
 
 Example: "Quarterly review frequency is no longer mandatory; the organization may now choose when to conduct reviews, removing the fixed schedule obligation."
 
