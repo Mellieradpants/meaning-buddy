@@ -55,7 +55,7 @@ function parseEntries(categories: CategoryResult[]): ParsedEntry[] {
       revSnippet: truncateSnippet(sanitizeEvidence(rev.text)),
       effect:
         cat.operationalEffect && cat.operationalEffect !== "No change detected."
-          ? truncateSnippet(cat.operationalEffect, 120)
+          ? cat.operationalEffect
           : null,
     };
   });
