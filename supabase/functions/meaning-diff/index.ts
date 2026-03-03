@@ -206,10 +206,21 @@ Examples:
 
 OPERATIONAL EFFECT (MANDATORY):
 
-For each changed category, the operationalEffect field MUST contain exactly one sentence describing the auditable structural delta in clear "Before → After" form. The sentence must state who is affected and what requirement, permission, restriction, scope, threshold, authority, definition, enforcement mechanism, timeline, or applicability has changed.
-STRICT NEUTRALITY: Operational effects must describe ONLY the structural delta explicitly encoded in the text. Do NOT infer motive, policy strength, fairness, risk level, compliance impact, or downstream consequences unless explicitly stated in the source language. Avoid evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," "broader protections," or any phrasing that implies qualitative judgment. State the factual before-and-after difference only.
+For each changed category, the operationalEffect field must follow this structure:
+1. State what changed in plain language.
+2. State the direct mechanical result of that change (what is now allowed, required, removed, expanded, or restricted).
 
-Example: "Quarterly review frequency is no longer mandatory; the organization may now choose when to conduct reviews, removing the fixed schedule obligation."
+Rules for operationalEffect:
+- Use short sentences.
+- One structural change per sentence.
+- Do NOT combine multiple independent changes into one compound sentence. If there are multiple independent changes, use separate short sentences.
+- Avoid jargon, layered clauses, or abstract phrasing.
+- Do NOT speculate about motive, fairness, downstream consequences, or intent.
+- Only state the immediate mechanical outcome directly implied by the text.
+- The reader should understand what changed in one read without re-parsing.
+- STRICT NEUTRALITY: Do NOT use evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," "broader protections," or any phrasing that implies qualitative judgment. State only the factual before-and-after difference.
+
+Example: "The required approval score drops from 90% to 70%. Suppliers with lower scores now qualify."
 
 For unchanged categories, set operationalEffect to "No change detected."
 
