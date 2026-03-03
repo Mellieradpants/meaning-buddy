@@ -206,21 +206,28 @@ Examples:
 
 OPERATIONAL EFFECT (MANDATORY):
 
-For each changed category, the operationalEffect field must follow this structure:
-1. State what changed in plain language.
-2. State the direct mechanical result of that change (what is now allowed, required, removed, expanded, or restricted).
+For each changed category, write the operationalEffect in plain language a high-school student can understand.
 
-Rules for operationalEffect:
-- Use short sentences.
-- One structural change per sentence.
-- Do NOT combine multiple independent changes into one compound sentence. If there are multiple independent changes, use separate short sentences.
-- Avoid jargon, layered clauses, or abstract phrasing.
+Structure:
+1. Say what changed.
+2. Say what that means in practice (what is now allowed, required, removed, expanded, or restricted).
+
+Writing rules for operationalEffect:
+- Use short subject–verb sentences. Keep each sentence under 20 words.
+- Use simple verbs: remove, add, allow, limit, require, no longer require, expand, narrow, replace.
+- One structural change per sentence. If two independent changes occur, write two separate short sentences.
+- Do NOT use passive voice like "is replaced by" or "is no longer required." Use active voice: "X replaces Y" or "X no longer requires Y."
+- Do NOT stack noun phrases (e.g., avoid "verification of environmental data against records and invoices"). Break them into simpler phrases.
+- Do NOT use abstract, policy-style, or formal language. Write like you are explaining to a coworker.
 - Do NOT speculate about motive, fairness, downstream consequences, or intent.
-- Only state the immediate mechanical outcome directly implied by the text.
+- Do NOT use evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," or "broader protections." State only the factual before-and-after difference.
 - The reader should understand what changed in one read without re-parsing.
-- STRICT NEUTRALITY: Do NOT use evaluative language such as "less rigorous," "weakened oversight," "more lenient," "stricter," "broader protections," or any phrasing that implies qualitative judgment. State only the factual before-and-after difference.
 
-Example: "The required approval score drops from 90% to 70%. Suppliers with lower scores now qualify."
+Good example:
+"Formal audits are removed. The company now gives feedback only if it has time."
+
+Bad example (DO NOT write like this):
+"Formal auditing and verification is replaced by best-effort feedback as resources allow."
 
 For unchanged categories, set operationalEffect to "No change detected."
 
