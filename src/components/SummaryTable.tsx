@@ -51,7 +51,7 @@ function toMarkdownTable(categories: CategoryResult[]): string {
     const orig = truncate(sanitizeEvidence(extractPageFromEvidence(cat.originalEvidence).text), 120).replace(/\|/g, "\\|");
     const rev = truncate(sanitizeEvidence(extractPageFromEvidence(cat.revisedEvidence).text), 120).replace(/\|/g, "\\|");
     const effect = (cat.operationalEffect || "—").replace(/\|/g, "\\|");
-    return `| ${page} | ${category} | ${status} | ${orig} | ${rev} | ${truncate(effect, 120)} |`;
+    return `| ${page} | ${category} | ${status} | ${orig} | ${rev} | ${effect} |`;
   });
   return [header, divider, ...rows].join("\n");
 }
@@ -182,9 +182,9 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
                     {truncate(sanitizeEvidence(revParsed.text))}
                   </TableCell>
-                  <TableCell className="max-w-[220px] text-xs text-foreground leading-relaxed">
+                  <TableCell className="min-w-[220px] max-w-[320px] text-xs text-foreground leading-relaxed whitespace-normal break-words">
                     {cat.operationalEffect && cat.operationalEffect !== "No change detected."
-                      ? truncate(cat.operationalEffect, 100)
+                      ? cat.operationalEffect
                       : "—"}
                   </TableCell>
                 </TableRow>
