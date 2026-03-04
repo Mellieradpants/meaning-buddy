@@ -2,3 +2,6 @@ project_id = "tvgebjficjkfjbjlrkht"
 
 [functions.meaning-diff]
 verify_jwt = false
+
+[functions.translate-effect]
+verify_jwt = false
