@@ -352,64 +352,6 @@ const Index = () => {
                 ? "Structural Change Detected"
                 : "No Meaningful Change"}
             </div>
-
-            {/* Controls: Copy + Export */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Copy results */}
-              <button
-                type="button"
-                onClick={() => {
-                  const lines = changedCategories.map((cat) => {
-                    const gi = result.categories.indexOf(cat);
-                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
-                      ? getDisplayEffect(gi, cat.operationalEffect)
-                      : "";
-                    return [
-                      `## ${CATEGORIES[cat.category] || cat.category}`,
-                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
-                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
-                      eff ? `**Operational Effect:** ${eff}` : "",
-                      "",
-                    ].filter(Boolean).join("\n");
-                  });
-                  navigator.clipboard.writeText(lines.join("\n")).then(() => toast.success("Copied to clipboard"));
-                }}
-                className="h-8 px-3 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-              >
-                Copy
-              </button>
-
-              {/* Export results */}
-              <button
-                type="button"
-                onClick={() => {
-                  const lines = changedCategories.map((cat) => {
-                    const gi = result.categories.indexOf(cat);
-                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
-                      ? getDisplayEffect(gi, cat.operationalEffect)
-                      : "";
-                    return [
-                      `## ${CATEGORIES[cat.category] || cat.category}`,
-                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
-                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
-                      eff ? `**Operational Effect:** ${eff}` : "",
-                      "",
-                    ].filter(Boolean).join("\n");
-                  });
-                  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "comparison-results.txt";
-                  a.click();
-                  URL.revokeObjectURL(url);
-                  toast.success("Exported");
-                }}
-                className="h-8 px-3 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
-              >
-                Export
-              </button>
-            </div>
           </div>
 
           {/* No changes message */}
@@ -552,6 +494,63 @@ const Index = () => {
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Copy + Export at bottom of results */}
+          {changedCategories.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const lines = changedCategories.map((cat) => {
+                    const gi = result.categories.indexOf(cat);
+                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                      ? getDisplayEffect(gi, cat.operationalEffect)
+                      : "";
+                    return [
+                      `## ${CATEGORIES[cat.category] || cat.category}`,
+                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
+                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
+                      eff ? `**Operational Effect:** ${eff}` : "",
+                      "",
+                    ].filter(Boolean).join("\n");
+                  });
+                  navigator.clipboard.writeText(lines.join("\n")).then(() => toast.success("Copied to clipboard"));
+                }}
+                className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+              >
+                Copy Results
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const lines = changedCategories.map((cat) => {
+                    const gi = result.categories.indexOf(cat);
+                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                      ? getDisplayEffect(gi, cat.operationalEffect)
+                      : "";
+                    return [
+                      `## ${CATEGORIES[cat.category] || cat.category}`,
+                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
+                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
+                      eff ? `**Operational Effect:** ${eff}` : "",
+                      "",
+                    ].filter(Boolean).join("\n");
+                  });
+                  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "comparison-results.txt";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Exported");
+                }}
+                className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+              >
+                Export Summary
+              </button>
             </div>
           )}
         </div>
