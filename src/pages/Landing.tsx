@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import ThemeToggle from "@/components/ThemeToggle";
+// ThemeToggle removed — light-only interface
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -14,9 +14,6 @@ const Landing = () => {
 
   return (
     <div className="min-h-dvh bg-background p-6 md:p-10 max-w-3xl mx-auto">
-      <div className="flex justify-end mb-4">
-        <ThemeToggle />
-      </div>
       <header className="mb-14">
         <h1 className="font-semibold tracking-tight font-mono text-[2rem] md:text-[2.5rem]" style={{ lineHeight: 1.2 }}>
           Structural Language Comparison Tool
