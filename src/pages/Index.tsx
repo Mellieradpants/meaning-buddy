@@ -39,11 +39,20 @@ interface DiffResult {
   categories: CategoryResult[];
 }
 
+const SCOPE_OPTIONS: { value: string; label: string }[] = [
+  { value: "all", label: "All shifts" },
+  ...(Object.entries(CATEGORIES) as [CategoryKey, string][]).map(([key, label]) => ({
+    value: key,
+    label,
+  })),
+];
+
 const Index = () => {
   const [original, setOriginal] = useState("");
   const [revised, setRevised] = useState("");
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scopeFilter, setScopeFilter] = useState<string>("all");
   const [devMode, setDevMode] = useState(() => {
     try { return localStorage.getItem("devModeEnabled") === "true"; } catch { return false; }
   });
@@ -170,9 +179,16 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Apply scope filter to results
+  const allChanged = result?.categories.filter(c => c.status === "changed") || [];
+  const allUnchanged = result?.categories.filter(c => c.status === "unchanged") || [];
 
-  const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
-  const unchangedCategories = result?.categories.filter(c => c.status === "unchanged") || [];
+  const changedCategories = scopeFilter === "all"
+    ? allChanged
+    : allChanged.filter(c => c.category === scopeFilter);
+  const unchangedCategories = scopeFilter === "all"
+    ? allUnchanged
+    : allUnchanged.filter(c => c.category === scopeFilter);
 
   useEffect(() => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -195,6 +211,45 @@ const Index = () => {
         <p className="text-muted-foreground text-xs">
           Operational explanations can be translated into multiple languages. Evidence remains verbatim.
         </p>
+
+        {/* Scope + Language controls */}
+        <div className="mt-3 flex flex-col sm:flex-row gap-2">
+          <div className="w-64">
+            <Select value={scopeFilter} onValueChange={setScopeFilter}>
+              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
+                <SelectValue placeholder="All shifts" />
+              </SelectTrigger>
+              <SelectContent>
+                {SCOPE_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="text-xs">
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-64">
+            <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
+              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EFFECT_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang} value={lang} className="text-xs">
+                    {lang}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {translating && (
+            <span className="text-xs text-muted-foreground flex items-center gap-0.5 self-center">
+              <span className="animate-bounce [animation-delay:0ms]">·</span>
+              <span className="animate-bounce [animation-delay:150ms]">·</span>
+              <span className="animate-bounce [animation-delay:300ms]">·</span>
+            </span>
+          )}
+        </div>
       </header>
 
       {/* Input Section */}
@@ -298,49 +353,13 @@ const Index = () => {
                 : "No Meaningful Change"}
             </div>
 
-            {/* Controls: Language + Copy + Export */}
+            {/* Controls: Copy + Export */}
             <div className="flex flex-wrap items-center gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1.5">
-                      <label className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
-                        Language
-                      </label>
-                      <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
-                        <SelectTrigger className="h-8 w-36 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {EFFECT_LANGUAGES.map((lang) => (
-                            <SelectItem key={lang} value={lang} className="text-xs">
-                              {lang}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs max-w-[220px]">
-                    <p>Changes the language of Operational Effect explanations only. Evidence text stays verbatim.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              {/* Translating dots */}
-              {translating && (
-                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                  <span className="animate-bounce [animation-delay:0ms]">·</span>
-                  <span className="animate-bounce [animation-delay:150ms]">·</span>
-                  <span className="animate-bounce [animation-delay:300ms]">·</span>
-                </span>
-              )}
-
               {/* Copy results */}
               <button
                 type="button"
                 onClick={() => {
-                  const lines = changedCategories.map((cat, i) => {
+                  const lines = changedCategories.map((cat) => {
                     const gi = result.categories.indexOf(cat);
                     const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
                       ? getDisplayEffect(gi, cat.operationalEffect)
@@ -364,7 +383,7 @@ const Index = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const lines = changedCategories.map((cat, i) => {
+                  const lines = changedCategories.map((cat) => {
                     const gi = result.categories.indexOf(cat);
                     const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
                       ? getDisplayEffect(gi, cat.operationalEffect)
@@ -396,14 +415,18 @@ const Index = () => {
           {/* No changes message */}
           {changedCategories.length === 0 && (
             <p className="text-sm text-muted-foreground leading-relaxed">
-              No substantive structural changes detected.
+              {scopeFilter === "all"
+                ? "No substantive structural changes detected."
+                : `No changes detected for ${CATEGORIES[scopeFilter as CategoryKey] || scopeFilter}.`}
             </p>
           )}
 
           {/* Category Chips */}
           {result.categories.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {result.categories.map((cat, i) => (
+              {result.categories
+                .filter(cat => scopeFilter === "all" || cat.category === scopeFilter)
+                .map((cat, i) => (
                 <span
                   key={i}
                   className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${
