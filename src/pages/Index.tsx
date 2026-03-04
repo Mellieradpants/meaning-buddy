@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import ThemeToggle from "@/components/ThemeToggle";
+// ThemeToggle removed — light-only interface
 import { supabase } from "@/integrations/supabase/client";
 import { extractPageFromEvidence } from "@/lib/pageParser";
 import { sanitizeEvidence } from "@/lib/sanitize";
@@ -208,9 +208,6 @@ const Index = () => {
 
   return (
     <div className="min-h-dvh bg-background p-4 md:p-10 max-w-5xl mx-auto">
-      <div className="flex justify-end mb-4">
-        <ThemeToggle />
-      </div>
 
       {/* Hero Section — compact technical header */}
       <header className="mb-6 space-y-1">
