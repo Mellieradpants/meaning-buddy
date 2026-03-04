@@ -306,11 +306,11 @@ const Index = () => {
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                 Changes Detected ({changedCategories.length})
               </h2>
-              <div className="space-y-4">
+              <div className="divide-y divide-border/40">
                 {changedCategories.map((cat, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-border bg-card p-5"
+                    className={`rounded-lg border border-border bg-card p-5${i > 0 ? ' mt-6 pt-6' : ''}`}
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
