@@ -47,6 +47,9 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string>("");
   const [selectedSample, setSelectedSample] = useState<string>("");
+  const [devMode, setDevMode] = useState(() => {
+    try { return localStorage.getItem("devModeEnabled") === "true"; } catch { return false; }
+  });
   const inputRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -518,9 +521,27 @@ const Index = () => {
         </div>
       )}
 
-      {/* Translation Stress Test — Dev/QA */}
-      <div className="mt-10 border-t border-border/40 pt-8">
-        <TranslationStressTest />
+      {/* Developer Mode toggle + Stress Test */}
+      <div className="mt-10 border-t border-border/40 pt-6">
+        <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={devMode}
+            onChange={(e) => {
+              const v = e.target.checked;
+              setDevMode(v);
+              try { localStorage.setItem("devModeEnabled", String(v)); } catch {}
+            }}
+            className="accent-primary w-3.5 h-3.5"
+          />
+          <span className="text-[11px] text-muted-foreground font-medium">Developer Mode</span>
+        </label>
+
+        {devMode && (
+          <div className="mt-4">
+            <TranslationStressTest />
+          </div>
+        )}
       </div>
     </div>
   );
