@@ -228,6 +228,9 @@ const Index = () => {
         <p className="text-muted-foreground text-sm mt-1">
           This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
         </p>
+        <p className="text-muted-foreground text-xs mt-1">
+          Operational explanations can be viewed in multiple languages while evidence remains exactly as written.
+        </p>
         <div className="mt-3 flex flex-col sm:flex-row gap-2">
           <div className="w-64">
             <Select value={selectedSample} onValueChange={handleLoadSample}>
