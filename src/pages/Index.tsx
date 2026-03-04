@@ -390,6 +390,61 @@ const Index = () => {
                   <span className="animate-bounce [animation-delay:300ms]">·</span>
                 </span>
               )}
+
+              {/* Copy results */}
+              <button
+                type="button"
+                onClick={() => {
+                  const lines = changedCategories.map((cat, i) => {
+                    const gi = result.categories.indexOf(cat);
+                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                      ? getDisplayEffect(gi, cat.operationalEffect)
+                      : "";
+                    return [
+                      `## ${CATEGORIES[cat.category] || cat.category}`,
+                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
+                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
+                      eff ? `**Operational Effect:** ${eff}` : "",
+                      "",
+                    ].filter(Boolean).join("\n");
+                  });
+                  navigator.clipboard.writeText(lines.join("\n")).then(() => toast.success("Copied to clipboard"));
+                }}
+                className="h-8 px-3 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+              >
+                Copy
+              </button>
+
+              {/* Export results */}
+              <button
+                type="button"
+                onClick={() => {
+                  const lines = changedCategories.map((cat, i) => {
+                    const gi = result.categories.indexOf(cat);
+                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                      ? getDisplayEffect(gi, cat.operationalEffect)
+                      : "";
+                    return [
+                      `## ${CATEGORIES[cat.category] || cat.category}`,
+                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
+                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
+                      eff ? `**Operational Effect:** ${eff}` : "",
+                      "",
+                    ].filter(Boolean).join("\n");
+                  });
+                  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "comparison-results.txt";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Exported");
+                }}
+                className="h-8 px-3 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+              >
+                Export
+              </button>
             </div>
           </div>
 
@@ -436,17 +491,27 @@ const Index = () => {
                       key={i}
                       className="rounded-lg border border-border bg-card p-5 font-mono text-sm space-y-4"
                     >
-                      {/* Shift label */}
-                      <div className="flex items-center gap-2">
-                        <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
-                          {CATEGORIES[cat.category] || cat.category}
+                      {/* Original evidence */}
+                      <div>
+                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                          Original
                         </span>
-                        <span className="text-xs font-sans text-muted-foreground">
-                          {cat.label.replace(/_/g, " ")}
+                        <span className="text-foreground leading-[1.8] block">
+                          {sanitizeEvidence(cat.originalEvidence)}
                         </span>
                       </div>
 
-                      {/* Operational explanation */}
+                      {/* Revised evidence */}
+                      <div className="border-t border-border pt-4">
+                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                          Revised
+                        </span>
+                        <span className="text-foreground leading-[1.8] block">
+                          {sanitizeEvidence(cat.revisedEvidence)}
+                        </span>
+                      </div>
+
+                      {/* Operational Effect */}
                       {effectText && (
                         <div className="border-t border-border pt-4">
                           <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
@@ -462,22 +527,19 @@ const Index = () => {
                         </div>
                       )}
 
-                      {/* Evidence block */}
+                      {/* Detected changes / category chip */}
                       <div className="border-t border-border pt-4">
-                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                          Original
+                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+                          Detected changes
                         </span>
-                        <span className="text-foreground leading-[1.8] block">
-                          {sanitizeEvidence(cat.originalEvidence)}
-                        </span>
-                      </div>
-                      <div className="border-t border-border pt-4">
-                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                          Revised
-                        </span>
-                        <span className="text-foreground leading-[1.8] block">
-                          {sanitizeEvidence(cat.revisedEvidence)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
+                            {CATEGORIES[cat.category] || cat.category}
+                          </span>
+                          <span className="text-xs font-sans text-muted-foreground">
+                            {cat.label.replace(/_/g, " ")}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
