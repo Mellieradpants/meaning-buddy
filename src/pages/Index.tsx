@@ -79,7 +79,6 @@ const Index = () => {
   const { language, setLanguage, getTranslated, translating, error: translationError, isRtl } =
     useEffectTranslation(effectStrings);
 
-  // Build a map from category index to effect index for translation lookup
   const effectIndexMap = useMemo(() => {
     const map = new Map<number, number>();
     if (!result) return map;
@@ -197,10 +196,6 @@ const Index = () => {
     }
   };
 
-  const scrollToResults = () => {
-    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
   const unchangedCategories = result?.categories.filter(c => c.status === "unchanged") || [];
 
@@ -212,25 +207,21 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-background p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="min-h-dvh bg-background p-4 md:p-10 max-w-5xl mx-auto">
       <div className="flex justify-end mb-4">
         <ThemeToggle />
       </div>
-      <header className="mb-8 space-y-1">
-        <h1 className="font-semibold tracking-tight font-mono text-[2rem] md:text-[2.5rem] text-foreground" style={{ lineHeight: 1.2 }}>
+
+      {/* Hero Section — compact technical header */}
+      <header className="mb-6 space-y-1">
+        <h1 className="font-semibold tracking-tight font-mono text-lg md:text-xl text-foreground">
           Structural Language Comparison
         </h1>
-        <h2 className="font-medium text-[1.1rem] md:text-[1.25rem] text-muted-foreground">
-          Compare two versions of section text
-        </h2>
-        <p className="text-muted-foreground text-sm mt-2">
-          Paste the earlier version on the left and the revised version on the right.
+        <p className="text-muted-foreground text-sm">
+          Compare two versions of text to detect structural wording changes and their operational consequences.
         </p>
-        <p className="text-muted-foreground text-sm mt-1">
-          This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
-        </p>
-        <p className="text-muted-foreground text-xs mt-1">
-          Operational explanations can be viewed in multiple languages while evidence remains exactly as written.
+        <p className="text-muted-foreground text-xs">
+          Operational explanations can be translated into multiple languages. Evidence remains verbatim.
         </p>
         <div className="mt-3 flex flex-col sm:flex-row gap-2">
           <div className="w-64">
@@ -265,7 +256,7 @@ const Index = () => {
       </header>
 
       {/* Input Section */}
-      <div ref={inputRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div ref={inputRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
             Original (earlier version)
@@ -273,7 +264,7 @@ const Index = () => {
           <textarea
             value={original}
             onChange={(e) => setOriginal(e.target.value)}
-            className="w-full h-64 md:h-80 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-52 md:h-72 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Paste the earlier version here…"
           />
         </div>
@@ -284,49 +275,30 @@ const Index = () => {
           <textarea
             value={revised}
             onChange={(e) => setRevised(e.target.value)}
-            className="w-full h-64 md:h-80 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-52 md:h-72 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Paste the updated version here…"
           />
         </div>
       </div>
 
-      {/* Instruction */}
-      <div className="text-sm text-muted-foreground mb-4 text-center space-y-1">
-        <p>After pasting both versions, click Compare.</p>
-        <p>Results will appear below showing detected structural change types and a side-by-side comparison of modified lines.</p>
-      </div>
-
       {/* Compare & Clear Buttons */}
-      <div className="flex flex-col items-center gap-3 mb-10">
-        <div className="flex justify-center gap-3">
-          <button
-            onClick={handleCompare}
-            disabled={loading}
-            className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Comparing…" : "Compare"}
-            <kbd className="ml-2 hidden sm:inline-block text-[10px] opacity-60 font-mono bg-primary-foreground/10 px-1.5 py-0.5 rounded border border-primary-foreground/20">
-              {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "⌘ ↵" : "Ctrl ↵"}
-            </kbd>
-          </button>
-          <button
-            onClick={handleClear}
-            className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            Clear
-          </button>
-        </div>
-
-        {/* Scroll to Results helper */}
-        {!loading && result && (
-          <button
-            onClick={scrollToResults}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium border border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            <span className="text-muted-foreground">Results ready</span>
-            <span className="border-l border-border pl-2">Scroll to results ↓</span>
-          </button>
-        )}
+      <div className="flex justify-center gap-3 mb-10">
+        <button
+          onClick={handleCompare}
+          disabled={loading}
+          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Comparing…" : "Compare"}
+          <kbd className="ml-2 hidden sm:inline-block text-[10px] opacity-60 font-mono bg-primary-foreground/10 px-1.5 py-0.5 rounded border border-primary-foreground/20">
+            {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "⌘ ↵" : "Ctrl ↵"}
+          </kbd>
+        </button>
+        <button
+          onClick={handleClear}
+          className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+        >
+          Clear
+        </button>
       </div>
 
       {/* Loading Skeleton */}
@@ -365,16 +337,18 @@ const Index = () => {
       {/* Results */}
       {!loading && result && (
         <div id="results" ref={resultsRef} className="space-y-6 scroll-mt-4">
-          {/* Verdict Badge + Language Selector */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+          {/* Results Control Bar */}
+          <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Verdict Badge */}
             <div
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border ${
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-semibold border ${
                 result.overallVerdict === "meaningful_change"
                   ? "bg-changed-bg text-changed border-changed-border"
                   : "bg-unchanged-bg text-unchanged border-border"
               }`}
             >
-              <span className="text-lg">
+              <span className="text-base">
                 {result.overallVerdict === "meaningful_change" ? "⚠" : "✓"}
               </span>
               {result.overallVerdict === "meaningful_change"
@@ -382,41 +356,47 @@ const Index = () => {
                 : "No Meaningful Change"}
             </div>
 
-            {/* Language Selector */}
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-muted-foreground whitespace-nowrap">
-                Operational Effect language
-              </label>
+            {/* Controls: Language + Copy + Export */}
+            <div className="flex flex-wrap items-center gap-2">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span>
-              <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
-                <SelectTrigger className="h-8 w-44 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {EFFECT_LANGUAGES.map((lang) => (
-                    <SelectItem key={lang} value={lang} className="text-xs">
-                      {lang}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <label className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
+                        Language
+                      </label>
+                      <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
+                        <SelectTrigger className="h-8 w-36 text-xs font-medium bg-secondary text-secondary-foreground border-border">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {EFFECT_LANGUAGES.map((lang) => (
+                            <SelectItem key={lang} value={lang} className="text-xs">
+                              {lang}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs max-w-[220px]">
-                    <p>Supported: English, Spanish, French, German, Russian, Chinese (Simplified), Hebrew</p>
+                    <p>Changes the language of Operational Effect explanations only. Evidence text stays verbatim.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+
+              {/* Translating dots */}
               {translating && (
-                <span className="text-[10px] text-muted-foreground animate-pulse">Translating…</span>
+                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                  <span className="animate-bounce [animation-delay:0ms]">·</span>
+                  <span className="animate-bounce [animation-delay:150ms]">·</span>
+                  <span className="animate-bounce [animation-delay:300ms]">·</span>
+                </span>
               )}
             </div>
           </div>
 
-          {/* Plain-Language Summary */}
+          {/* No changes message */}
           {changedCategories.length === 0 && (
             <p className="text-sm text-muted-foreground leading-relaxed">
               No substantive structural changes detected.
@@ -564,6 +544,7 @@ const Index = () => {
             }
           }
         });
+        if (!devMode) return null;
         return (
           <div className="mt-6">
             {drifts.length === 0 ? (
@@ -571,26 +552,31 @@ const Index = () => {
             ) : (
               <>
                 <p className="text-xs text-destructive font-medium">⚠️ English output differs from original explanation.</p>
-                {devMode && (
-                  <div className="mt-2 space-y-3">
-                    {drifts.map((d, i) => (
-                      <div key={i} className="rounded border border-border bg-muted/30 p-3 text-xs space-y-1 font-mono">
-                        <p className="text-muted-foreground font-sans font-medium">Category index {d.catIndex}</p>
-                        <p><span className="font-sans font-medium text-muted-foreground">Original:</span> {d.original}</p>
-                        <p><span className="font-sans font-medium text-muted-foreground">Displayed:</span> {d.displayed}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="mt-2 space-y-3">
+                  {drifts.map((d, i) => (
+                    <div key={i} className="rounded border border-border bg-muted/30 p-3 text-xs space-y-1 font-mono">
+                      <p className="text-muted-foreground font-sans font-medium">Category index {d.catIndex}</p>
+                      <p><span className="font-sans font-medium text-muted-foreground">Original:</span> {d.original}</p>
+                      <p><span className="font-sans font-medium text-muted-foreground">Displayed:</span> {d.displayed}</p>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
           </div>
         );
       })()}
 
-      {/* Developer Mode toggle + Stress Test */}
-      <div className="mt-10 border-t border-border/40 pt-6">
-        <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+      {/* Developer Mode toggle + Stress Test — hidden from public view */}
+      {devMode && (
+        <div className="mt-10 border-t border-border/40 pt-6">
+          <TranslationStressTest />
+        </div>
+      )}
+
+      {/* Hidden dev mode toggle — only visible via localStorage */}
+      <div className="mt-6 flex justify-center">
+        <label className="inline-flex items-center gap-2 cursor-pointer select-none opacity-0 hover:opacity-100 transition-opacity">
           <input
             type="checkbox"
             checked={devMode}
@@ -599,16 +585,10 @@ const Index = () => {
               setDevMode(v);
               try { localStorage.setItem("devModeEnabled", String(v)); } catch {}
             }}
-            className="accent-primary w-3.5 h-3.5"
+            className="accent-primary w-3 h-3"
           />
-          <span className="text-[11px] text-muted-foreground font-medium">Developer Mode</span>
+          <span className="text-[10px] text-muted-foreground">Dev</span>
         </label>
-
-        {devMode && (
-          <div className="mt-4">
-            <TranslationStressTest />
-          </div>
-        )}
       </div>
     </div>
   );
