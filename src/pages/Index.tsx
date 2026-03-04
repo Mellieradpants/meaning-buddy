@@ -19,6 +19,7 @@ import {
 import { SAMPLES } from "@/lib/samples";
 import SummaryTable from "@/components/SummaryTable";
 import ChangeSummary from "@/components/ChangeSummary";
+import TranslationStressTest from "@/components/TranslationStressTest";
 import {
   useEffectTranslation,
   EFFECT_LANGUAGES,
@@ -516,6 +517,11 @@ const Index = () => {
           )}
         </div>
       )}
+
+      {/* Translation Stress Test — Dev/QA */}
+      <div className="mt-10 border-t border-border/40 pt-8">
+        <TranslationStressTest />
+      </div>
     </div>
   );
 };
