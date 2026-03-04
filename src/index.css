@@ -33,6 +33,7 @@
 
     --changed: 38 72% 42%;
     --changed-bg: 38 50% 94%;
+    --changed-border: 38 50% 80%;
     --unchanged: 211 13% 52%;
     --unchanged-bg: 210 25% 94%;
 
@@ -44,6 +45,43 @@
 
     --font-mono: 'JetBrains Mono', monospace;
     --font-sans: 'Inter', system-ui, sans-serif;
+  }
+
+  .dark {
+    --background: 210 15% 10%;
+    --foreground: 210 20% 88%;
+
+    --card: 210 14% 13%;
+    --card-foreground: 210 20% 88%;
+
+    --popover: 210 14% 13%;
+    --popover-foreground: 210 20% 88%;
+
+    --primary: 209 34% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 209 34% 38%;
+
+    --secondary: 210 14% 18%;
+    --secondary-foreground: 210 20% 82%;
+
+    --muted: 210 12% 16%;
+    --muted-foreground: 210 12% 55%;
+
+    --accent: 210 14% 18%;
+    --accent-foreground: 210 20% 82%;
+
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --changed: 38 55% 50%;
+    --changed-bg: 38 25% 18%;
+    --changed-border: 38 30% 28%;
+    --unchanged: 211 12% 50%;
+    --unchanged-bg: 210 12% 16%;
+
+    --border: 210 12% 20%;
+    --input: 210 12% 20%;
+    --ring: 209 34% 45%;
   }
 }
 

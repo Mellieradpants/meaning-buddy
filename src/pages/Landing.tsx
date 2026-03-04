@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -13,6 +14,9 @@ const Landing = () => {
 
   return (
     <div className="min-h-dvh bg-background p-6 md:p-10 max-w-3xl mx-auto">
+      <div className="flex justify-end mb-4">
+        <ThemeToggle />
+      </div>
       <header className="mb-14">
         <h1 className="font-semibold tracking-tight font-mono text-[2rem] md:text-[2.5rem]" style={{ lineHeight: 1.2 }}>
           Structural Language Comparison Tool
@@ -24,7 +28,7 @@ const Landing = () => {
         <div className="mt-8">
           <button
             onClick={() => navigate("/tool")}
-            className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-[hsl(209,38%,23%)] transition-colors"
+            className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary-hover transition-colors"
           >
             Open the tool
           </button>
@@ -76,26 +80,26 @@ const Landing = () => {
         <div className="mt-4 rounded-lg border border-border bg-card p-5">
           <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Detected changes</span>
           <div className="flex flex-wrap gap-2 mb-3">
-            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Modality Shift</span>
-            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Scope Change</span>
-            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Threshold Shift</span>
-            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">Obligation Removal</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">Modality Shift</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">Scope Change</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">Threshold Shift</span>
+            <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">Obligation Removal</span>
           </div>
           <ul className="text-sm text-foreground space-y-2.5">
             <li className="flex items-start gap-2">
-              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
+              <span className="text-changed mt-0.5">•</span>
               <span><span className="font-medium">Modality Shift</span> — "shall provide" → "may provide"</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
+              <span className="text-changed mt-0.5">•</span>
               <span><span className="font-medium">Scope Change</span> — "all full-time employees" → "eligible employees"</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
+              <span className="text-changed mt-0.5">•</span>
               <span><span className="font-medium">Threshold Shift</span> — "within 30 days" → "within a reasonable timeframe"</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[hsl(38,72%,42%)] mt-0.5">•</span>
+              <span className="text-changed mt-0.5">•</span>
               <span><span className="font-medium">Obligation Removal</span> — mandatory duty weakened to discretionary</span>
             </li>
           </ul>

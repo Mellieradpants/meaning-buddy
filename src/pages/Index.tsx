@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { extractPageFromEvidence } from "@/lib/pageParser";
 import { sanitizeEvidence } from "@/lib/sanitize";
@@ -139,6 +140,9 @@ const Index = () => {
 
   return (
     <div className="min-h-dvh bg-background p-6 md:p-10 max-w-5xl mx-auto">
+      <div className="flex justify-end mb-4">
+        <ThemeToggle />
+      </div>
       <header className="mb-8 space-y-1">
         <h1 className="font-semibold tracking-tight font-mono text-[2rem] md:text-[2.5rem] text-foreground" style={{ lineHeight: 1.2 }}>
           Structural Language Comparison
@@ -205,7 +209,7 @@ const Index = () => {
         <button
           onClick={handleCompare}
           disabled={loading}
-          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-[hsl(209,38%,23%)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Comparing…" : "Compare"}
         </button>
@@ -258,8 +262,8 @@ const Index = () => {
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border ${
                 result.overallVerdict === "meaningful_change"
-                  ? "bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border-[hsl(38,50%,80%)]"
-                  : "bg-[hsl(210,25%,94%)] text-[hsl(211,13%,52%)] border-border"
+                  ? "bg-changed-bg text-changed border-changed-border"
+                  : "bg-unchanged-bg text-unchanged border-border"
               }`}
             >
               <span className="text-lg">
@@ -286,8 +290,8 @@ const Index = () => {
                   key={i}
                   className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${
                     cat.status === "changed"
-                      ? "bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border-[hsl(38,50%,80%)]"
-                      : "bg-[hsl(210,25%,94%)] text-[hsl(211,13%,52%)] border-border"
+                      ? "bg-changed-bg text-changed border-changed-border"
+                      : "bg-unchanged-bg text-unchanged border-border"
                   }`}
                 >
                   {CATEGORIES[cat.category] || cat.category}
@@ -309,7 +313,7 @@ const Index = () => {
                     className="rounded-lg border border-border bg-card p-5"
                   >
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[hsl(38,50%,94%)] text-[hsl(38,72%,42%)] border border-[hsl(38,50%,80%)]">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
                         CHANGED
                       </span>
                       <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
@@ -380,7 +384,7 @@ const Index = () => {
                 {unchangedCategories.map((cat, i) => (
                   <span
                     key={i}
-                    className="inline-block px-3 py-1.5 rounded-full text-xs font-medium bg-[hsl(210,25%,94%)] text-[hsl(211,13%,52%)] border border-border"
+                    className="inline-block px-3 py-1.5 rounded-full text-xs font-medium bg-unchanged-bg text-unchanged border border-border"
                   >
                     {CATEGORIES[cat.category] || cat.category}
                   </span>

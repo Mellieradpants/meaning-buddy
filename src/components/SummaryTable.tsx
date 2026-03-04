@@ -169,8 +169,8 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
                     <span
                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                         cat.status === "changed"
-                          ? "bg-[hsl(var(--changed-bg))] text-[hsl(var(--changed))] border-[hsl(38,50%,80%)]"
-                          : "bg-[hsl(var(--unchanged-bg))] text-[hsl(var(--unchanged))] border-border"
+                          ? "bg-changed-bg text-changed border-changed-border"
+                          : "bg-unchanged-bg text-unchanged border-border"
                       }`}
                     >
                       {cat.status === "changed" ? "Changed" : "Unchanged"}
