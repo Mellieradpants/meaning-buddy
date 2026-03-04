@@ -69,3 +69,10 @@
     min-height: 100dvh;
   }
 }
+
+/* Hide Lovable floating badge in published app */
+#lovable-badge,
+a[href*="lovable.dev"],
+a[href*="gptengineer"] {
+  display: none !important;
+}

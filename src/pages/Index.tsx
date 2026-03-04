@@ -13,10 +13,8 @@ import {
 } from "@/components/ui/select";
 import {
   CATEGORIES,
-  SAMPLE_SCENARIOS,
   type CategoryKey,
 } from "@/lib/taxonomy";
-import { SAMPLES } from "@/lib/samples";
 import SummaryTable from "@/components/SummaryTable";
 import ChangeSummary from "@/components/ChangeSummary";
 import TranslationStressTest from "@/components/TranslationStressTest";
@@ -46,8 +44,6 @@ const Index = () => {
   const [revised, setRevised] = useState("");
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedScenario, setSelectedScenario] = useState<string>("");
-  const [selectedSample, setSelectedSample] = useState<string>("");
   const [devMode, setDevMode] = useState(() => {
     try { return localStorage.getItem("devModeEnabled") === "true"; } catch { return false; }
   });
@@ -171,30 +167,9 @@ const Index = () => {
     setRevised("");
     setResult(null);
     setLoading(false);
-    setSelectedScenario("");
-    setSelectedSample("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleLoadScenario = (key: CategoryKey) => {
-    setSelectedScenario(key);
-    const scenario = SAMPLE_SCENARIOS[key];
-    setOriginal(scenario.original);
-    setRevised(scenario.revised);
-    setResult(null);
-    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const handleLoadSample = (index: string) => {
-    setSelectedSample(index);
-    const sample = SAMPLES[parseInt(index)];
-    if (sample) {
-      setOriginal(sample.original);
-      setRevised(sample.revised);
-      setResult(null);
-      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
 
   const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
   const unchangedCategories = result?.categories.filter(c => c.status === "unchanged") || [];
@@ -220,36 +195,6 @@ const Index = () => {
         <p className="text-muted-foreground text-xs">
           Operational explanations can be translated into multiple languages. Evidence remains verbatim.
         </p>
-        <div className="mt-3 flex flex-col sm:flex-row gap-2">
-          <div className="w-64">
-            <Select value={selectedSample} onValueChange={handleLoadSample}>
-              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-                <SelectValue placeholder="Sample Library" />
-              </SelectTrigger>
-              <SelectContent>
-                {SAMPLES.map((sample, i) => (
-                  <SelectItem key={i} value={String(i)} className="text-xs">
-                    {sample.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="w-64">
-            <Select value={selectedScenario} onValueChange={(v) => handleLoadScenario(v as CategoryKey)}>
-              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-                <SelectValue placeholder="Load Sample (by category)" />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.entries(CATEGORIES) as [CategoryKey, string][]).map(([key, label]) => (
-                  <SelectItem key={key} value={key} className="text-xs">
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
       </header>
 
       {/* Input Section */}
