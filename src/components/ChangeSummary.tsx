@@ -17,6 +17,8 @@ interface ChangeSummaryProps {
   categories: CategoryResult[];
   originalText: string;
   revisedText: string;
+  getDisplayEffect?: (index: number, original: string) => string;
+  isRtl?: boolean;
 }
 
 function truncateSnippet(text: string, max = 80): string {
@@ -32,11 +34,13 @@ interface ParsedEntry {
   origSnippet: string;
   revSnippet: string;
   effect: string | null;
+  globalIndex: number;
 }
 
 function parseEntries(categories: CategoryResult[]): ParsedEntry[] {
   const changed = categories.filter((c) => c.status === "changed");
   return changed.map((cat) => {
+    const globalIndex = categories.indexOf(cat);
     const orig = extractPageFromEvidence(cat.originalEvidence);
     const rev = extractPageFromEvidence(cat.revisedEvidence);
 
@@ -57,27 +61,43 @@ function parseEntries(categories: CategoryResult[]): ParsedEntry[] {
         cat.operationalEffect && cat.operationalEffect !== "No change detected."
           ? cat.operationalEffect
           : null,
+      globalIndex,
     };
   });
 }
 
-function buildMarkdownSummary(entries: ParsedEntry[]): string {
+function buildMarkdownSummary(
+  entries: ParsedEntry[],
+  getDisplayEffect?: (index: number, original: string) => string
+): string {
   if (entries.length === 0) return "No structural changes detected.";
 
   const lines = entries.map((e) => {
     let entry = `- ${e.pageRef} — ${e.categoryLabel} — ${e.shortLabel}`;
     if (e.origSnippet) entry += `\n  - Original: "${e.origSnippet}"`;
     if (e.revSnippet) entry += `\n  - Revised: "${e.revSnippet}"`;
-    if (e.effect) entry += `\n  - Effect: ${e.effect}`;
+    if (e.effect) {
+      const displayEffect = getDisplayEffect
+        ? getDisplayEffect(e.globalIndex, e.effect)
+        : e.effect;
+      entry += `\n  - Effect: ${displayEffect}`;
+    }
     return entry;
   });
 
   return lines.join("\n");
 }
 
-export default function ChangeSummary({ categories }: ChangeSummaryProps) {
+export default function ChangeSummary({
+  categories,
+  getDisplayEffect,
+  isRtl,
+}: ChangeSummaryProps) {
   const entries = useMemo(() => parseEntries(categories), [categories]);
-  const markdown = useMemo(() => buildMarkdownSummary(entries), [entries]);
+  const markdown = useMemo(
+    () => buildMarkdownSummary(entries, getDisplayEffect),
+    [entries, getDisplayEffect]
+  );
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(markdown);
@@ -101,31 +121,41 @@ export default function ChangeSummary({ categories }: ChangeSummaryProps) {
       </div>
       <div className="rounded-lg border border-border bg-card p-4 overflow-x-auto">
         <div className="space-y-4">
-          {entries.map((e, i) => (
-            <div key={i} className="text-xs text-foreground" style={{ lineHeight: 1.6 }}>
-              <div className="font-medium">
-                {e.pageRef} — {e.categoryLabel} — {e.shortLabel}
+          {entries.map((e, i) => {
+            const displayEffect = e.effect && getDisplayEffect
+              ? getDisplayEffect(e.globalIndex, e.effect)
+              : e.effect;
+
+            return (
+              <div key={i} className="text-xs text-foreground" style={{ lineHeight: 1.6 }}>
+                <div className="font-medium">
+                  {e.pageRef} — {e.categoryLabel} — {e.shortLabel}
+                </div>
+                {e.origSnippet && (
+                  <div className="ml-4 mt-0.5 font-mono">
+                    <span className="font-semibold text-muted-foreground">Original:</span>{" "}
+                    &ldquo;{e.origSnippet}&rdquo;
+                  </div>
+                )}
+                {e.revSnippet && (
+                  <div className="ml-4 mt-0.5 font-mono">
+                    <span className="font-semibold text-muted-foreground">Revised:</span>{" "}
+                    &ldquo;{e.revSnippet}&rdquo;
+                  </div>
+                )}
+                {displayEffect && (
+                  <div
+                    className="ml-4 mt-0.5"
+                    dir={isRtl ? "rtl" : undefined}
+                    style={isRtl ? { textAlign: "right" } : undefined}
+                  >
+                    <span className="font-semibold text-muted-foreground">Effect:</span>{" "}
+                    {displayEffect}
+                  </div>
+                )}
               </div>
-              {e.origSnippet && (
-                <div className="ml-4 mt-0.5 font-mono">
-                  <span className="font-semibold text-muted-foreground">Original:</span>{" "}
-                  &ldquo;{e.origSnippet}&rdquo;
-                </div>
-              )}
-              {e.revSnippet && (
-                <div className="ml-4 mt-0.5 font-mono">
-                  <span className="font-semibold text-muted-foreground">Revised:</span>{" "}
-                  &ldquo;{e.revSnippet}&rdquo;
-                </div>
-              )}
-              {e.effect && (
-                <div className="ml-4 mt-0.5">
-                  <span className="font-semibold text-muted-foreground">Effect:</span>{" "}
-                  {e.effect}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

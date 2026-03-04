@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { extractPageFromEvidence } from "@/lib/pageParser";
@@ -19,6 +19,11 @@ import {
 import { SAMPLES } from "@/lib/samples";
 import SummaryTable from "@/components/SummaryTable";
 import ChangeSummary from "@/components/ChangeSummary";
+import {
+  useEffectTranslation,
+  EFFECT_LANGUAGES,
+  type EffectLanguage,
+} from "@/hooks/useEffectTranslation";
 
 interface CategoryResult {
   category: CategoryKey;
@@ -46,13 +51,42 @@ const Index = () => {
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
 
+  // Collect all operationalEffect strings for translation
+  const effectStrings = useMemo(() => {
+    if (!result) return [];
+    return result.categories
+      .filter((c) => c.status === "changed" && c.operationalEffect && c.operationalEffect !== "No change detected.")
+      .map((c) => c.operationalEffect!);
+  }, [result]);
+
+  const { language, setLanguage, getTranslated, translating, error: translationError, isRtl } =
+    useEffectTranslation(effectStrings);
+
+  // Build a map from category index to effect index for translation lookup
+  const effectIndexMap = useMemo(() => {
+    const map = new Map<number, number>();
+    if (!result) return map;
+    let effectIdx = 0;
+    result.categories.forEach((c, i) => {
+      if (c.status === "changed" && c.operationalEffect && c.operationalEffect !== "No change detected.") {
+        map.set(i, effectIdx++);
+      }
+    });
+    return map;
+  }, [result]);
+
+  const getDisplayEffect = (catIndex: number, original: string): string => {
+    const effectIdx = effectIndexMap.get(catIndex);
+    if (effectIdx === undefined) return original;
+    return getTranslated(effectIdx, original);
+  };
+
   const handleCompare = async () => {
     if (!original.trim() || !revised.trim()) {
       toast.error("Please enter text in both fields.");
       return;
     }
 
-    // Cancel any in-flight request
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -66,7 +100,6 @@ const Index = () => {
         body: { original, revised },
       });
 
-      // If this request was superseded by a reset/new request, discard
       if (currentRequestId !== requestIdRef.current) return;
 
       if (error) {
@@ -101,7 +134,6 @@ const Index = () => {
 
       setResult(parsedResult);
 
-      // Scroll to results after state update
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
@@ -113,7 +145,6 @@ const Index = () => {
   };
 
   const handleClear = () => {
-    // Invalidate any in-flight request
     requestIdRef.current++;
     abortRef.current?.abort();
     abortRef.current = null;
@@ -309,8 +340,8 @@ const Index = () => {
       {/* Results */}
       {!loading && result && (
         <div id="results" ref={resultsRef} className="space-y-6 scroll-mt-4">
-          {/* Verdict Badge */}
-          <div className="flex items-center gap-3">
+          {/* Verdict Badge + Language Selector */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border ${
                 result.overallVerdict === "meaningful_change"
@@ -324,6 +355,28 @@ const Index = () => {
               {result.overallVerdict === "meaningful_change"
                 ? "Structural Change Detected"
                 : "No Meaningful Change"}
+            </div>
+
+            {/* Language Selector */}
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-muted-foreground whitespace-nowrap">
+                Operational Effect language
+              </label>
+              <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
+                <SelectTrigger className="h-8 w-44 text-xs font-medium bg-secondary text-secondary-foreground border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {EFFECT_LANGUAGES.map((lang) => (
+                    <SelectItem key={lang} value={lang} className="text-xs">
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {translating && (
+                <span className="text-[10px] text-muted-foreground animate-pulse">Translating…</span>
+              )}
             </div>
           </div>
 
@@ -359,55 +412,66 @@ const Index = () => {
                 Changes Detected ({changedCategories.length})
               </h2>
               <div className="divide-y divide-border/40">
-                {changedCategories.map((cat, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-lg border border-border bg-card p-5${i > 0 ? ' mt-6 pt-6' : ''}`}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
-                        CHANGED
-                      </span>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
-                        {CATEGORIES[cat.category] || cat.category}
-                      </span>
+                {changedCategories.map((cat, i) => {
+                  const globalIndex = result.categories.indexOf(cat);
+                  const effectText = cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                    ? getDisplayEffect(globalIndex, cat.operationalEffect)
+                    : null;
+
+                  return (
+                    <div
+                      key={i}
+                      className={`rounded-lg border border-border bg-card p-5${i > 0 ? ' mt-6 pt-6' : ''}`}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
+                          CHANGED
+                        </span>
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
+                          {CATEGORIES[cat.category] || cat.category}
+                        </span>
+                      </div>
+
+                      <p className="text-sm font-mono font-medium text-foreground mb-3">
+                        {cat.label.replace(/_/g, " ")}
+                      </p>
+
+                      {effectText && (
+                        <div className="rounded-md border border-border bg-muted/50 p-3 mb-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                            Operational Effect
+                          </div>
+                          <p
+                            className="text-xs text-foreground leading-relaxed"
+                            dir={isRtl ? "rtl" : undefined}
+                            style={isRtl ? { textAlign: "right" } : undefined}
+                          >
+                            {effectText}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                        <div className="rounded-md border border-border bg-background p-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Original
+                          </div>
+                          <p className="text-xs font-mono text-foreground leading-relaxed">
+                            {sanitizeEvidence(cat.originalEvidence)}
+                          </p>
+                        </div>
+                        <div className="rounded-md border border-border bg-background p-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Revised
+                          </div>
+                          <p className="text-xs font-mono text-foreground leading-relaxed">
+                            {sanitizeEvidence(cat.revisedEvidence)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-
-                    <p className="text-sm font-mono font-medium text-foreground mb-3">
-                      {cat.label.replace(/_/g, " ")}
-                    </p>
-
-                    {cat.operationalEffect && cat.operationalEffect !== "No change detected." && (
-                      <div className="rounded-md border border-border bg-muted/50 p-3 mb-3">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                          Operational Effect
-                        </div>
-                        <p className="text-xs text-foreground leading-relaxed">
-                          {cat.operationalEffect}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                      <div className="rounded-md border border-border bg-background p-3">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                          Original
-                        </div>
-                        <p className="text-xs font-mono text-foreground leading-relaxed">
-                          {sanitizeEvidence(cat.originalEvidence)}
-                        </p>
-                      </div>
-                      <div className="rounded-md border border-border bg-background p-3">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                          Revised
-                        </div>
-                        <p className="text-xs font-mono text-foreground leading-relaxed">
-                          {sanitizeEvidence(cat.revisedEvidence)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -418,12 +482,18 @@ const Index = () => {
               categories={result.categories}
               originalText={original}
               revisedText={revised}
+              getDisplayEffect={getDisplayEffect}
+              isRtl={isRtl}
             />
           )}
 
           {/* Summary Table */}
           {changedCategories.length > 0 && (
-            <SummaryTable categories={result.categories} />
+            <SummaryTable
+              categories={result.categories}
+              getDisplayEffect={getDisplayEffect}
+              isRtl={isRtl}
+            />
           )}
 
           {/* Unchanged Categories */}

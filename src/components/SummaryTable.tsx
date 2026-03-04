@@ -23,6 +23,8 @@ interface CategoryResult {
 
 interface SummaryTableProps {
   categories: CategoryResult[];
+  getDisplayEffect?: (index: number, original: string) => string;
+  isRtl?: boolean;
 }
 
 type SortKey = "category" | "page";
@@ -41,22 +43,28 @@ function getPageDisplay(cat: CategoryResult): string {
   return "—";
 }
 
-function toMarkdownTable(categories: CategoryResult[]): string {
+function toMarkdownTable(
+  categories: CategoryResult[],
+  getDisplayEffect?: (index: number, original: string) => string
+): string {
   const header = "| Page / Section | Category | Status | Original | Revised | Operational Effect |";
   const divider = "| --- | --- | --- | --- | --- | --- |";
-  const rows = categories.map((cat) => {
+  const rows = categories.map((cat, idx) => {
     const page = getPageDisplay(cat);
     const category = CATEGORIES[cat.category] || cat.category;
     const status = cat.status === "changed" ? "Changed" : "Unchanged";
     const orig = truncate(sanitizeEvidence(extractPageFromEvidence(cat.originalEvidence).text), 120).replace(/\|/g, "\\|");
     const rev = truncate(sanitizeEvidence(extractPageFromEvidence(cat.revisedEvidence).text), 120).replace(/\|/g, "\\|");
-    const effect = (cat.operationalEffect || "—").replace(/\|/g, "\\|");
+    const rawEffect = cat.operationalEffect || "—";
+    const effect = getDisplayEffect && rawEffect !== "—"
+      ? getDisplayEffect(idx, rawEffect).replace(/\|/g, "\\|")
+      : rawEffect.replace(/\|/g, "\\|");
     return `| ${page} | ${category} | ${status} | ${orig} | ${rev} | ${effect} |`;
   });
   return [header, divider, ...rows].join("\n");
 }
 
-export default function SummaryTable({ categories }: SummaryTableProps) {
+export default function SummaryTable({ categories, getDisplayEffect, isRtl }: SummaryTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("category");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -70,16 +78,16 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
   };
 
   const sorted = useMemo(() => {
-    const arr = [...categories];
+    const arr = categories.map((cat, idx) => ({ cat, originalIndex: idx }));
     arr.sort((a, b) => {
       let cmp = 0;
       if (sortKey === "category") {
-        const la = CATEGORIES[a.category] || a.category;
-        const lb = CATEGORIES[b.category] || b.category;
+        const la = CATEGORIES[a.cat.category] || a.cat.category;
+        const lb = CATEGORIES[b.cat.category] || b.cat.category;
         cmp = la.localeCompare(lb);
       } else if (sortKey === "page") {
-        const pa = getPageDisplay(a);
-        const pb = getPageDisplay(b);
+        const pa = getPageDisplay(a.cat);
+        const pb = getPageDisplay(b.cat);
         cmp = pa.localeCompare(pb, undefined, { numeric: true });
       }
       return sortDir === "desc" ? -cmp : cmp;
@@ -87,7 +95,10 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
     return arr;
   }, [categories, sortKey, sortDir]);
 
-  const markdown = useMemo(() => toMarkdownTable(categories), [categories]);
+  const markdown = useMemo(
+    () => toMarkdownTable(categories, getDisplayEffect),
+    [categories, getDisplayEffect]
+  );
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(markdown);
@@ -154,9 +165,16 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sorted.map((cat, i) => {
+            {sorted.map(({ cat, originalIndex }, i) => {
               const origParsed = extractPageFromEvidence(cat.originalEvidence);
               const revParsed = extractPageFromEvidence(cat.revisedEvidence);
+              const rawEffect = cat.operationalEffect && cat.operationalEffect !== "No change detected."
+                ? cat.operationalEffect
+                : null;
+              const displayEffect = rawEffect && getDisplayEffect
+                ? getDisplayEffect(originalIndex, rawEffect)
+                : rawEffect;
+
               return (
                 <TableRow key={i}>
                   <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
@@ -182,10 +200,12 @@ export default function SummaryTable({ categories }: SummaryTableProps) {
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
                     {truncate(sanitizeEvidence(revParsed.text))}
                   </TableCell>
-                  <TableCell className="min-w-[220px] max-w-[320px] text-xs text-foreground leading-relaxed whitespace-normal break-words">
-                    {cat.operationalEffect && cat.operationalEffect !== "No change detected."
-                      ? cat.operationalEffect
-                      : "—"}
+                  <TableCell
+                    className="min-w-[220px] max-w-[320px] text-xs text-foreground leading-relaxed whitespace-normal break-words"
+                    dir={isRtl && displayEffect ? "rtl" : undefined}
+                    style={isRtl && displayEffect ? { textAlign: "right" } : undefined}
+                  >
+                    {displayEffect || "—"}
                   </TableCell>
                 </TableRow>
               );
