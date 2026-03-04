@@ -418,13 +418,13 @@ const Index = () => {
             </div>
           )}
 
-          {/* Changed Categories Detail */}
+          {/* Changed Categories — mirror landing page card structure */}
           {changedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
                 Changes Detected ({changedCategories.length})
               </h2>
-              <div className="divide-y divide-border/40">
+              <div className="space-y-4">
                 {changedCategories.map((cat, i) => {
                   const globalIndex = result.categories.indexOf(cat);
                   const effectText = cat.operationalEffect && cat.operationalEffect !== "No change detected."
@@ -434,53 +434,50 @@ const Index = () => {
                   return (
                     <div
                       key={i}
-                      className={`rounded-lg border border-border bg-card p-5${i > 0 ? ' mt-6 pt-6' : ''}`}
+                      className="rounded-lg border border-border bg-card p-5 font-mono text-sm space-y-4"
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
-                          CHANGED
-                        </span>
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
+                      {/* Shift label */}
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
                           {CATEGORIES[cat.category] || cat.category}
+                        </span>
+                        <span className="text-xs font-sans text-muted-foreground">
+                          {cat.label.replace(/_/g, " ")}
                         </span>
                       </div>
 
-                      <p className="text-sm font-mono font-medium text-foreground mb-3">
-                        {cat.label.replace(/_/g, " ")}
-                      </p>
-
+                      {/* Operational explanation */}
                       {effectText && (
-                        <div className="rounded-md border border-border bg-muted/50 p-3 mb-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-strong mb-1">
+                        <div className="border-t border-border pt-4">
+                          <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
                             Operational Effect
-                          </div>
-                          <p
-                            className="text-xs text-foreground leading-relaxed"
-                            dir={isRtl ? "rtl" : undefined}
+                          </span>
+                          <span
+                            className="text-foreground leading-[1.8] block"
+                            dir={isRtl ? "rtl" : "ltr"}
                             style={isRtl ? { textAlign: "right" } : undefined}
                           >
                             {effectText}
-                          </p>
+                          </span>
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                        <div className="rounded-md border border-border bg-background p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-strong mb-1.5">
-                            Original
-                          </div>
-                          <p className="text-xs font-mono text-foreground leading-relaxed">
-                            {sanitizeEvidence(cat.originalEvidence)}
-                          </p>
-                        </div>
-                        <div className="rounded-md border border-border bg-background p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-strong mb-1.5">
-                            Revised
-                          </div>
-                          <p className="text-xs font-mono text-foreground leading-relaxed">
-                            {sanitizeEvidence(cat.revisedEvidence)}
-                          </p>
-                        </div>
+                      {/* Evidence block */}
+                      <div className="border-t border-border pt-4">
+                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                          Original
+                        </span>
+                        <span className="text-foreground leading-[1.8] block">
+                          {sanitizeEvidence(cat.originalEvidence)}
+                        </span>
+                      </div>
+                      <div className="border-t border-border pt-4">
+                        <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                          Revised
+                        </span>
+                        <span className="text-foreground leading-[1.8] block">
+                          {sanitizeEvidence(cat.revisedEvidence)}
+                        </span>
                       </div>
                     </div>
                   );
