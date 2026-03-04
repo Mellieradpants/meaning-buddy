@@ -214,10 +214,10 @@ const Index = () => {
 
       {/* Hero Section — compact technical header */}
       <header className="mb-6 space-y-1">
-        <h1 className="font-semibold tracking-tight font-mono text-lg md:text-xl text-foreground">
+        <h1 className="font-semibold tracking-tight font-mono text-lg md:text-xl text-foreground-strong">
           Structural Language Comparison
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-foreground-strong text-sm">
           Compare two versions of text to detect structural wording changes and their operational consequences.
         </p>
         <p className="text-muted-foreground text-xs">
@@ -258,7 +258,7 @@ const Index = () => {
       {/* Input Section */}
       <div ref={inputRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-strong mb-2">
             Original (earlier version)
           </label>
           <textarea
@@ -269,7 +269,7 @@ const Index = () => {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-strong mb-2">
             Revised (updated version)
           </label>
           <textarea
@@ -424,7 +424,7 @@ const Index = () => {
           {/* Changed Categories Detail */}
           {changedCategories.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
                 Changes Detected ({changedCategories.length})
               </h2>
               <div className="divide-y divide-border/40">
@@ -454,7 +454,7 @@ const Index = () => {
 
                       {effectText && (
                         <div className="rounded-md border border-border bg-muted/50 p-3 mb-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-strong mb-1">
                             Operational Effect
                           </div>
                           <p
@@ -469,7 +469,7 @@ const Index = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                         <div className="rounded-md border border-border bg-background p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-strong mb-1.5">
                             Original
                           </div>
                           <p className="text-xs font-mono text-foreground leading-relaxed">
@@ -477,7 +477,7 @@ const Index = () => {
                           </p>
                         </div>
                         <div className="rounded-md border border-border bg-background p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground-strong mb-1.5">
                             Revised
                           </div>
                           <p className="text-xs font-mono text-foreground leading-relaxed">
@@ -515,7 +515,7 @@ const Index = () => {
           {/* Unchanged Categories */}
           {unchangedCategories.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
                 Unchanged ({unchangedCategories.length})
               </h2>
               <div className="flex flex-wrap gap-2">
