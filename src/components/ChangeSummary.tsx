@@ -109,7 +109,7 @@ export default function ChangeSummary({
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
           Change Summary (Markdown)
         </h2>
         <button
@@ -133,13 +133,13 @@ export default function ChangeSummary({
                 </div>
                 {e.origSnippet && (
                   <div className="ml-4 mt-0.5 font-mono">
-                    <span className="font-semibold text-muted-foreground">Original:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">Original:</span>{" "}
                     &ldquo;{e.origSnippet}&rdquo;
                   </div>
                 )}
                 {e.revSnippet && (
                   <div className="ml-4 mt-0.5 font-mono">
-                    <span className="font-semibold text-muted-foreground">Revised:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">Revised:</span>{" "}
                     &ldquo;{e.revSnippet}&rdquo;
                   </div>
                 )}
@@ -149,7 +149,7 @@ export default function ChangeSummary({
                     dir={isRtl ? "rtl" : undefined}
                     style={isRtl ? { textAlign: "right" } : undefined}
                   >
-                    <span className="font-semibold text-muted-foreground">Effect:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">Effect:</span>{" "}
                     {displayEffect}
                   </div>
                 )}

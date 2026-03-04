@@ -123,7 +123,7 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl }: Su
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
           Summary Table of Changes
         </h2>
         <div className="flex gap-2">
