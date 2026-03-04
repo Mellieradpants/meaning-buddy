@@ -16,6 +16,7 @@ import {
   SAMPLE_SCENARIOS,
   type CategoryKey,
 } from "@/lib/taxonomy";
+import { SAMPLES } from "@/lib/samples";
 import SummaryTable from "@/components/SummaryTable";
 import ChangeSummary from "@/components/ChangeSummary";
 
@@ -33,16 +34,15 @@ interface DiffResult {
   categories: CategoryResult[];
 }
 
-
-
-
 const Index = () => {
   const [original, setOriginal] = useState("");
   const [revised, setRevised] = useState("");
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string>("");
+  const [selectedSample, setSelectedSample] = useState<string>("");
   const inputRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
 
@@ -81,10 +81,11 @@ const Index = () => {
       }
 
       const raw = data as any;
+      let parsedResult: DiffResult;
       if (raw.categories) {
-        setResult(raw as DiffResult);
+        parsedResult = raw as DiffResult;
       } else if (raw.findings) {
-        const mapped: DiffResult = {
+        parsedResult = {
           overallVerdict: raw.overallVerdict,
           categories: raw.findings.map((f: any) => ({
             category: f.type || "scope_change",
@@ -94,10 +95,16 @@ const Index = () => {
             revisedEvidence: f.revisedSnippet || "",
           })),
         };
-        setResult(mapped);
       } else {
-        setResult(raw as DiffResult);
+        parsedResult = raw as DiffResult;
       }
+
+      setResult(parsedResult);
+
+      // Scroll to results after state update
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     } finally {
       if (currentRequestId === requestIdRef.current) {
         setLoading(false);
@@ -116,6 +123,7 @@ const Index = () => {
     setResult(null);
     setLoading(false);
     setSelectedScenario("");
+    setSelectedSample("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -126,6 +134,21 @@ const Index = () => {
     setRevised(scenario.revised);
     setResult(null);
     inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleLoadSample = (index: string) => {
+    setSelectedSample(index);
+    const sample = SAMPLES[parseInt(index)];
+    if (sample) {
+      setOriginal(sample.original);
+      setRevised(sample.revised);
+      setResult(null);
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const changedCategories = result?.categories.filter(c => c.status === "changed") || [];
@@ -156,19 +179,35 @@ const Index = () => {
         <p className="text-muted-foreground text-sm mt-1">
           This tool highlights structural wording changes only. It does not interpret intent or provide legal advice.
         </p>
-        <div className="mt-3 w-64">
-          <Select value={selectedScenario} onValueChange={(v) => handleLoadScenario(v as CategoryKey)}>
-            <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-              <SelectValue placeholder="Load Sample (by category)" />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.entries(CATEGORIES) as [CategoryKey, string][]).map(([key, label]) => (
-                <SelectItem key={key} value={key} className="text-xs">
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mt-3 flex flex-col sm:flex-row gap-2">
+          <div className="w-64">
+            <Select value={selectedSample} onValueChange={handleLoadSample}>
+              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
+                <SelectValue placeholder="Sample Library" />
+              </SelectTrigger>
+              <SelectContent>
+                {SAMPLES.map((sample, i) => (
+                  <SelectItem key={i} value={String(i)} className="text-xs">
+                    {sample.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-64">
+            <Select value={selectedScenario} onValueChange={(v) => handleLoadScenario(v as CategoryKey)}>
+              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
+                <SelectValue placeholder="Load Sample (by category)" />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(CATEGORIES) as [CategoryKey, string][]).map(([key, label]) => (
+                  <SelectItem key={key} value={key} className="text-xs">
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </header>
 
@@ -205,20 +244,33 @@ const Index = () => {
       </div>
 
       {/* Compare & Clear Buttons */}
-      <div className="flex justify-center gap-3 mb-10">
-        <button
-          onClick={handleCompare}
-          disabled={loading}
-          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Comparing…" : "Compare"}
-        </button>
-        <button
-          onClick={handleClear}
-          className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-        >
-          Clear
-        </button>
+      <div className="flex flex-col items-center gap-3 mb-10">
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={handleCompare}
+            disabled={loading}
+            className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Comparing…" : "Compare"}
+          </button>
+          <button
+            onClick={handleClear}
+            className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+
+        {/* Scroll to Results helper */}
+        {!loading && result && (
+          <button
+            onClick={scrollToResults}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium border border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <span className="text-muted-foreground">Results ready</span>
+            <span className="border-l border-border pl-2">Scroll to results ↓</span>
+          </button>
+        )}
       </div>
 
       {/* Loading Skeleton */}
@@ -256,7 +308,7 @@ const Index = () => {
 
       {/* Results */}
       {!loading && result && (
-        <div className="space-y-6">
+        <div id="results" ref={resultsRef} className="space-y-6 scroll-mt-4">
           {/* Verdict Badge */}
           <div className="flex items-center gap-3">
             <div
