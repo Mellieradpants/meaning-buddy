@@ -521,6 +521,41 @@ const Index = () => {
         </div>
       )}
 
+      {/* English verification check */}
+      {result && language === "English" && (() => {
+        const drifts: { catIndex: number; original: string; displayed: string }[] = [];
+        result.categories.forEach((cat, i) => {
+          if (cat.status === "changed" && cat.operationalEffect && cat.operationalEffect !== "No change detected.") {
+            const displayed = getDisplayEffect(i, cat.operationalEffect);
+            if (displayed !== cat.operationalEffect) {
+              drifts.push({ catIndex: i, original: cat.operationalEffect, displayed });
+            }
+          }
+        });
+        return (
+          <div className="mt-6">
+            {drifts.length === 0 ? (
+              <p className="text-xs text-muted-foreground">✅ English output verified: no translation drift.</p>
+            ) : (
+              <>
+                <p className="text-xs text-destructive font-medium">⚠️ English output differs from original explanation.</p>
+                {devMode && (
+                  <div className="mt-2 space-y-3">
+                    {drifts.map((d, i) => (
+                      <div key={i} className="rounded border border-border bg-muted/30 p-3 text-xs space-y-1 font-mono">
+                        <p className="text-muted-foreground font-sans font-medium">Category index {d.catIndex}</p>
+                        <p><span className="font-sans font-medium text-muted-foreground">Original:</span> {d.original}</p>
+                        <p><span className="font-sans font-medium text-muted-foreground">Displayed:</span> {d.displayed}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Developer Mode toggle + Stress Test */}
       <div className="mt-10 border-t border-border/40 pt-6">
         <label className="inline-flex items-center gap-2 cursor-pointer select-none">
