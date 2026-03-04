@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { extractPageFromEvidence } from "@/lib/pageParser";
@@ -55,7 +55,19 @@ const Index = () => {
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
 
-  // Collect all operationalEffect strings for translation
+  const handleCompareRef = useRef<() => void>();
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleCompareRef.current?.();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const effectStrings = useMemo(() => {
     if (!result) return [];
     return result.categories
@@ -147,6 +159,8 @@ const Index = () => {
       }
     }
   };
+
+  handleCompareRef.current = handleCompare;
 
   const handleClear = () => {
     requestIdRef.current++;
@@ -287,6 +301,7 @@ const Index = () => {
             className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Comparing…" : "Compare"}
+            <kbd className="ml-2 hidden sm:inline-block text-[10px] opacity-60 font-mono bg-primary-foreground/10 px-1.5 py-0.5 rounded">⌘↵</kbd>
           </button>
           <button
             onClick={handleClear}
