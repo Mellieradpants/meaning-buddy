@@ -25,6 +25,7 @@ import {
   EFFECT_LANGUAGES,
   type EffectLanguage,
 } from "@/hooks/useEffectTranslation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CategoryResult {
   category: CategoryKey;
@@ -386,6 +387,10 @@ const Index = () => {
               <label className="text-xs text-muted-foreground whitespace-nowrap">
                 Operational Effect language
               </label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
               <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
                 <SelectTrigger className="h-8 w-44 text-xs font-medium bg-secondary text-secondary-foreground border-border">
                   <SelectValue />
@@ -398,6 +403,13 @@ const Index = () => {
                   ))}
                 </SelectContent>
               </Select>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs max-w-[220px]">
+                    <p>Supported: English, Spanish, French, German, Russian, Chinese (Simplified), Hebrew</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               {translating && (
                 <span className="text-[10px] text-muted-foreground animate-pulse">Translating…</span>
               )}
