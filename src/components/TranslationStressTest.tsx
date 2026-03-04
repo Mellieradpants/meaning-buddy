@@ -20,17 +20,23 @@ const EXPECTED_NUMBERS = [
   "90%", "75%", "30", "3", "7", "1%", "5%", "$10,000", "14", "10,000",
 ];
 
-function extractNumbers(text: string): string[] {
-  // Extract all number-like tokens including currency, percentages, dates
-  const matches = text.match(/\$?[\d,]+(?:\.\d+)?%?/g) || [];
-  return matches;
+function extractCoreNumbers(text: string): string[] {
+  // Extract raw digit sequences (ignoring formatting like commas, dots, spaces, currency)
+  // e.g. "$10,000" → "10000", "90%" → "90", "10.000" → "10000"
+  const matches = text.match(/[\d]+(?:[.,\s]\d+)*/g) || [];
+  return matches.map((m) => m.replace(/[.,\s]/g, ""));
 }
 
-function checkNumbersPreserved(englishEffect: string, translatedEffect: string): { pass: boolean; missing: string[] } {
-  const englishNums = extractNumbers(englishEffect);
+function checkNumbersPreserved(
+  englishEffect: string,
+  translatedEffect: string
+): { pass: boolean; missing: string[] } {
+  const englishNums = extractCoreNumbers(englishEffect);
+  const translatedNums = extractCoreNumbers(translatedEffect);
   const missing: string[] = [];
+
   for (const num of englishNums) {
-    if (!translatedEffect.includes(num)) {
+    if (!translatedNums.includes(num)) {
       missing.push(num);
     }
   }
