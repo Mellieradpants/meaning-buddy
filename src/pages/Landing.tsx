@@ -8,15 +8,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type ShiftKey = "all" | "threshold" | "obligation" | "scope" | "enforcement";
+type ShiftKey = "all" | "modality" | "action_domain" | "threshold" | "actor_power" | "obligation" | "scope" | "enforcement";
 type LangKey = "en" | "es" | "fr" | "de" | "ru" | "zh" | "he";
 
 const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
   { value: "all", label: "All shifts" },
-  { value: "threshold", label: "Threshold change" },
-  { value: "obligation", label: "Obligation removal" },
-  { value: "scope", label: "Scope expansion" },
-  { value: "enforcement", label: "Enforcement modification" },
+  { value: "modality", label: "Modality Shift" },
+  { value: "action_domain", label: "Action Domain Shift" },
+  { value: "threshold", label: "Threshold / Standard Shift" },
+  { value: "actor_power", label: "Actor Power Shift" },
+  { value: "obligation", label: "Obligation Removal" },
+  { value: "scope", label: "Scope Change" },
+  { value: "enforcement", label: "Enforcement Modification" },
 ];
 
 const LANG_OPTIONS: { value: LangKey; label: string }[] = [
@@ -35,7 +38,7 @@ interface DemoEntry {
   effect: Record<LangKey, string>;
 }
 
-const DEMO_DATA: Record<ShiftKey, { original: string; revised: string; operationalEffect: Record<LangKey, string>; changes: DemoEntry[] }> = {
+const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; operationalEffect: Record<LangKey, string>; changes: DemoEntry[] }>> = {
   all: {
     original: "The employer shall provide health insurance to all full-time employees within 30 days of their start date.",
     revised: "The employer may provide health insurance to eligible employees within a reasonable timeframe.",
@@ -133,7 +136,7 @@ const Landing = () => {
     }
   }, []);
 
-  const demo = useMemo(() => DEMO_DATA[shift], [shift]);
+  const demo = useMemo(() => DEMO_DATA[shift] ?? DEMO_DATA["all"]!, [shift]);
   const isRtl = lang === "he";
 
   return (
