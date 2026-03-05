@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
 import { extractPageFromEvidence } from "@/lib/pageParser";
 import { sanitizeEvidence } from "@/lib/sanitize";
-import { toast } from "sonner";
+
 
 interface CategoryResult {
   category: CategoryKey;
@@ -66,27 +66,6 @@ function parseEntries(categories: CategoryResult[]): ParsedEntry[] {
   });
 }
 
-function buildMarkdownSummary(
-  entries: ParsedEntry[],
-  getDisplayEffect?: (index: number, original: string) => string
-): string {
-  if (entries.length === 0) return "No structural changes detected.";
-
-  const lines = entries.map((e) => {
-    let entry = `- ${e.pageRef} — ${e.categoryLabel} — ${e.shortLabel}`;
-    if (e.origSnippet) entry += `\n  - Original: "${e.origSnippet}"`;
-    if (e.revSnippet) entry += `\n  - Revised: "${e.revSnippet}"`;
-    if (e.effect) {
-      const displayEffect = getDisplayEffect
-        ? getDisplayEffect(e.globalIndex, e.effect)
-        : e.effect;
-      entry += `\n  - Effect: ${displayEffect}`;
-    }
-    return entry;
-  });
-
-  return lines.join("\n");
-}
 
 export default function ChangeSummary({
   categories,
@@ -94,31 +73,15 @@ export default function ChangeSummary({
   isRtl,
 }: ChangeSummaryProps) {
   const entries = useMemo(() => parseEntries(categories), [categories]);
-  const markdown = useMemo(
-    () => buildMarkdownSummary(entries, getDisplayEffect),
-    [entries, getDisplayEffect]
-  );
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(markdown);
-    toast.success("Summary copied to clipboard");
-  };
 
   if (entries.length === 0) return null;
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-3">
           Change Summary (Markdown)
-        </h2>
-        <button
-          onClick={handleCopy}
-          className="px-3 py-1.5 rounded-md text-xs font-medium border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-        >
-          Copy Summary
-        </button>
-      </div>
+      </h2>
       <div className="rounded-lg border border-border bg-card p-4 overflow-x-auto">
         <div className="space-y-4">
           {entries.map((e, i) => {
