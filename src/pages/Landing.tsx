@@ -39,6 +39,54 @@ interface DemoEntry {
 }
 
 const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; operationalEffect: Record<LangKey, string>; changes: DemoEntry[] }>> = {
+  modality: {
+    original: "The contractor shall complete all safety inspections before occupancy is granted.",
+    revised: "The contractor may complete safety inspections before occupancy is granted.",
+    operationalEffect: {
+      en: "Mandatory safety inspections become optional. The contractor now has discretion over whether inspections occur before occupancy, removing a previously binding requirement.",
+      es: "Las inspecciones de seguridad obligatorias se vuelven opcionales. El contratista ahora tiene discreción sobre si las inspecciones ocurren antes de la ocupación, eliminando un requisito previamente vinculante.",
+      fr: "Les inspections de sécurité obligatoires deviennent facultatives. L'entrepreneur a désormais le pouvoir discrétionnaire de décider si les inspections ont lieu avant l'occupation, supprimant une exigence auparavant contraignante.",
+      de: "Pflicht-Sicherheitsinspektionen werden optional. Der Auftragnehmer hat nun Ermessensspielraum, ob Inspektionen vor der Belegung stattfinden, wodurch eine zuvor verbindliche Anforderung entfällt.",
+      zh: "强制性安全检查变为可选。承包商现在可以自行决定是否在入住前进行检查，取消了之前的强制性要求。",
+      he: "בדיקות בטיחות חובה הופכות לאופציונליות. לקבלן יש כעת שיקול דעת אם הבדיקות יתקיימו לפני האכלוס, מה שמסיר דרישה שהייתה מחייבת בעבר.",
+      ru: "Обязательные проверки безопасности становятся необязательными. Подрядчик теперь сам решает, проводить ли проверки до заселения, устраняя ранее обязательное требование.",
+    },
+    changes: [
+      { category: "Modality Shift", detail: '"shall complete" → "may complete"', effect: { en: "Binding duty weakened to permission", es: "Deber vinculante debilitado a permiso", fr: "Devoir contraignant affaibli en permission", de: "Verbindliche Pflicht zu Erlaubnis abgeschwächt", zh: "约束性义务弱化为许可", he: "חובה מחייבת הוחלשה להרשאה", ru: "Обязывающая обязанность ослаблена до разрешения" } },
+    ],
+  },
+  action_domain: {
+    original: "The agency shall investigate all consumer complaints within 10 business days.",
+    revised: "The agency shall review consumer complaints and may refer them for further evaluation.",
+    operationalEffect: {
+      en: "The required action shifts from 'investigate' to 'review,' a significantly less rigorous process. The fixed 10-day timeline is removed, and referral for further evaluation is discretionary.",
+      es: "La acción requerida cambia de 'investigar' a 'revisar', un proceso significativamente menos riguroso. Se elimina el plazo fijo de 10 días y la derivación para evaluación adicional es discrecional.",
+      fr: "L'action requise passe de 'enquêter' à 'examiner', un processus nettement moins rigoureux. Le délai fixe de 10 jours est supprimé et le renvoi pour évaluation complémentaire est discrétionnaire.",
+      de: "Die erforderliche Maßnahme ändert sich von 'untersuchen' zu 'prüfen', einem deutlich weniger strengen Verfahren. Die feste 10-Tage-Frist entfällt und die Weiterleitung zur weiteren Bewertung ist ermessensabhängig.",
+      zh: "所需行动从\u2018调查\u2019转变为\u2018审查\u2019，这是一个显著不那么严格的过程。固定的10天时限被取消，转交进一步评估是自由裁量的。",
+      he: "הפעולה הנדרשת משתנה מ'חקירה' ל'סקירה', תהליך פחות קפדני בהרבה. לוח הזמנים הקבוע של 10 ימים מוסר, וההפניה להערכה נוספת היא לפי שיקול דעת.",
+      ru: "Требуемое действие меняется с 'расследовать' на 'рассмотреть' — значительно менее строгий процесс. Фиксированный 10-дневный срок отменён, а направление на дополнительную оценку является дискреционным.",
+    },
+    changes: [
+      { category: "Action Domain Shift", detail: '"investigate" → "review … may refer"', effect: { en: "Rigorous investigation replaced with lighter review", es: "Investigación rigurosa reemplazada por revisión más ligera", fr: "Enquête rigoureuse remplacée par un examen plus léger", de: "Gründliche Untersuchung durch leichtere Prüfung ersetzt", zh: "严格调查被较轻的审查取代", he: "חקירה קפדנית הוחלפה בסקירה קלה יותר", ru: "Тщательное расследование заменено более лёгким рассмотрением" } },
+    ],
+  },
+  actor_power: {
+    original: "An independent review board shall approve all research protocols before trials begin.",
+    revised: "The project director may approve research protocols before trials begin.",
+    operationalEffect: {
+      en: "Approval authority shifts from an independent review board to the project director — a party with a potential conflict of interest. Independent oversight is eliminated.",
+      es: "La autoridad de aprobación pasa de una junta de revisión independiente al director del proyecto, una parte con un posible conflicto de intereses. Se elimina la supervisión independiente.",
+      fr: "L'autorité d'approbation passe d'un comité de révision indépendant au directeur de projet — une partie potentiellement en conflit d'intérêts. La supervision indépendante est éliminée.",
+      de: "Die Genehmigungsbefugnis verlagert sich von einem unabhängigen Prüfungsausschuss auf den Projektleiter — eine Partei mit potenziellem Interessenkonflikt. Die unabhängige Aufsicht entfällt.",
+      zh: "审批权从独立审查委员会转移到项目主管——一个可能存在利益冲突的一方。独立监督被取消。",
+      he: "סמכות האישור עוברת מוועדת ביקורת עצמאית למנהל הפרויקט — גורם עם ניגוד עניינים פוטנציאלי. הפיקוח העצמאי מבוטל.",
+      ru: "Полномочия по утверждению переходят от независимого наблюдательного совета к руководителю проекта — стороне с потенциальным конфликтом интересов. Независимый надзор устраняется.",
+    },
+    changes: [
+      { category: "Actor Power Shift", detail: '"independent review board shall" → "project director may"', effect: { en: "Independent oversight replaced by internal discretion", es: "Supervisión independiente reemplazada por discreción interna", fr: "Surveillance indépendante remplacée par discrétion interne", de: "Unabhängige Aufsicht durch internes Ermessen ersetzt", zh: "独立监督被内部自由裁量取代", he: "פיקוח עצמאי הוחלף בשיקול דעת פנימי", ru: "Независимый надзор заменён внутренним усмотрением" } },
+    ],
+  },
   all: {
     original: "The employer shall provide health insurance to all full-time employees within 30 days of their start date.",
     revised: "The employer may provide health insurance to eligible employees within a reasonable timeframe.",
