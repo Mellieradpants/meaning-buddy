@@ -1,5 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ShiftKey = "all" | "threshold" | "obligation" | "scope" | "enforcement";
 type LangKey = "en" | "es" | "fr" | "de" | "ru" | "zh" | "he";
@@ -181,27 +188,29 @@ const Landing = () => {
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="flex-1">
             <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Shift</label>
-            <select
-              value={shift}
-              onChange={(e) => setShift(e.target.value as ShiftKey)}
-              className="w-full rounded-md border border-border bg-card text-foreground text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {SHIFT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <Select value={shift} onValueChange={(v) => setShift(v as ShiftKey)}>
+              <SelectTrigger className="w-full bg-card text-foreground text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SHIFT_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex-1">
             <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Explanation language</label>
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as LangKey)}
-              className="w-full rounded-md border border-border bg-card text-foreground text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {LANG_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <Select value={lang} onValueChange={(v) => setLang(v as LangKey)}>
+              <SelectTrigger className="w-full bg-card text-foreground text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANG_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
