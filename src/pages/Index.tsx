@@ -15,7 +15,7 @@ import {
   CATEGORIES,
   type CategoryKey,
 } from "@/lib/taxonomy";
-import SummaryTable from "@/components/SummaryTable";
+import SummaryTable, { toMarkdownTable } from "@/components/SummaryTable";
 import ChangeSummary from "@/components/ChangeSummary";
 import TranslationStressTest from "@/components/TranslationStressTest";
 import {
@@ -525,31 +525,29 @@ const Index = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const lines = changedCategories.map((cat) => {
-                    const gi = result.categories.indexOf(cat);
-                    const eff = cat.operationalEffect && cat.operationalEffect !== "No change detected."
-                      ? getDisplayEffect(gi, cat.operationalEffect)
-                      : "";
-                    return [
-                      `## ${CATEGORIES[cat.category] || cat.category}`,
-                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
-                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
-                      eff ? `**Operational Effect:** ${eff}` : "",
-                      "",
-                    ].filter(Boolean).join("\n");
-                  });
-                  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+                  const md = toMarkdownTable(result.categories, getDisplayEffect);
+                  navigator.clipboard.writeText(md).then(() => toast.success("Copied as Markdown"));
+                }}
+                className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+              >
+                Copy as Markdown
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const md = toMarkdownTable(result.categories, getDisplayEffect);
+                  const blob = new Blob([md], { type: "text/markdown" });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
-                  a.download = "comparison-results.txt";
+                  a.download = "summary-table.md";
                   a.click();
                   URL.revokeObjectURL(url);
                   toast.success("Exported");
                 }}
                 className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
               >
-                Export Summary
+                Export
               </button>
             </div>
           )}

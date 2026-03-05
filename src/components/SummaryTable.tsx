@@ -10,7 +10,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { toast } from "sonner";
+
 
 interface CategoryResult {
   category: CategoryKey;
@@ -43,7 +43,7 @@ function getPageDisplay(cat: CategoryResult): string {
   return "—";
 }
 
-function toMarkdownTable(
+export function toMarkdownTable(
   categories: CategoryResult[],
   getDisplayEffect?: (index: number, original: string) => string
 ): string {
@@ -95,25 +95,7 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl }: Su
     return arr;
   }, [categories, sortKey, sortDir]);
 
-  const markdown = useMemo(
-    () => toMarkdownTable(categories, getDisplayEffect),
-    [categories, getDisplayEffect]
-  );
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(markdown);
-    toast.success("Copied as Markdown");
-  };
-
-  const handleExport = () => {
-    const blob = new Blob([markdown], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "summary-table.md";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const sortIndicator = (key: SortKey) => {
     if (sortKey !== key) return "";
@@ -122,25 +104,9 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl }: Su
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-3">
           Summary Table of Changes
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={handleCopy}
-            className="px-3 py-1.5 rounded-md text-xs font-medium border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            Copy as Markdown
-          </button>
-          <button
-            onClick={handleExport}
-            className="px-3 py-1.5 rounded-md text-xs font-medium border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            Export .md
-          </button>
-        </div>
-      </div>
+      </h2>
 
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <Table>
