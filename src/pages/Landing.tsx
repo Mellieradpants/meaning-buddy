@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 type ShiftKey = "all" | "threshold" | "obligation" | "scope" | "enforcement";
-type LangKey = "en" | "es" | "zh" | "ja" | "he" | "ru";
+type LangKey = "en" | "es" | "fr" | "de" | "ru" | "zh" | "he";
 
 const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
   { value: "all", label: "All shifts" },
@@ -15,10 +15,11 @@ const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
 const LANG_OPTIONS: { value: LangKey; label: string }[] = [
   { value: "en", label: "English" },
   { value: "es", label: "Spanish" },
-  { value: "zh", label: "Chinese (Simplified)" },
-  { value: "ja", label: "Japanese" },
-  { value: "he", label: "Hebrew" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
   { value: "ru", label: "Russian" },
+  { value: "zh", label: "Chinese (Simplified)" },
+  { value: "he", label: "Hebrew" },
 ];
 
 interface DemoEntry {
@@ -34,16 +35,17 @@ const DEMO_DATA: Record<ShiftKey, { original: string; revised: string; operation
     operationalEffect: {
       en: "Health insurance is no longer guaranteed. The employer can now decide whether to offer it. Coverage no longer extends to all full-time employees — only those deemed eligible. The fixed 30-day deadline no longer applies.",
       es: "El seguro de salud ya no está garantizado. El empleador ahora puede decidir si lo ofrece. La cobertura ya no se extiende a todos los empleados a tiempo completo, solo a los considerados elegibles. El plazo fijo de 30 días ya no aplica.",
+      fr: "L'assurance maladie n'est plus garantie. L'employeur peut désormais décider s'il la propose. La couverture ne s'étend plus à tous les employés à temps plein — uniquement à ceux jugés éligibles. Le délai fixe de 30 jours ne s'applique plus.",
+      de: "Die Krankenversicherung ist nicht mehr garantiert. Der Arbeitgeber kann nun entscheiden, ob er sie anbietet. Der Versicherungsschutz erstreckt sich nicht mehr auf alle Vollzeitbeschäftigten — nur auf als berechtigt eingestufte Mitarbeiter. Die feste 30-Tage-Frist gilt nicht mehr.",
       zh: "健康保险不再有保障。雇主现在可以决定是否提供。覆盖范围不再延伸至所有全职员工——仅限于被认为符合条件的人。30天的固定期限不再适用。",
-      ja: "健康保険はもはや保証されていません。雇用主は提供するかどうかを決定できるようになりました。対象は全正社員ではなく、適格と判断された従業員のみです。30日の固定期限は適用されなくなりました。",
       he: "ביטוח הבריאות אינו מובטח עוד. המעסיק יכול כעת להחליט אם להציע אותו. הכיסוי אינו חל עוד על כל העובדים במשרה מלאה — רק על מי שנחשב זכאי. המועד הקבוע של 30 יום אינו חל עוד.",
       ru: "Медицинское страхование больше не гарантировано. Работодатель теперь может решать, предоставлять ли его. Покрытие больше не распространяется на всех штатных сотрудников — только на тех, кто признан имеющим право. Фиксированный 30-дневный срок больше не применяется.",
     },
     changes: [
-      { category: "Modality Shift", detail: '"shall provide" → "may provide"', effect: { en: "Mandatory obligation weakened to discretionary", es: "Obligación obligatoria debilitada a discrecional", zh: "强制性义务弱化为自由裁量", ja: "義務的な責務が裁量的に弱体化", he: "חובה מחייבת הוחלשה לשיקול דעת", ru: "Обязательное обязательство ослаблено до дискреционного" } },
-      { category: "Scope Change", detail: '"all full-time employees" → "eligible employees"', effect: { en: "Coverage narrowed to a subset", es: "Cobertura reducida a un subgrupo", zh: "覆盖范围缩小到一个子集", ja: "対象が一部に限定", he: "הכיסוי צומצם לתת-קבוצה", ru: "Покрытие сужено до подгруппы" } },
-      { category: "Threshold Shift", detail: '"within 30 days" → "within a reasonable timeframe"', effect: { en: "Fixed deadline replaced with subjective standard", es: "Plazo fijo reemplazado por estándar subjetivo", zh: "固定期限被主观标准取代", ja: "固定期限が主観的基準に置き換え", he: "מועד קבוע הוחלף בסטנדרט סובייקטיבי", ru: "Фиксированный срок заменён субъективным стандартом" } },
-      { category: "Obligation Removal", detail: "Mandatory duty weakened to discretionary", effect: { en: "Core obligation effectively removed", es: "Obligación esencial efectivamente eliminada", zh: "核心义务实际上已取消", ja: "中核的義務が事実上削除", he: "חובה מרכזית הוסרה למעשה", ru: "Основное обязательство фактически устранено" } },
+      { category: "Modality Shift", detail: '"shall provide" → "may provide"', effect: { en: "Mandatory obligation weakened to discretionary", es: "Obligación obligatoria debilitada a discrecional", fr: "Obligation impérative affaiblie en discrétionnaire", de: "Verbindliche Pflicht zu Ermessensentscheidung abgeschwächt", zh: "强制性义务弱化为自由裁量", he: "חובה מחייבת הוחלשה לשיקול דעת", ru: "Обязательное обязательство ослаблено до дискреционного" } },
+      { category: "Scope Change", detail: '"all full-time employees" → "eligible employees"', effect: { en: "Coverage narrowed to a subset", es: "Cobertura reducida a un subgrupo", fr: "Couverture réduite à un sous-ensemble", de: "Deckung auf eine Teilgruppe eingeschränkt", zh: "覆盖范围缩小到一个子集", he: "הכיסוי צומצם לתת-קבוצה", ru: "Покрытие сужено до подгруппы" } },
+      { category: "Threshold Shift", detail: '"within 30 days" → "within a reasonable timeframe"', effect: { en: "Fixed deadline replaced with subjective standard", es: "Plazo fijo reemplazado por estándar subjetivo", fr: "Délai fixe remplacé par un critère subjectif", de: "Feste Frist durch subjektiven Maßstab ersetzt", zh: "固定期限被主观标准取代", he: "מועד קבוע הוחלף בסטנדרט סובייקטיבי", ru: "Фиксированный срок заменён субъективным стандартом" } },
+      { category: "Obligation Removal", detail: "Mandatory duty weakened to discretionary", effect: { en: "Core obligation effectively removed", es: "Obligación esencial efectivamente eliminada", fr: "Obligation fondamentale effectivement supprimée", de: "Kernpflicht faktisch aufgehoben", zh: "核心义务实际上已取消", he: "חובה מרכזית הוסרה למעשה", ru: "Основное обязательство фактически устранено" } },
     ],
   },
   threshold: {
@@ -52,13 +54,14 @@ const DEMO_DATA: Record<ShiftKey, { original: string; revised: string; operation
     operationalEffect: {
       en: "Payment deadline extended from 15 to 45 days. A written exception clause allows further extension at the provider's discretion.",
       es: "El plazo de pago se extiende de 15 a 45 días. Una cláusula de excepción escrita permite una extensión adicional a discreción del proveedor.",
+      fr: "Le délai de paiement est prolongé de 15 à 45 jours. Une clause d'exception écrite permet une prolongation supplémentaire à la discrétion du prestataire.",
+      de: "Die Zahlungsfrist wurde von 15 auf 45 Tage verlängert. Eine schriftliche Ausnahmeklausel ermöglicht eine weitere Verlängerung nach Ermessen des Anbieters.",
       zh: "付款期限从15天延长至45天。书面例外条款允许供应商酌情进一步延长。",
-      ja: "支払い期限が15日から45日に延長。書面による例外条項により、提供者の裁量でさらに延長可能。",
       he: "מועד התשלום הוארך מ-15 ל-45 יום. סעיף חריג בכתב מאפשר הארכה נוספת לפי שיקול דעת הספק.",
       ru: "Срок оплаты увеличен с 15 до 45 дней. Письменная оговорка позволяет дальнейшее продление по усмотрению поставщика.",
     },
     changes: [
-      { category: "Threshold Shift", detail: '"within 15 days" → "within 45 days"', effect: { en: "Payment window tripled", es: "Ventana de pago triplicada", zh: "付款窗口增加了三倍", ja: "支払い期間が3倍に", he: "חלון התשלום שולש", ru: "Окно оплаты утроено" } },
+      { category: "Threshold Shift", detail: '"within 15 days" → "within 45 days"', effect: { en: "Payment window tripled", es: "Ventana de pago triplicada", fr: "Fenêtre de paiement triplée", de: "Zahlungsfenster verdreifacht", zh: "付款窗口增加了三倍", he: "חלון התשלום שולש", ru: "Окно оплаты утроено" } },
     ],
   },
   obligation: {
@@ -67,13 +70,14 @@ const DEMO_DATA: Record<ShiftKey, { original: string; revised: string; operation
     operationalEffect: {
       en: "Filing an appeal changes from mandatory to optional. The deadline doubles from 30 to 60 days.",
       es: "Presentar una apelación cambia de obligatorio a opcional. El plazo se duplica de 30 a 60 días.",
+      fr: "Le dépôt d'un appel passe d'obligatoire à facultatif. Le délai double, passant de 30 à 60 jours.",
+      de: "Die Einlegung einer Berufung ändert sich von verpflichtend zu optional. Die Frist verdoppelt sich von 30 auf 60 Tage.",
       zh: "提起上诉从强制变为可选。期限从30天增加到60天。",
-      ja: "上訴の提出が義務から任意に変更。期限が30日から60日に倍増。",
       he: "הגשת ערעור משתנה מחובה לאופציונלית. המועד מוכפל מ-30 ל-60 יום.",
       ru: "Подача апелляции меняется с обязательной на необязательную. Срок удваивается с 30 до 60 дней.",
     },
     changes: [
-      { category: "Obligation Removal", detail: '"shall be filed" → "may be filed"', effect: { en: "Mandatory filing weakened to optional", es: "Presentación obligatoria debilitada a opcional", zh: "强制提交弱化为可选", ja: "義務的な提出が任意に弱体化", he: "הגשה חובה הוחלשה לאופציונלית", ru: "Обязательная подача ослаблена до необязательной" } },
+      { category: "Obligation Removal", detail: '"shall be filed" → "may be filed"', effect: { en: "Mandatory filing weakened to optional", es: "Presentación obligatoria debilitada a opcional", fr: "Dépôt obligatoire affaibli en facultatif", de: "Pflichteinreichung zu optional abgeschwächt", zh: "强制提交弱化为可选", he: "הגשה חובה הוחלשה לאופציונלית", ru: "Обязательная подача ослаблена до необязательной" } },
     ],
   },
   scope: {
@@ -82,13 +86,14 @@ const DEMO_DATA: Record<ShiftKey, { original: string; revised: string; operation
     operationalEffect: {
       en: "Coverage narrows from all diagnostic imaging to only certain procedures deemed medically necessary. Discretion is introduced where none existed.",
       es: "La cobertura se reduce de todas las imágenes diagnósticas a solo ciertos procedimientos considerados médicamente necesarios. Se introduce discreción donde no existía.",
+      fr: "La couverture se réduit de toute l'imagerie diagnostique à certaines procédures jugées médicalement nécessaires. Un pouvoir discrétionnaire est introduit là où il n'existait pas.",
+      de: "Die Deckung verengt sich von der gesamten diagnostischen Bildgebung auf bestimmte als medizinisch notwendig erachtete Verfahren. Ermessensspielraum wird eingeführt, wo keiner bestand.",
       zh: "覆盖范围从所有诊断影像缩小到仅某些被认为医学上必要的程序。引入了之前不存在的自由裁量权。",
-      ja: "対象がすべての画像診断から医学的に必要と判断された特定の手順のみに縮小。以前はなかった裁量が導入。",
       he: "הכיסוי מצטמצם מכל הדימות האבחנתי לנהלים מסוימים בלבד הנחשבים נחוצים רפואית. שיקול דעת מוכנס היכן שלא היה קיים.",
       ru: "Покрытие сужается от всей диагностической визуализации до определённых процедур, признанных медицински необходимыми. Вводится усмотрение там, где его не было.",
     },
     changes: [
-      { category: "Scope Change", detail: '"all diagnostic imaging" → "certain diagnostic imaging procedures"', effect: { en: "Broad coverage narrowed to selective subset", es: "Cobertura amplia reducida a subgrupo selectivo", zh: "广泛覆盖缩小到选择性子集", ja: "広範な対象が選択的サブセットに縮小", he: "כיסוי רחב צומצם לתת-קבוצה סלקטיבית", ru: "Широкое покрытие сужено до избранной подгруппы" } },
+      { category: "Scope Change", detail: '"all diagnostic imaging" → "certain diagnostic imaging procedures"', effect: { en: "Broad coverage narrowed to selective subset", es: "Cobertura amplia reducida a subgrupo selectivo", fr: "Couverture large réduite à un sous-ensemble sélectif", de: "Breite Deckung auf selektive Teilmenge eingeschränkt", zh: "广泛覆盖缩小到选择性子集", he: "כיסוי רחב צומצם לתת-קבוצה סלקטיבית", ru: "Широкое покрытие сужено до избранной подгруппы" } },
     ],
   },
   enforcement: {
@@ -97,13 +102,14 @@ const DEMO_DATA: Record<ShiftKey, { original: string; revised: string; operation
     operationalEffect: {
       en: "The fixed annual deadline is removed. Publication frequency and timing become discretionary. The public loses a guaranteed reporting schedule.",
       es: "Se elimina el plazo anual fijo. La frecuencia y el momento de publicación se vuelven discrecionales. El público pierde un calendario de informes garantizado.",
+      fr: "Le délai annuel fixe est supprimé. La fréquence et le calendrier de publication deviennent discrétionnaires. Le public perd un calendrier de rapports garanti.",
+      de: "Die feste jährliche Frist wird aufgehoben. Veröffentlichungshäufigkeit und -zeitpunkt werden ermessensabhängig. Die Öffentlichkeit verliert einen garantierten Berichtszeitplan.",
       zh: "固定的年度截止日期被取消。发布频率和时间变为自由裁量。公众失去了有保障的报告时间表。",
-      ja: "固定の年次期限が撤廃。発行頻度とタイミングが裁量的に。国民は保証された報告スケジュールを失う。",
       he: "המועד השנתי הקבוע מוסר. תדירות ועיתוי הפרסום הופכים לשיקול דעת. הציבור מאבד לוח זמנים מובטח לדיווח.",
       ru: "Фиксированный годовой срок отменён. Частота и сроки публикации становятся дискреционными. Общественность теряет гарантированный график отчётности.",
     },
     changes: [
-      { category: "Enforcement Modification", detail: '"shall publish an annual report by March 1" → "may publish periodic reports as it deems appropriate"', effect: { en: "Enforceable deadline replaced with open-ended discretion", es: "Plazo ejecutable reemplazado por discreción abierta", zh: "可执行的截止日期被开放式自由裁量取代", ja: "強制力のある期限が無期限の裁量に置換", he: "מועד אכיף הוחלף בשיקול דעת פתוח", ru: "Исполнимый срок заменён неограниченным усмотрением" } },
+      { category: "Enforcement Modification", detail: '"shall publish an annual report by March 1" → "may publish periodic reports as it deems appropriate"', effect: { en: "Enforceable deadline replaced with open-ended discretion", es: "Plazo ejecutable reemplazado por discreción abierta", fr: "Délai exécutoire remplacé par un pouvoir discrétionnaire illimité", de: "Durchsetzbare Frist durch unbegrenztes Ermessen ersetzt", zh: "可执行的截止日期被开放式自由裁量取代", he: "מועד אכיף הוחלף בשיקול דעת פתוח", ru: "Исполнимый срок заменён неограниченным усмотрением" } },
     ],
   },
 };
