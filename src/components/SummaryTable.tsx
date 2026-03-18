@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
 import { extractPageFromEvidence } from "@/lib/pageParser";
 import { sanitizeEvidence } from "@/lib/sanitize";
+import { t, type UILanguage } from "@/lib/uiTranslations";
 import {
   Table,
   TableHeader,
