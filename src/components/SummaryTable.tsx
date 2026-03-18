@@ -108,7 +108,7 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl, uiLa
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-3">
-          Summary Table of Changes
+          {t(uiLanguage, "summaryTable")}
       </h2>
 
       <div className="rounded-lg border border-border bg-card overflow-hidden">
