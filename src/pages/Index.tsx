@@ -303,7 +303,7 @@ const Index = () => {
           onClick={handleClear}
           className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
         >
-          Clear
+          {t(uiLang, "clear")}
         </button>
       </div>
 
