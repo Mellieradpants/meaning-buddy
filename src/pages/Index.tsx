@@ -54,6 +54,7 @@ const Index = () => {
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [scopeFilter, setScopeFilter] = useState<string>("all");
+  const [uiLang, setUiLang] = useState<UILanguage>(getStoredUILanguage);
   const [devMode, setDevMode] = useState(() => {
     try { return localStorage.getItem("devModeEnabled") === "true"; } catch { return false; }
   });
@@ -61,6 +62,13 @@ const Index = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
+
+  const handleUILangChange = (lang: UILanguage) => {
+    setUiLang(lang);
+    storeUILanguage(lang);
+    // Sync effect translation language
+    setLanguage(lang as EffectLanguage);
+  };
 
   const handleCompareRef = useRef<() => void>();
 
