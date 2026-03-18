@@ -541,7 +541,7 @@ const Index = () => {
                 }}
                 className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
               >
-                Copy as Markdown
+                {t(uiLang, "copyAsMarkdown")}
               </button>
               <button
                 type="button"
