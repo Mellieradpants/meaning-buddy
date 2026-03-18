@@ -546,7 +546,7 @@ const Index = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const md = toMarkdownTable(result.categories, getDisplayEffect);
+                  const md = toMarkdownTable(result.categories, getDisplayEffect, uiLang);
                   const blob = new Blob([md], { type: "text/markdown" });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
