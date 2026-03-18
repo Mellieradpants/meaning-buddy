@@ -276,7 +276,7 @@ const Index = () => {
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-strong mb-2">
-            Revised (updated version)
+            {t(uiLang, "revised")} (updated version)
           </label>
           <textarea
             value={revised}
