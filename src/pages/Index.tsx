@@ -24,6 +24,7 @@ import {
   type EffectLanguage,
 } from "@/hooks/useEffectTranslation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, type UILanguage } from "@/lib/uiTranslations";
 
 interface CategoryResult {
   category: CategoryKey;
