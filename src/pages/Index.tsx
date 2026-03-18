@@ -265,7 +265,7 @@ const Index = () => {
       <div ref={inputRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-strong mb-2">
-            Original (earlier version)
+            {t(uiLang, "original")} (earlier version)
           </label>
           <textarea
             value={original}
