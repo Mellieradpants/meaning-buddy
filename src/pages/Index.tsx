@@ -24,6 +24,7 @@ import {
   type EffectLanguage,
 } from "@/hooks/useEffectTranslation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, type UILanguage } from "@/lib/uiTranslations";
 
 interface CategoryResult {
   category: CategoryKey;
@@ -53,6 +54,7 @@ const Index = () => {
   const [result, setResult] = useState<DiffResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [scopeFilter, setScopeFilter] = useState<string>("all");
+  const [uiLang, setUiLang] = useState<UILanguage>(getStoredUILanguage);
   const [devMode, setDevMode] = useState(() => {
     try { return localStorage.getItem("devModeEnabled") === "true"; } catch { return false; }
   });
@@ -60,6 +62,13 @@ const Index = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
+
+  const handleUILangChange = (lang: UILanguage) => {
+    setUiLang(lang);
+    storeUILanguage(lang);
+    // Sync effect translation language
+    setLanguage(lang as EffectLanguage);
+  };
 
   const handleCompareRef = useRef<() => void>();
 
@@ -229,12 +238,12 @@ const Index = () => {
             </Select>
           </div>
           <div className="w-64">
-            <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
+            <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
               <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {EFFECT_LANGUAGES.map((lang) => (
+                {UI_LANGUAGES.map((lang) => (
                   <SelectItem key={lang} value={lang} className="text-xs">
                     {lang}
                   </SelectItem>
@@ -256,7 +265,7 @@ const Index = () => {
       <div ref={inputRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-strong mb-2">
-            Original (earlier version)
+            {t(uiLang, "original")} (earlier version)
           </label>
           <textarea
             value={original}
@@ -267,7 +276,7 @@ const Index = () => {
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-strong mb-2">
-            Revised (updated version)
+            {t(uiLang, "revised")} (updated version)
           </label>
           <textarea
             value={revised}
@@ -285,7 +294,7 @@ const Index = () => {
           disabled={loading}
           className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Comparing…" : "Compare"}
+          {loading ? t(uiLang, "comparing") : t(uiLang, "compare")}
           <kbd className="ml-2 hidden sm:inline-block text-[10px] opacity-60 font-mono bg-primary-foreground/10 px-1.5 py-0.5 rounded border border-primary-foreground/20">
             {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "⌘ ↵" : "Ctrl ↵"}
           </kbd>
@@ -294,7 +303,7 @@ const Index = () => {
           onClick={handleClear}
           className="px-8 py-3 rounded-lg border border-input bg-background text-foreground font-medium text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
         >
-          Clear
+          {t(uiLang, "clear")}
         </button>
       </div>
 
@@ -387,7 +396,7 @@ const Index = () => {
           {changedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
-                Changes Detected ({changedCategories.length})
+                {t(uiLang, "changesDetected")} ({changedCategories.length})
               </h2>
               <div className="space-y-4">
                 {changedCategories.map((cat, i) => {
@@ -404,7 +413,7 @@ const Index = () => {
                       {/* Original evidence */}
                       <div>
                         <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                          Original
+                          {t(uiLang, "original")}
                         </span>
                         <span className="text-foreground leading-[1.8] block">
                           {sanitizeEvidence(cat.originalEvidence)}
@@ -414,7 +423,7 @@ const Index = () => {
                       {/* Revised evidence */}
                       <div className="border-t border-border pt-4">
                         <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                          Revised
+                          {t(uiLang, "revised")}
                         </span>
                         <span className="text-foreground leading-[1.8] block">
                           {sanitizeEvidence(cat.revisedEvidence)}
@@ -425,7 +434,7 @@ const Index = () => {
                       {effectText && (
                         <div className="border-t border-border pt-4">
                           <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                            Operational Effect
+                            {t(uiLang, "operationalEffect")}
                           </span>
                           <span
                             className="text-foreground leading-[1.8] block"
@@ -440,7 +449,7 @@ const Index = () => {
                       {/* Detected changes / category chip */}
                       <div className="border-t border-border pt-4">
                         <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-                          Detected changes
+                          {t(uiLang, "detectedChanges")}
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
@@ -460,29 +469,31 @@ const Index = () => {
 
           {/* Change Summary (Markdown) */}
           {changedCategories.length > 0 && (
-            <ChangeSummary
-              categories={result.categories}
-              originalText={original}
-              revisedText={revised}
-              getDisplayEffect={getDisplayEffect}
-              isRtl={isRtl}
-            />
-          )}
+             <ChangeSummary
+               categories={result.categories}
+               originalText={original}
+               revisedText={revised}
+               getDisplayEffect={getDisplayEffect}
+               isRtl={isRtl}
+               uiLanguage={uiLang}
+             />
+           )}
 
-          {/* Summary Table */}
-          {changedCategories.length > 0 && (
-            <SummaryTable
-              categories={result.categories}
-              getDisplayEffect={getDisplayEffect}
-              isRtl={isRtl}
-            />
+           {/* Summary Table */}
+           {changedCategories.length > 0 && (
+             <SummaryTable
+               categories={result.categories}
+               getDisplayEffect={getDisplayEffect}
+               isRtl={isRtl}
+               uiLanguage={uiLang}
+             />
           )}
 
           {/* Unchanged Categories */}
           {unchangedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
-                Unchanged ({unchangedCategories.length})
+                {t(uiLang, "unchanged")} ({unchangedCategories.length})
               </h2>
               <div className="flex flex-wrap gap-2">
                 {unchangedCategories.map((cat, i) => (
@@ -510,9 +521,9 @@ const Index = () => {
                       : "";
                     return [
                       `## ${CATEGORIES[cat.category] || cat.category}`,
-                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
-                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
-                      eff ? `**Operational Effect:** ${eff}` : "",
+                      `**${t(uiLang, "original")}:** ${sanitizeEvidence(cat.originalEvidence)}`,
+                      `**${t(uiLang, "revised")}:** ${sanitizeEvidence(cat.revisedEvidence)}`,
+                      eff ? `**${t(uiLang, "operationalEffect")}:** ${eff}` : "",
                       "",
                     ].filter(Boolean).join("\n");
                   });
@@ -520,22 +531,22 @@ const Index = () => {
                 }}
                 className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
               >
-                Copy Results
+                {t(uiLang, "copyResults")}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  const md = toMarkdownTable(result.categories, getDisplayEffect);
+                  const md = toMarkdownTable(result.categories, getDisplayEffect, uiLang);
                   navigator.clipboard.writeText(md).then(() => toast.success("Copied as Markdown"));
                 }}
                 className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
               >
-                Copy as Markdown
+                {t(uiLang, "copyAsMarkdown")}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  const md = toMarkdownTable(result.categories, getDisplayEffect);
+                  const md = toMarkdownTable(result.categories, getDisplayEffect, uiLang);
                   const blob = new Blob([md], { type: "text/markdown" });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
@@ -547,7 +558,7 @@ const Index = () => {
                 }}
                 className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
               >
-                Export
+                {t(uiLang, "exportResults")}
               </button>
             </div>
           )}

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
 import { extractPageFromEvidence } from "@/lib/pageParser";
 import { sanitizeEvidence } from "@/lib/sanitize";
+import { t, type UILanguage } from "@/lib/uiTranslations";
 
 
 interface CategoryResult {
@@ -19,6 +20,7 @@ interface ChangeSummaryProps {
   revisedText: string;
   getDisplayEffect?: (index: number, original: string) => string;
   isRtl?: boolean;
+  uiLanguage?: UILanguage;
 }
 
 function truncateSnippet(text: string, max = 80): string {
@@ -71,6 +73,7 @@ export default function ChangeSummary({
   categories,
   getDisplayEffect,
   isRtl,
+  uiLanguage = "English",
 }: ChangeSummaryProps) {
   const entries = useMemo(() => parseEntries(categories), [categories]);
 
@@ -80,7 +83,7 @@ export default function ChangeSummary({
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-3">
-          Change Summary (Markdown)
+          {t(uiLanguage, "changeSummary")}
       </h2>
       <div className="rounded-lg border border-border bg-card p-4 overflow-x-auto">
         <div className="space-y-4">
@@ -96,13 +99,13 @@ export default function ChangeSummary({
                 </div>
                 {e.origSnippet && (
                   <div className="ml-4 mt-0.5 font-mono">
-                    <span className="font-semibold text-foreground-strong">Original:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">{t(uiLanguage, "original")}:</span>{" "}
                     &ldquo;{e.origSnippet}&rdquo;
                   </div>
                 )}
                 {e.revSnippet && (
                   <div className="ml-4 mt-0.5 font-mono">
-                    <span className="font-semibold text-foreground-strong">Revised:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">{t(uiLanguage, "revised")}:</span>{" "}
                     &ldquo;{e.revSnippet}&rdquo;
                   </div>
                 )}
@@ -112,7 +115,7 @@ export default function ChangeSummary({
                     dir={isRtl ? "rtl" : undefined}
                     style={isRtl ? { textAlign: "right" } : undefined}
                   >
-                    <span className="font-semibold text-foreground-strong">Effect:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">{t(uiLanguage, "effect")}:</span>{" "}
                     {displayEffect}
                   </div>
                 )}

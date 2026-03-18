@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { CATEGORIES, type CategoryKey } from "@/lib/taxonomy";
 import { extractPageFromEvidence } from "@/lib/pageParser";
 import { sanitizeEvidence } from "@/lib/sanitize";
+import { t, type UILanguage } from "@/lib/uiTranslations";
 import {
   Table,
   TableHeader,
@@ -25,6 +26,7 @@ interface SummaryTableProps {
   categories: CategoryResult[];
   getDisplayEffect?: (index: number, original: string) => string;
   isRtl?: boolean;
+  uiLanguage?: UILanguage;
 }
 
 type SortKey = "category" | "page";
@@ -45,14 +47,15 @@ function getPageDisplay(cat: CategoryResult): string {
 
 export function toMarkdownTable(
   categories: CategoryResult[],
-  getDisplayEffect?: (index: number, original: string) => string
+  getDisplayEffect?: (index: number, original: string) => string,
+  uiLanguage: UILanguage = "English"
 ): string {
-  const header = "| Page / Section | Category | Status | Original | Revised | Operational Effect |";
+  const header = `| ${t(uiLanguage, "pageSection")} | ${t(uiLanguage, "category")} | ${t(uiLanguage, "status")} | ${t(uiLanguage, "original")} | ${t(uiLanguage, "revised")} | ${t(uiLanguage, "operationalEffect")} |`;
   const divider = "| --- | --- | --- | --- | --- | --- |";
   const rows = categories.map((cat, idx) => {
     const page = getPageDisplay(cat);
     const category = CATEGORIES[cat.category] || cat.category;
-    const status = cat.status === "changed" ? "Changed" : "Unchanged";
+    const status = cat.status === "changed" ? t(uiLanguage, "changed") : t(uiLanguage, "unchanged");
     const orig = truncate(sanitizeEvidence(extractPageFromEvidence(cat.originalEvidence).text), 120).replace(/\|/g, "\\|");
     const rev = truncate(sanitizeEvidence(extractPageFromEvidence(cat.revisedEvidence).text), 120).replace(/\|/g, "\\|");
     const rawEffect = cat.operationalEffect || "—";
@@ -64,7 +67,7 @@ export function toMarkdownTable(
   return [header, divider, ...rows].join("\n");
 }
 
-export default function SummaryTable({ categories, getDisplayEffect, isRtl }: SummaryTableProps) {
+export default function SummaryTable({ categories, getDisplayEffect, isRtl, uiLanguage = "English" }: SummaryTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("category");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -105,7 +108,7 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl }: Su
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-3">
-          Summary Table of Changes
+          {t(uiLanguage, "summaryTable")}
       </h2>
 
       <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -116,18 +119,18 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl }: Su
                 className="cursor-pointer select-none whitespace-nowrap"
                 onClick={() => toggleSort("page")}
               >
-                Page / Section{sortIndicator("page")}
+                {t(uiLanguage, "pageSection")}{sortIndicator("page")}
               </TableHead>
               <TableHead
                 className="cursor-pointer select-none whitespace-nowrap"
                 onClick={() => toggleSort("category")}
               >
-                Category{sortIndicator("category")}
+                {t(uiLanguage, "category")}{sortIndicator("category")}
               </TableHead>
-              <TableHead className="whitespace-nowrap">Status</TableHead>
-              <TableHead className="whitespace-nowrap">Original Snippet</TableHead>
-              <TableHead className="whitespace-nowrap">Revised Snippet</TableHead>
-              <TableHead className="whitespace-nowrap">Operational Effect</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "status")}</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "originalSnippet")}</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "revisedSnippet")}</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "operationalEffect")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,7 +160,7 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl }: Su
                           : "bg-unchanged-bg text-unchanged border-border"
                       }`}
                     >
-                      {cat.status === "changed" ? "Changed" : "Unchanged"}
+                      {cat.status === "changed" ? t(uiLanguage, "changed") : t(uiLanguage, "unchanged")}
                     </span>
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">
