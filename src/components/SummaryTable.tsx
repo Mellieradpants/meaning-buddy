@@ -67,7 +67,7 @@ export function toMarkdownTable(
   return [header, divider, ...rows].join("\n");
 }
 
-export default function SummaryTable({ categories, getDisplayEffect, isRtl }: SummaryTableProps) {
+export default function SummaryTable({ categories, getDisplayEffect, isRtl, uiLanguage = "English" }: SummaryTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("category");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
