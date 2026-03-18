@@ -73,6 +73,7 @@ export default function ChangeSummary({
   categories,
   getDisplayEffect,
   isRtl,
+  uiLanguage = "English",
 }: ChangeSummaryProps) {
   const entries = useMemo(() => parseEntries(categories), [categories]);
 
@@ -82,7 +83,7 @@ export default function ChangeSummary({
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-3">
-          Change Summary (Markdown)
+          {t(uiLanguage, "changeSummary")}
       </h2>
       <div className="rounded-lg border border-border bg-card p-4 overflow-x-auto">
         <div className="space-y-4">
