@@ -469,22 +469,24 @@ const Index = () => {
 
           {/* Change Summary (Markdown) */}
           {changedCategories.length > 0 && (
-            <ChangeSummary
-              categories={result.categories}
-              originalText={original}
-              revisedText={revised}
-              getDisplayEffect={getDisplayEffect}
-              isRtl={isRtl}
-            />
-          )}
+             <ChangeSummary
+               categories={result.categories}
+               originalText={original}
+               revisedText={revised}
+               getDisplayEffect={getDisplayEffect}
+               isRtl={isRtl}
+               uiLanguage={uiLang}
+             />
+           )}
 
-          {/* Summary Table */}
-          {changedCategories.length > 0 && (
-            <SummaryTable
-              categories={result.categories}
-              getDisplayEffect={getDisplayEffect}
-              isRtl={isRtl}
-            />
+           {/* Summary Table */}
+           {changedCategories.length > 0 && (
+             <SummaryTable
+               categories={result.categories}
+               getDisplayEffect={getDisplayEffect}
+               isRtl={isRtl}
+               uiLanguage={uiLang}
+             />
           )}
 
           {/* Unchanged Categories */}
