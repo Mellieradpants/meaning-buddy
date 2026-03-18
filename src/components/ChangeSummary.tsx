@@ -99,7 +99,7 @@ export default function ChangeSummary({
                 </div>
                 {e.origSnippet && (
                   <div className="ml-4 mt-0.5 font-mono">
-                    <span className="font-semibold text-foreground-strong">Original:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">{t(uiLanguage, "original")}:</span>{" "}
                     &ldquo;{e.origSnippet}&rdquo;
                   </div>
                 )}
