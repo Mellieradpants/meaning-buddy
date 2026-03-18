@@ -20,6 +20,7 @@ interface ChangeSummaryProps {
   revisedText: string;
   getDisplayEffect?: (index: number, original: string) => string;
   isRtl?: boolean;
+  uiLanguage?: UILanguage;
 }
 
 function truncateSnippet(text: string, max = 80): string {
