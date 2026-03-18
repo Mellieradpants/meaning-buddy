@@ -160,7 +160,7 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl, uiLa
                           : "bg-unchanged-bg text-unchanged border-border"
                       }`}
                     >
-                      {cat.status === "changed" ? "Changed" : "Unchanged"}
+                      {cat.status === "changed" ? t(uiLanguage, "changed") : t(uiLanguage, "unchanged")}
                     </span>
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs font-mono text-foreground">

@@ -115,7 +115,7 @@ export default function ChangeSummary({
                     dir={isRtl ? "rtl" : undefined}
                     style={isRtl ? { textAlign: "right" } : undefined}
                   >
-                    <span className="font-semibold text-foreground-strong">Effect:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">{t(uiLanguage, "effect")}:</span>{" "}
                     {displayEffect}
                   </div>
                 )}
