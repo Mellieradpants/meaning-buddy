@@ -423,7 +423,7 @@ const Index = () => {
                       {/* Revised evidence */}
                       <div className="border-t border-border pt-4">
                         <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                          Revised
+                          {t(uiLang, "revised")}
                         </span>
                         <span className="text-foreground leading-[1.8] block">
                           {sanitizeEvidence(cat.revisedEvidence)}
