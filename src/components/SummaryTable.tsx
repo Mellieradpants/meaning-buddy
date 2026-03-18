@@ -26,6 +26,7 @@ interface SummaryTableProps {
   categories: CategoryResult[];
   getDisplayEffect?: (index: number, original: string) => string;
   isRtl?: boolean;
+  uiLanguage?: UILanguage;
 }
 
 type SortKey = "category" | "page";
