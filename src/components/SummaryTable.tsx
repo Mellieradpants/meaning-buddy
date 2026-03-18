@@ -47,14 +47,15 @@ function getPageDisplay(cat: CategoryResult): string {
 
 export function toMarkdownTable(
   categories: CategoryResult[],
-  getDisplayEffect?: (index: number, original: string) => string
+  getDisplayEffect?: (index: number, original: string) => string,
+  uiLanguage: UILanguage = "English"
 ): string {
-  const header = "| Page / Section | Category | Status | Original | Revised | Operational Effect |";
+  const header = `| ${t(uiLanguage, "pageSection")} | ${t(uiLanguage, "category")} | ${t(uiLanguage, "status")} | ${t(uiLanguage, "original")} | ${t(uiLanguage, "revised")} | ${t(uiLanguage, "operationalEffect")} |`;
   const divider = "| --- | --- | --- | --- | --- | --- |";
   const rows = categories.map((cat, idx) => {
     const page = getPageDisplay(cat);
     const category = CATEGORIES[cat.category] || cat.category;
-    const status = cat.status === "changed" ? "Changed" : "Unchanged";
+    const status = cat.status === "changed" ? t(uiLanguage, "changed") : t(uiLanguage, "unchanged");
     const orig = truncate(sanitizeEvidence(extractPageFromEvidence(cat.originalEvidence).text), 120).replace(/\|/g, "\\|");
     const rev = truncate(sanitizeEvidence(extractPageFromEvidence(cat.revisedEvidence).text), 120).replace(/\|/g, "\\|");
     const rawEffect = cat.operationalEffect || "—";
