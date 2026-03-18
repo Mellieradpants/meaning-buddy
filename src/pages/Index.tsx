@@ -449,7 +449,7 @@ const Index = () => {
                       {/* Detected changes / category chip */}
                       <div className="border-t border-border pt-4">
                         <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-                          Detected changes
+                          {t(uiLang, "detectedChanges")}
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border">
