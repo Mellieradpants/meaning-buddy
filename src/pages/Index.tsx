@@ -493,7 +493,7 @@ const Index = () => {
           {unchangedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
-                Unchanged ({unchangedCategories.length})
+                {t(uiLang, "unchanged")} ({unchangedCategories.length})
               </h2>
               <div className="flex flex-wrap gap-2">
                 {unchangedCategories.map((cat, i) => (
