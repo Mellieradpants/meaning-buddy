@@ -119,18 +119,18 @@ export default function SummaryTable({ categories, getDisplayEffect, isRtl, uiLa
                 className="cursor-pointer select-none whitespace-nowrap"
                 onClick={() => toggleSort("page")}
               >
-                Page / Section{sortIndicator("page")}
+                {t(uiLanguage, "pageSection")}{sortIndicator("page")}
               </TableHead>
               <TableHead
                 className="cursor-pointer select-none whitespace-nowrap"
                 onClick={() => toggleSort("category")}
               >
-                Category{sortIndicator("category")}
+                {t(uiLanguage, "category")}{sortIndicator("category")}
               </TableHead>
-              <TableHead className="whitespace-nowrap">Status</TableHead>
-              <TableHead className="whitespace-nowrap">Original Snippet</TableHead>
-              <TableHead className="whitespace-nowrap">Revised Snippet</TableHead>
-              <TableHead className="whitespace-nowrap">Operational Effect</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "status")}</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "originalSnippet")}</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "revisedSnippet")}</TableHead>
+              <TableHead className="whitespace-nowrap">{t(uiLanguage, "operationalEffect")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
