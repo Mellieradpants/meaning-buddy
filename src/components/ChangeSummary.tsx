@@ -105,7 +105,7 @@ export default function ChangeSummary({
                 )}
                 {e.revSnippet && (
                   <div className="ml-4 mt-0.5 font-mono">
-                    <span className="font-semibold text-foreground-strong">Revised:</span>{" "}
+                    <span className="font-semibold text-foreground-strong">{t(uiLanguage, "revised")}:</span>{" "}
                     &ldquo;{e.revSnippet}&rdquo;
                   </div>
                 )}
