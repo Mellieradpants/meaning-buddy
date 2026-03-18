@@ -521,9 +521,9 @@ const Index = () => {
                       : "";
                     return [
                       `## ${CATEGORIES[cat.category] || cat.category}`,
-                      `**Original:** ${sanitizeEvidence(cat.originalEvidence)}`,
-                      `**Revised:** ${sanitizeEvidence(cat.revisedEvidence)}`,
-                      eff ? `**Operational Effect:** ${eff}` : "",
+                      `**${t(uiLang, "original")}:** ${sanitizeEvidence(cat.originalEvidence)}`,
+                      `**${t(uiLang, "revised")}:** ${sanitizeEvidence(cat.revisedEvidence)}`,
+                      eff ? `**${t(uiLang, "operationalEffect")}:** ${eff}` : "",
                       "",
                     ].filter(Boolean).join("\n");
                   });
