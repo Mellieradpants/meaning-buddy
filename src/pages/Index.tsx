@@ -536,7 +536,7 @@ const Index = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const md = toMarkdownTable(result.categories, getDisplayEffect);
+                  const md = toMarkdownTable(result.categories, getDisplayEffect, uiLang);
                   navigator.clipboard.writeText(md).then(() => toast.success("Copied as Markdown"));
                 }}
                 className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
