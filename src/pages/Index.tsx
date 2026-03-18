@@ -396,7 +396,7 @@ const Index = () => {
           {changedCategories.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong mb-4">
-                Changes Detected ({changedCategories.length})
+                {t(uiLang, "changesDetected")} ({changedCategories.length})
               </h2>
               <div className="space-y-4">
                 {changedCategories.map((cat, i) => {
