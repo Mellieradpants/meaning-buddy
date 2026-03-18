@@ -238,12 +238,12 @@ const Index = () => {
             </Select>
           </div>
           <div className="w-64">
-            <Select value={language} onValueChange={(v) => setLanguage(v as EffectLanguage)}>
+            <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
               <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {EFFECT_LANGUAGES.map((lang) => (
+                {UI_LANGUAGES.map((lang) => (
                   <SelectItem key={lang} value={lang} className="text-xs">
                     {lang}
                   </SelectItem>
