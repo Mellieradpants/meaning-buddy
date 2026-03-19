@@ -27,39 +27,36 @@ export function storeUILanguage(lang: UILanguage): void {
 }
 
 type TranslationKey =
-  | "changeSummary"
+  | "meaningTranslator"
+  | "meaningTranslatorDesc"
   | "operationalEffect"
-  | "original"
-  | "revised"
+  | "plainLanguageMeaning"
+  | "pasteText"
+  | "pasteTextPlaceholder"
   | "analyze"
   | "analyzing"
+  | "analysisFailed"
   | "copyResults"
-  | "copyAsMarkdown"
-  | "exportResults"
-  | "changesDetected"
-  | "unchanged"
-  | "detectedChanges"
-  | "summaryTable"
-  | "pageSection"
-  | "category"
-  | "status"
-  | "originalSnippet"
-  | "revisedSnippet"
-  | "changed"
-  | "effect"
-  | "compare"
-  | "comparing"
   | "clear";
 
 const translations: Record<TranslationKey, Record<UILanguage, string>> = {
-  changeSummary: {
-    English: "Change Summary (Markdown)",
-    Spanish: "Resumen de cambios (Markdown)",
-    French: "Résumé des modifications (Markdown)",
-    German: "Änderungsübersicht (Markdown)",
-    Russian: "Сводка изменений (Markdown)",
-    "Chinese (Simplified)": "变更摘要 (Markdown)",
-    Hebrew: "סיכום שינויים (Markdown)",
+  meaningTranslator: {
+    English: "Meaning Translator",
+    Spanish: "Traductor de Significado",
+    French: "Traducteur de Sens",
+    German: "Bedeutungsübersetzer",
+    Russian: "Переводчик смысла",
+    "Chinese (Simplified)": "含义翻译器",
+    Hebrew: "מתרגם משמעות",
+  },
+  meaningTranslatorDesc: {
+    English: "Paste any text to get a plain-language explanation and its operational effect.",
+    Spanish: "Pegue cualquier texto para obtener una explicación en lenguaje sencillo y su efecto operativo.",
+    French: "Collez un texte pour obtenir une explication en langage simple et son effet opérationnel.",
+    German: "Fügen Sie einen Text ein, um eine verständliche Erklärung und die operative Auswirkung zu erhalten.",
+    Russian: "Вставьте текст, чтобы получить объяснение простым языком и его практический эффект.",
+    "Chinese (Simplified)": "粘贴任何文本，获取通俗解释及其操作效果。",
+    Hebrew: "הדביקו טקסט כדי לקבל הסבר בשפה פשוטה ואת ההשפעה התפעולית שלו.",
   },
   operationalEffect: {
     English: "Operational Effect",
@@ -70,23 +67,32 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     "Chinese (Simplified)": "操作效果",
     Hebrew: "השפעה תפעולית",
   },
-  original: {
-    English: "Original",
-    Spanish: "Original",
-    French: "Original",
-    German: "Original",
-    Russian: "Оригинал",
-    "Chinese (Simplified)": "原文",
-    Hebrew: "מקור",
+  plainLanguageMeaning: {
+    English: "Plain Language Meaning",
+    Spanish: "Significado en lenguaje sencillo",
+    French: "Signification en langage simple",
+    German: "Bedeutung in einfacher Sprache",
+    Russian: "Значение простым языком",
+    "Chinese (Simplified)": "通俗含义",
+    Hebrew: "משמעות בשפה פשוטה",
   },
-  revised: {
-    English: "Revised",
-    Spanish: "Revisado",
-    French: "Révisé",
-    German: "Überarbeitet",
-    Russian: "Пересмотрено",
-    "Chinese (Simplified)": "修订版",
-    Hebrew: "מתוקן",
+  pasteText: {
+    English: "Paste text",
+    Spanish: "Pegar texto",
+    French: "Coller le texte",
+    German: "Text einfügen",
+    Russian: "Вставить текст",
+    "Chinese (Simplified)": "粘贴文本",
+    Hebrew: "הדבק טקסט",
+  },
+  pasteTextPlaceholder: {
+    English: "Paste your text here…",
+    Spanish: "Pegue su texto aquí…",
+    French: "Collez votre texte ici…",
+    German: "Fügen Sie Ihren Text hier ein…",
+    Russian: "Вставьте текст сюда…",
+    "Chinese (Simplified)": "在此粘贴文本…",
+    Hebrew: "…הדביקו את הטקסט כאן",
   },
   analyze: {
     English: "Analyze",
@@ -98,13 +104,22 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     Hebrew: "ניתוח",
   },
   analyzing: {
-    English: "Analyzing",
-    Spanish: "Analizando",
-    French: "Analyse en cours",
-    German: "Wird analysiert",
-    Russian: "Анализируется",
-    "Chinese (Simplified)": "分析中",
-    Hebrew: "מנתח",
+    English: "Analyzing…",
+    Spanish: "Analizando…",
+    French: "Analyse en cours…",
+    German: "Wird analysiert…",
+    Russian: "Анализируется…",
+    "Chinese (Simplified)": "分析中…",
+    Hebrew: "…מנתח",
+  },
+  analysisFailed: {
+    English: "Analysis failed. Please try again.",
+    Spanish: "El análisis falló. Inténtelo de nuevo.",
+    French: "L'analyse a échoué. Veuillez réessayer.",
+    German: "Analyse fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    Russian: "Анализ не удался. Попробуйте снова.",
+    "Chinese (Simplified)": "分析失败，请重试。",
+    Hebrew: "הניתוח נכשל. נסו שוב.",
   },
   copyResults: {
     English: "Copy Results",
@@ -114,141 +129,6 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     Russian: "Копировать результаты",
     "Chinese (Simplified)": "复制结果",
     Hebrew: "העתק תוצאות",
-  },
-  copyAsMarkdown: {
-    English: "Copy as Markdown",
-    Spanish: "Copiar como Markdown",
-    French: "Copier en Markdown",
-    German: "Als Markdown kopieren",
-    Russian: "Копировать как Markdown",
-    "Chinese (Simplified)": "复制为 Markdown",
-    Hebrew: "העתק כ-Markdown",
-  },
-  exportResults: {
-    English: "Export",
-    Spanish: "Exportar",
-    French: "Exporter",
-    German: "Exportieren",
-    Russian: "Экспортировать",
-    "Chinese (Simplified)": "导出",
-    Hebrew: "ייצוא",
-  },
-  changesDetected: {
-    English: "Changes Detected",
-    Spanish: "Cambios detectados",
-    French: "Modifications détectées",
-    German: "Änderungen erkannt",
-    Russian: "Обнаружены изменения",
-    "Chinese (Simplified)": "检测到变更",
-    Hebrew: "שינויים שזוהו",
-  },
-  unchanged: {
-    English: "Unchanged",
-    Spanish: "Sin cambios",
-    French: "Inchangé",
-    German: "Unverändert",
-    Russian: "Без изменений",
-    "Chinese (Simplified)": "未更改",
-    Hebrew: "ללא שינוי",
-  },
-  detectedChanges: {
-    English: "Detected changes",
-    Spanish: "Cambios detectados",
-    French: "Changements détectés",
-    German: "Erkannte Änderungen",
-    Russian: "Обнаруженные изменения",
-    "Chinese (Simplified)": "检测到的变更",
-    Hebrew: "שינויים שזוהו",
-  },
-  summaryTable: {
-    English: "Summary Table of Changes",
-    Spanish: "Tabla resumen de cambios",
-    French: "Tableau récapitulatif des modifications",
-    German: "Zusammenfassungstabelle der Änderungen",
-    Russian: "Сводная таблица изменений",
-    "Chinese (Simplified)": "变更汇总表",
-    Hebrew: "טבלת סיכום שינויים",
-  },
-  pageSection: {
-    English: "Page / Section",
-    Spanish: "Página / Sección",
-    French: "Page / Section",
-    German: "Seite / Abschnitt",
-    Russian: "Страница / Раздел",
-    "Chinese (Simplified)": "页面 / 章节",
-    Hebrew: "עמוד / סעיף",
-  },
-  category: {
-    English: "Category",
-    Spanish: "Categoría",
-    French: "Catégorie",
-    German: "Kategorie",
-    Russian: "Категория",
-    "Chinese (Simplified)": "类别",
-    Hebrew: "קטגוריה",
-  },
-  status: {
-    English: "Status",
-    Spanish: "Estado",
-    French: "Statut",
-    German: "Status",
-    Russian: "Статус",
-    "Chinese (Simplified)": "状态",
-    Hebrew: "סטטוס",
-  },
-  originalSnippet: {
-    English: "Original Snippet",
-    Spanish: "Fragmento original",
-    French: "Extrait original",
-    German: "Originalausschnitt",
-    Russian: "Оригинальный фрагмент",
-    "Chinese (Simplified)": "原始片段",
-    Hebrew: "קטע מקורי",
-  },
-  revisedSnippet: {
-    English: "Revised Snippet",
-    Spanish: "Fragmento revisado",
-    French: "Extrait révisé",
-    German: "Überarbeiteter Ausschnitt",
-    Russian: "Пересмотренный фрагмент",
-    "Chinese (Simplified)": "修订片段",
-    Hebrew: "קטע מתוקן",
-  },
-  changed: {
-    English: "Changed",
-    Spanish: "Cambiado",
-    French: "Modifié",
-    German: "Geändert",
-    Russian: "Изменено",
-    "Chinese (Simplified)": "已更改",
-    Hebrew: "שונה",
-  },
-  effect: {
-    English: "Effect",
-    Spanish: "Efecto",
-    French: "Effet",
-    German: "Auswirkung",
-    Russian: "Эффект",
-    "Chinese (Simplified)": "效果",
-    Hebrew: "השפעה",
-  },
-  compare: {
-    English: "Compare",
-    Spanish: "Comparar",
-    French: "Comparer",
-    German: "Vergleichen",
-    Russian: "Сравнить",
-    "Chinese (Simplified)": "比较",
-    Hebrew: "השוואה",
-  },
-  comparing: {
-    English: "Comparing…",
-    Spanish: "Comparando…",
-    French: "Comparaison…",
-    German: "Vergleiche…",
-    Russian: "Сравнение…",
-    "Chinese (Simplified)": "比较中…",
-    Hebrew: "…משווה",
   },
   clear: {
     English: "Clear",
