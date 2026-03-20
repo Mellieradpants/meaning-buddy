@@ -37,11 +37,23 @@ type TranslationKey =
   | "analyzing"
   | "analysisFailed"
   | "copyResults"
-  | "clear";
+  | "clear"
+  | "original"
+  | "revised"
+  | "compare"
+  | "comparing"
+  | "detectedChanges"
+  | "noChangesDetected"
+  | "modalityShift"
+  | "actorPowerShift"
+  | "scopeChange"
+  | "thresholdShift"
+  | "actionDomainShift"
+  | "obligationRemoval";
 
 const translations: Record<TranslationKey, Record<UILanguage, string>> = {
   meaningTranslator: {
-    English: "Meaning Translator",
+    English: "Meaning Buddy",
     Spanish: "Traductor de Significado",
     French: "Traducteur de Sens",
     German: "Bedeutungsübersetzer",
@@ -50,13 +62,13 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     Hebrew: "מתרגם משמעות",
   },
   meaningTranslatorDesc: {
-    English: "Paste any text to get a plain-language explanation and its operational effect.",
-    Spanish: "Pegue cualquier texto para obtener una explicación en lenguaje sencillo y su efecto operativo.",
-    French: "Collez un texte pour obtenir une explication en langage simple et son effet opérationnel.",
-    German: "Fügen Sie einen Text ein, um eine verständliche Erklärung und die operative Auswirkung zu erhalten.",
-    Russian: "Вставьте текст, чтобы получить объяснение простым языком и его практический эффект.",
-    "Chinese (Simplified)": "粘贴任何文本，获取通俗解释及其操作效果。",
-    Hebrew: "הדביקו טקסט כדי לקבל הסבר בשפה פשוטה ואת ההשפעה התפעולית שלו.",
+    English: "Paste original and revised text to see what structurally changed.",
+    Spanish: "Pegue el texto original y revisado para ver qué cambió estructuralmente.",
+    French: "Collez le texte original et révisé pour voir ce qui a changé structurellement.",
+    German: "Fügen Sie den Originaltext und die überarbeitete Version ein, um strukturelle Änderungen zu sehen.",
+    Russian: "Вставьте оригинальный и измененный текст, чтобы увидеть структурные изменения.",
+    "Chinese (Simplified)": "粘贴原文和修订文本，查看结构性变化。",
+    Hebrew: "הדביקו טקסט מקורי ומתוקן כדי לראות מה השתנה מבנית.",
   },
   operationalEffect: {
     English: "Operational Effect",
@@ -138,6 +150,114 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     Russian: "Очистить",
     "Chinese (Simplified)": "清除",
     Hebrew: "נקה",
+  },
+  original: {
+    English: "Original",
+    Spanish: "Original",
+    French: "Original",
+    German: "Original",
+    Russian: "Оригинал",
+    "Chinese (Simplified)": "原文",
+    Hebrew: "מקור",
+  },
+  revised: {
+    English: "Revised",
+    Spanish: "Revisado",
+    French: "Révisé",
+    German: "Überarbeitet",
+    Russian: "Изменённый",
+    "Chinese (Simplified)": "修订版",
+    Hebrew: "מתוקן",
+  },
+  compare: {
+    English: "Compare",
+    Spanish: "Comparar",
+    French: "Comparer",
+    German: "Vergleichen",
+    Russian: "Сравнить",
+    "Chinese (Simplified)": "比较",
+    Hebrew: "השווה",
+  },
+  comparing: {
+    English: "Comparing…",
+    Spanish: "Comparando…",
+    French: "Comparaison…",
+    German: "Wird verglichen…",
+    Russian: "Сравнение…",
+    "Chinese (Simplified)": "比较中…",
+    Hebrew: "…משווה",
+  },
+  detectedChanges: {
+    English: "Detected Changes",
+    Spanish: "Cambios detectados",
+    French: "Changements détectés",
+    German: "Erkannte Änderungen",
+    Russian: "Обнаруженные изменения",
+    "Chinese (Simplified)": "检测到的变化",
+    Hebrew: "שינויים שזוהו",
+  },
+  noChangesDetected: {
+    English: "No structural changes detected.",
+    Spanish: "No se detectaron cambios estructurales.",
+    French: "Aucun changement structurel détecté.",
+    German: "Keine strukturellen Änderungen erkannt.",
+    Russian: "Структурные изменения не обнаружены.",
+    "Chinese (Simplified)": "未检测到结构性变化。",
+    Hebrew: "לא זוהו שינויים מבניים.",
+  },
+  modalityShift: {
+    English: "Modality Shift",
+    Spanish: "Cambio de modalidad",
+    French: "Changement de modalité",
+    German: "Modalitätswechsel",
+    Russian: "Смена модальности",
+    "Chinese (Simplified)": "模态变化",
+    Hebrew: "שינוי מודאליות",
+  },
+  actorPowerShift: {
+    English: "Actor Power Shift",
+    Spanish: "Cambio de poder del actor",
+    French: "Changement de pouvoir d'acteur",
+    German: "Akteur-Machtverschiebung",
+    Russian: "Смена полномочий",
+    "Chinese (Simplified)": "主体权力转移",
+    Hebrew: "שינוי סמכות",
+  },
+  scopeChange: {
+    English: "Scope Change",
+    Spanish: "Cambio de alcance",
+    French: "Changement de portée",
+    German: "Umfangsänderung",
+    Russian: "Изменение объёма",
+    "Chinese (Simplified)": "范围变更",
+    Hebrew: "שינוי היקף",
+  },
+  thresholdShift: {
+    English: "Threshold / Standard Shift",
+    Spanish: "Cambio de umbral / estándar",
+    French: "Changement de seuil / norme",
+    German: "Schwellenwert- / Standardänderung",
+    Russian: "Изменение порога / стандарта",
+    "Chinese (Simplified)": "阈值/标准变化",
+    Hebrew: "שינוי סף / תקן",
+  },
+  actionDomainShift: {
+    English: "Action Domain Shift",
+    Spanish: "Cambio de dominio de acción",
+    French: "Changement de domaine d'action",
+    German: "Aktionsbereichswechsel",
+    Russian: "Смена области действия",
+    "Chinese (Simplified)": "行动领域变化",
+    Hebrew: "שינוי תחום פעולה",
+  },
+  obligationRemoval: {
+    English: "Obligation Removal",
+    Spanish: "Eliminación de obligación",
+    French: "Suppression d'obligation",
+    German: "Verpflichtungsentfernung",
+    Russian: "Снятие обязательства",
+    "Chinese (Simplified)": "义务移除",
+    Hebrew: "הסרת חובה",
   },
 };
 
