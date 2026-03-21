@@ -8,11 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, type UILanguage } from "@/lib/uiTranslations";
+import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, isRtlLanguage, langToCode, type UILanguage, type TranslationKey } from "@/lib/uiTranslations";
 import { classifySourceText, type ClassifiedResult } from "@/lib/classifier";
 import { type CategoryKey } from "@/lib/taxonomy";
 
-const CATEGORY_TRANSLATION_KEY: Record<CategoryKey, Parameters<typeof t>[1]> = {
+const CATEGORY_TRANSLATION_KEY: Record<CategoryKey, TranslationKey> = {
   modality_shift: "modalityShift",
   actor_power_shift: "actorPowerShift",
   scope_change: "scopeChange",
@@ -21,7 +21,7 @@ const CATEGORY_TRANSLATION_KEY: Record<CategoryKey, Parameters<typeof t>[1]> = {
   obligation_removal: "obligationRemoval",
 };
 
-const CATEGORY_EXPLANATION_KEY: Record<CategoryKey, Parameters<typeof t>[1]> = {
+const CATEGORY_EXPLANATION_KEY: Record<CategoryKey, TranslationKey> = {
   modality_shift: "modalityShiftExplanation",
   actor_power_shift: "actorPowerShiftExplanation",
   scope_change: "scopeChangeExplanation",
@@ -31,8 +31,9 @@ const CATEGORY_EXPLANATION_KEY: Record<CategoryKey, Parameters<typeof t>[1]> = {
 };
 
 type ShiftFilter = "all" | CategoryKey;
+type ScopeMode = "full" | "meaning_only" | "operational_effect_only";
 
-const SHIFT_OPTIONS: { value: ShiftFilter; key: Parameters<typeof t>[1] | null }[] = [
+const SHIFT_OPTIONS: { value: ShiftFilter; key: TranslationKey | null }[] = [
   { value: "all", key: null },
   { value: "modality_shift", key: "modalityShift" },
   { value: "scope_change", key: "scopeChange" },
@@ -40,6 +41,12 @@ const SHIFT_OPTIONS: { value: ShiftFilter; key: Parameters<typeof t>[1] | null }
   { value: "actor_power_shift", key: "actorPowerShift" },
   { value: "action_domain_shift", key: "actionDomainShift" },
   { value: "obligation_removal", key: "obligationRemoval" },
+];
+
+const SCOPE_OPTIONS: { value: ScopeMode; key: TranslationKey }[] = [
+  { value: "full", key: "scopeFull" },
+  { value: "meaning_only", key: "scopeMeaningOnly" },
+  { value: "operational_effect_only", key: "scopeOperationalOnly" },
 ];
 
 interface AnalysisResult {
@@ -54,11 +61,12 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [uiLang, setUiLang] = useState<UILanguage>(getStoredUILanguage);
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("all");
+  const [scope, setScope] = useState<ScopeMode>("full");
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
 
-  const isRtl = uiLang === "Hebrew";
+  const isRtl = isRtlLanguage(uiLang);
 
   const handleUILangChange = (lang: UILanguage) => {
     setUiLang(lang);
@@ -86,7 +94,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-text", {
-        body: { text },
+        body: { text, language: langToCode(uiLang) },
       });
 
       if (currentRequestId !== requestIdRef.current) return;
@@ -133,6 +141,10 @@ const Index = () => {
     return classified.filter((g) => g.category === shiftFilter);
   }, [classified, shiftFilter]);
 
+  const showMeaning = scope === "full" || scope === "meaning_only";
+  const showEffect = scope === "full" || scope === "operational_effect_only";
+  const showScope = scope === "full";
+
   // Ctrl+Enter shortcut
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -155,11 +167,13 @@ const Index = () => {
 
   const buildExportText = () => {
     const parts: string[] = [];
-    if (result) {
+    if (result && showMeaning) {
       parts.push(`## ${t(uiLang, "plainLanguageMeaning")}`, "", result.plainLanguageMeaning, "");
+    }
+    if (result && showEffect) {
       parts.push(`## ${t(uiLang, "operationalEffect")}`, "", result.operationalEffect, "");
     }
-    if (filteredClassified && filteredClassified.length > 0) {
+    if (showScope && filteredClassified && filteredClassified.length > 0) {
       parts.push(`## ${t(uiLang, "detectedChanges")}`, "");
       for (const group of filteredClassified) {
         const label = t(uiLang, CATEGORY_TRANSLATION_KEY[group.category]);
@@ -189,7 +203,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-dvh bg-background p-4 md:p-10 max-w-3xl mx-auto">
+    <div className={`min-h-dvh bg-background p-4 md:p-10 max-w-3xl mx-auto ${isRtl ? "text-right" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
       {/* Header */}
       <header className="mb-6 space-y-1">
         <h1 className="font-semibold tracking-tight font-mono text-lg md:text-xl text-foreground-strong">
@@ -210,7 +224,46 @@ const Index = () => {
           onChange={(e) => setText(e.target.value)}
           className="w-full h-52 md:h-72 p-4 rounded-lg border border-border bg-card text-card-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
           placeholder={t(uiLang, "pasteTextPlaceholder")}
+          dir={isRtl ? "rtl" : "ltr"}
         />
+      </div>
+
+      {/* Scope + Language selectors above Analyze */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="flex-1">
+          <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+            {t(uiLang, "scopeLabel")}
+          </label>
+          <Select value={scope} onValueChange={(v) => setScope(v as ScopeMode)}>
+            <SelectTrigger className="w-full bg-card text-foreground text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SCOPE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {t(uiLang, o.key)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex-1">
+          <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+            {t(uiLang, "explanationLanguage")}
+          </label>
+          <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
+            <SelectTrigger className="w-full bg-card text-foreground text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {UI_LANGUAGES.map((lang) => (
+                <SelectItem key={lang} value={lang}>
+                  {lang}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Analyze & Clear Buttons */}
@@ -247,76 +300,57 @@ const Index = () => {
             <div className="h-3 w-full rounded bg-muted" />
             <div className="h-3 w-2/3 rounded bg-muted" />
           </div>
-          <div className="rounded-lg border border-border bg-card p-5 space-y-3">
-            <div className="h-4 w-32 rounded bg-muted" />
-            <div className="h-3 w-full rounded bg-muted" />
-            <div className="h-3 w-1/2 rounded bg-muted" />
-          </div>
         </div>
       )}
 
       {/* Results */}
       {!loading && result && (
         <div ref={resultsRef} className="space-y-4 scroll-mt-4">
-          {/* Plain Language Meaning + Operational Effect in single card (like Example) */}
+          {/* Plain Language Meaning + Operational Effect */}
           <div className="rounded-lg border border-border bg-card p-5 font-mono text-sm space-y-4">
-            <div>
-              <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                {t(uiLang, "plainLanguageMeaning")}
-              </span>
-              <span className={`text-foreground leading-[1.8] block ${isRtl ? "text-right" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
-                {result.plainLanguageMeaning}
-              </span>
-            </div>
-            <div className="border-t border-border pt-4">
-              <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                {t(uiLang, "operationalEffect")}
-              </span>
-              <span className={`text-foreground leading-[1.8] block ${isRtl ? "text-right" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
-                {result.operationalEffect}
-              </span>
-            </div>
+            {showMeaning && (
+              <div>
+                <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                  {t(uiLang, "plainLanguageMeaning")}
+                </span>
+                <span className="text-foreground leading-[1.8] block">
+                  {result.plainLanguageMeaning}
+                </span>
+              </div>
+            )}
+            {showMeaning && showEffect && <div className="border-t border-border" />}
+            {showEffect && (
+              <div>
+                <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                  {t(uiLang, "operationalEffect")}
+                </span>
+                <span className="text-foreground leading-[1.8] block">
+                  {result.operationalEffect}
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Detected Changes — matches Example section exactly */}
-          {classified && classified.length > 0 && (
+          {/* Detected Changes — only in full scope mode */}
+          {showScope && classified && classified.length > 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
-              {/* Control row: Shift filter + Explanation Language */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <div className="flex-1">
-                  <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                    {t(uiLang, "shift")}
-                  </label>
-                  <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
-                    <SelectTrigger className="w-full bg-card text-foreground text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SHIFT_OPTIONS.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>
-                          {o.key ? t(uiLang, o.key) : t(uiLang, "allShifts")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                    {t(uiLang, "explanationLanguage")}
-                  </label>
-                  <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
-                    <SelectTrigger className="w-full bg-card text-foreground text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UI_LANGUAGES.map((lang) => (
-                        <SelectItem key={lang} value={lang}>
-                          {lang}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Shift filter */}
+              <div className="mb-4 max-w-xs">
+                <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                  {t(uiLang, "shift")}
+                </label>
+                <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
+                  <SelectTrigger className="w-full bg-card text-foreground text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SHIFT_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.key ? t(uiLang, o.key) : t(uiLang, "allShifts")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Detected changes label */}
@@ -345,7 +379,7 @@ const Index = () => {
                       <span>
                         <span className="font-medium">{t(uiLang, CATEGORY_TRANSLATION_KEY[group.category])}</span> — {match}
                         <br />
-                        <span className={`text-muted-foreground text-xs ${isRtl ? "text-right block" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
+                        <span className="text-muted-foreground text-xs">
                           {t(uiLang, CATEGORY_EXPLANATION_KEY[group.category])}
                         </span>
                       </span>
@@ -356,7 +390,7 @@ const Index = () => {
             </div>
           )}
 
-          {classified && classified.length === 0 && (
+          {showScope && classified && classified.length === 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
               <p className="text-sm text-muted-foreground">{t(uiLang, "noChangesDetected")}</p>
             </div>
