@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -21,6 +21,27 @@ const CATEGORY_TRANSLATION_KEY: Record<CategoryKey, Parameters<typeof t>[1]> = {
   obligation_removal: "obligationRemoval",
 };
 
+const CATEGORY_EXPLANATION_KEY: Record<CategoryKey, Parameters<typeof t>[1]> = {
+  modality_shift: "modalityShiftExplanation",
+  actor_power_shift: "actorPowerShiftExplanation",
+  scope_change: "scopeChangeExplanation",
+  threshold_shift: "thresholdShiftExplanation",
+  action_domain_shift: "actionDomainShiftExplanation",
+  obligation_removal: "obligationRemovalExplanation",
+};
+
+type ShiftFilter = "all" | CategoryKey;
+
+const SHIFT_OPTIONS: { value: ShiftFilter; key: Parameters<typeof t>[1] | null }[] = [
+  { value: "all", key: null },
+  { value: "modality_shift", key: "modalityShift" },
+  { value: "scope_change", key: "scopeChange" },
+  { value: "threshold_shift", key: "thresholdShift" },
+  { value: "actor_power_shift", key: "actorPowerShift" },
+  { value: "action_domain_shift", key: "actionDomainShift" },
+  { value: "obligation_removal", key: "obligationRemoval" },
+];
+
 interface AnalysisResult {
   plainLanguageMeaning: string;
   operationalEffect: string;
@@ -32,9 +53,12 @@ const Index = () => {
   const [classified, setClassified] = useState<ClassifiedResult[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [uiLang, setUiLang] = useState<UILanguage>(getStoredUILanguage);
+  const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("all");
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
+
+  const isRtl = uiLang === "Hebrew";
 
   const handleUILangChange = (lang: UILanguage) => {
     setUiLang(lang);
@@ -55,6 +79,7 @@ const Index = () => {
     setLoading(true);
     setResult(null);
     setClassified(null);
+    setShiftFilter("all");
 
     // Run local classification immediately
     const scopeResults = classifySourceText(text);
@@ -98,8 +123,15 @@ const Index = () => {
     setResult(null);
     setClassified(null);
     setLoading(false);
+    setShiftFilter("all");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const filteredClassified = useMemo(() => {
+    if (!classified) return null;
+    if (shiftFilter === "all") return classified;
+    return classified.filter((g) => g.category === shiftFilter);
+  }, [classified, shiftFilter]);
 
   // Ctrl+Enter shortcut
   useEffect(() => {
@@ -121,22 +153,39 @@ const Index = () => {
     }
   }, []);
 
-  const buildCopyText = () => {
+  const buildExportText = () => {
     const parts: string[] = [];
     if (result) {
-      parts.push(`## ${t(uiLang, "plainLanguageMeaning")}`, result.plainLanguageMeaning, "");
-      parts.push(`## ${t(uiLang, "operationalEffect")}`, result.operationalEffect, "");
+      parts.push(`## ${t(uiLang, "plainLanguageMeaning")}`, "", result.plainLanguageMeaning, "");
+      parts.push(`## ${t(uiLang, "operationalEffect")}`, "", result.operationalEffect, "");
     }
-    if (classified && classified.length > 0) {
+    if (filteredClassified && filteredClassified.length > 0) {
       parts.push(`## ${t(uiLang, "detectedChanges")}`, "");
-      for (const group of classified) {
+      for (const group of filteredClassified) {
         const label = t(uiLang, CATEGORY_TRANSLATION_KEY[group.category]);
+        const explanation = t(uiLang, CATEGORY_EXPLANATION_KEY[group.category]);
         parts.push(`### ${label}`);
         parts.push(...group.matches.map((m) => `- ${m}`));
+        parts.push(`  ${explanation}`);
         parts.push("");
       }
     }
     return parts.join("\n");
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(buildExportText()).then(() => toast.success(t(uiLang, "copied")));
+  };
+
+  const handleExport = () => {
+    const content = buildExportText();
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "meaning-buddy-analysis.md";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -149,24 +198,6 @@ const Index = () => {
         <p className="text-foreground-strong text-sm">
           {t(uiLang, "meaningTranslatorDesc")}
         </p>
-
-        {/* Language selector */}
-        <div className="mt-3">
-          <div className="w-64">
-            <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
-              <SelectTrigger className="h-9 text-xs font-medium bg-secondary text-secondary-foreground border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {UI_LANGUAGES.map((lang) => (
-                  <SelectItem key={lang} value={lang} className="text-xs">
-                    {lang}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
       </header>
 
       {/* Single Input */}
@@ -226,60 +257,126 @@ const Index = () => {
 
       {/* Results */}
       {!loading && result && (
-        <div ref={resultsRef} className="space-y-6 scroll-mt-4">
-          {/* Plain Language Meaning */}
-          <div className="rounded-lg border border-border bg-card p-5 space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
-              {t(uiLang, "plainLanguageMeaning")}
-            </h2>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {result.plainLanguageMeaning}
-            </p>
+        <div ref={resultsRef} className="space-y-4 scroll-mt-4">
+          {/* Plain Language Meaning + Operational Effect in single card (like Example) */}
+          <div className="rounded-lg border border-border bg-card p-5 font-mono text-sm space-y-4">
+            <div>
+              <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                {t(uiLang, "plainLanguageMeaning")}
+              </span>
+              <span className={`text-foreground leading-[1.8] block ${isRtl ? "text-right" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
+                {result.plainLanguageMeaning}
+              </span>
+            </div>
+            <div className="border-t border-border pt-4">
+              <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                {t(uiLang, "operationalEffect")}
+              </span>
+              <span className={`text-foreground leading-[1.8] block ${isRtl ? "text-right" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
+                {result.operationalEffect}
+              </span>
+            </div>
           </div>
 
-          {/* Operational Effect */}
-          <div className="rounded-lg border border-border bg-card p-5 space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
-              {t(uiLang, "operationalEffect")}
-            </h2>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {result.operationalEffect}
-            </p>
-          </div>
-
-          {/* Grouped Taxonomy Scope Breakdown */}
+          {/* Detected Changes — matches Example section exactly */}
           {classified && classified.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
-                {t(uiLang, "detectedChanges")}
-              </h2>
-              {classified.map((group) => (
-                <div key={group.category} className="rounded-lg border border-border bg-card p-5 space-y-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground-strong">
-                    {t(uiLang, CATEGORY_TRANSLATION_KEY[group.category])}
-                  </h3>
-                  <ul className="space-y-1.5">
-                    {group.matches.map((match, idx) => (
-                      <li key={idx} className="text-sm text-foreground leading-relaxed font-mono">
-                        {match}
-                      </li>
-                    ))}
-                  </ul>
+            <div className="rounded-lg border border-border bg-card p-5">
+              {/* Control row: Shift filter + Explanation Language */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="flex-1">
+                  <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                    {t(uiLang, "shift")}
+                  </label>
+                  <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
+                    <SelectTrigger className="w-full bg-card text-foreground text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SHIFT_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.key ? t(uiLang, o.key) : t(uiLang, "allShifts")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              ))}
+                <div className="flex-1">
+                  <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                    {t(uiLang, "explanationLanguage")}
+                  </label>
+                  <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
+                    <SelectTrigger className="w-full bg-card text-foreground text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UI_LANGUAGES.map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {lang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Detected changes label */}
+              <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+                {t(uiLang, "detectedChanges")}
+              </span>
+
+              {/* Category chips */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {(filteredClassified ?? []).map((group) => (
+                  <span
+                    key={group.category}
+                    className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-changed-bg text-changed border border-changed-border"
+                  >
+                    {t(uiLang, CATEGORY_TRANSLATION_KEY[group.category])}
+                  </span>
+                ))}
+              </div>
+
+              {/* Structured change list */}
+              <ul className="text-sm text-foreground space-y-2.5">
+                {(filteredClassified ?? []).map((group) =>
+                  group.matches.map((match, idx) => (
+                    <li key={`${group.category}-${idx}`} className="flex items-start gap-2">
+                      <span className="text-changed mt-0.5">•</span>
+                      <span>
+                        <span className="font-medium">{t(uiLang, CATEGORY_TRANSLATION_KEY[group.category])}</span> — {match}
+                        <br />
+                        <span className={`text-muted-foreground text-xs ${isRtl ? "text-right block" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
+                          {t(uiLang, CATEGORY_EXPLANATION_KEY[group.category])}
+                        </span>
+                      </span>
+                    </li>
+                  ))
+                )}
+              </ul>
             </div>
           )}
 
-          {/* Copy button */}
-          <div className="flex justify-center">
+          {classified && classified.length === 0 && (
+            <div className="rounded-lg border border-border bg-card p-5">
+              <p className="text-sm text-muted-foreground">{t(uiLang, "noChangesDetected")}</p>
+            </div>
+          )}
+
+          {/* Copy + Export */}
+          <div className="flex justify-center gap-3">
             <button
               type="button"
-              onClick={() => {
-                navigator.clipboard.writeText(buildCopyText()).then(() => toast.success("Copied to clipboard"));
-              }}
+              onClick={handleCopy}
               className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
             >
               {t(uiLang, "copyResults")}
+            </button>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="h-9 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+            >
+              {t(uiLang, "exportResults")}
             </button>
           </div>
         </div>

@@ -37,19 +37,26 @@ type TranslationKey =
   | "analyzing"
   | "analysisFailed"
   | "copyResults"
+  | "exportResults"
+  | "copied"
   | "clear"
-  | "original"
-  | "revised"
-  | "compare"
-  | "comparing"
   | "detectedChanges"
   | "noChangesDetected"
+  | "shift"
+  | "allShifts"
+  | "explanationLanguage"
   | "modalityShift"
   | "actorPowerShift"
   | "scopeChange"
   | "thresholdShift"
   | "actionDomainShift"
-  | "obligationRemoval";
+  | "obligationRemoval"
+  | "modalityShiftExplanation"
+  | "actorPowerShiftExplanation"
+  | "scopeChangeExplanation"
+  | "thresholdShiftExplanation"
+  | "actionDomainShiftExplanation"
+  | "obligationRemovalExplanation";
 
 const translations: Record<TranslationKey, Record<UILanguage, string>> = {
   meaningTranslator: {
@@ -142,6 +149,24 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     "Chinese (Simplified)": "复制结果",
     Hebrew: "העתק תוצאות",
   },
+  exportResults: {
+    English: "Export",
+    Spanish: "Exportar",
+    French: "Exporter",
+    German: "Exportieren",
+    Russian: "Экспортировать",
+    "Chinese (Simplified)": "导出",
+    Hebrew: "ייצוא",
+  },
+  copied: {
+    English: "Copied to clipboard",
+    Spanish: "Copiado al portapapeles",
+    French: "Copié dans le presse-papiers",
+    German: "In die Zwischenablage kopiert",
+    Russian: "Скопировано в буфер обмена",
+    "Chinese (Simplified)": "已复制到剪贴板",
+    Hebrew: "הועתק ללוח",
+  },
   clear: {
     English: "Clear",
     Spanish: "Borrar",
@@ -151,41 +176,32 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     "Chinese (Simplified)": "清除",
     Hebrew: "נקה",
   },
-  original: {
-    English: "Original",
-    Spanish: "Original",
-    French: "Original",
-    German: "Original",
-    Russian: "Оригинал",
-    "Chinese (Simplified)": "原文",
-    Hebrew: "מקור",
+  shift: {
+    English: "Shift",
+    Spanish: "Cambio",
+    French: "Changement",
+    German: "Verschiebung",
+    Russian: "Сдвиг",
+    "Chinese (Simplified)": "变化",
+    Hebrew: "שינוי",
   },
-  revised: {
-    English: "Revised",
-    Spanish: "Revisado",
-    French: "Révisé",
-    German: "Überarbeitet",
-    Russian: "Изменённый",
-    "Chinese (Simplified)": "修订版",
-    Hebrew: "מתוקן",
+  allShifts: {
+    English: "All shifts",
+    Spanish: "Todos los cambios",
+    French: "Tous les changements",
+    German: "Alle Verschiebungen",
+    Russian: "Все сдвиги",
+    "Chinese (Simplified)": "所有变化",
+    Hebrew: "כל השינויים",
   },
-  compare: {
-    English: "Compare",
-    Spanish: "Comparar",
-    French: "Comparer",
-    German: "Vergleichen",
-    Russian: "Сравнить",
-    "Chinese (Simplified)": "比较",
-    Hebrew: "השווה",
-  },
-  comparing: {
-    English: "Comparing…",
-    Spanish: "Comparando…",
-    French: "Comparaison…",
-    German: "Wird verglichen…",
-    Russian: "Сравнение…",
-    "Chinese (Simplified)": "比较中…",
-    Hebrew: "…משווה",
+  explanationLanguage: {
+    English: "Explanation language",
+    Spanish: "Idioma de explicación",
+    French: "Langue d'explication",
+    German: "Erklärungssprache",
+    Russian: "Язык объяснения",
+    "Chinese (Simplified)": "解释语言",
+    Hebrew: "שפת הסבר",
   },
   detectedChanges: {
     English: "Detected Changes",
@@ -258,6 +274,60 @@ const translations: Record<TranslationKey, Record<UILanguage, string>> = {
     Russian: "Снятие обязательства",
     "Chinese (Simplified)": "义务移除",
     Hebrew: "הסרת חובה",
+  },
+  modalityShiftExplanation: {
+    English: "Changes mandatory language to discretionary language",
+    Spanish: "Cambia el lenguaje obligatorio a lenguaje discrecional",
+    French: "Transforme le langage obligatoire en langage discrétionnaire",
+    German: "Ändert verbindliche Sprache in ermessensbasierte Sprache",
+    Russian: "Меняет обязательные формулировки на дискреционные",
+    "Chinese (Simplified)": "将强制性语言改为自由裁量性语言",
+    Hebrew: "משנה שפה מחייבת לשפה שיקולית",
+  },
+  actorPowerShiftExplanation: {
+    English: "Shifts decision-making authority between parties",
+    Spanish: "Transfiere la autoridad de toma de decisiones entre partes",
+    French: "Transfère l'autorité décisionnelle entre les parties",
+    German: "Verschiebt Entscheidungsbefugnisse zwischen Parteien",
+    Russian: "Перераспределяет полномочия между сторонами",
+    "Chinese (Simplified)": "在各方之间转移决策权",
+    Hebrew: "מעביר סמכות קבלת החלטות בין גורמים",
+  },
+  scopeChangeExplanation: {
+    English: "Modifies the scope of what is covered",
+    Spanish: "Modifica el alcance de lo que está cubierto",
+    French: "Modifie la portée de ce qui est couvert",
+    German: "Ändert den Umfang des Abgedeckten",
+    Russian: "Изменяет объём охвата",
+    "Chinese (Simplified)": "修改覆盖范围",
+    Hebrew: "משנה את היקף הכיסוי",
+  },
+  thresholdShiftExplanation: {
+    English: "Adjusts the standards or thresholds required",
+    Spanish: "Ajusta los estándares o umbrales requeridos",
+    French: "Ajuste les normes ou seuils requis",
+    German: "Passt erforderliche Standards oder Schwellenwerte an",
+    Russian: "Корректирует требуемые стандарты или пороги",
+    "Chinese (Simplified)": "调整所需的标准或阈值",
+    Hebrew: "מתאים את הסטנדרטים או הספים הנדרשים",
+  },
+  actionDomainShiftExplanation: {
+    English: "Changes the type of actions required",
+    Spanish: "Cambia el tipo de acciones requeridas",
+    French: "Modifie le type d'actions requises",
+    German: "Ändert die Art der erforderlichen Maßnahmen",
+    Russian: "Изменяет тип требуемых действий",
+    "Chinese (Simplified)": "改变所需的行动类型",
+    Hebrew: "משנה את סוג הפעולות הנדרשות",
+  },
+  obligationRemovalExplanation: {
+    English: "Removes or weakens a previously stated obligation",
+    Spanish: "Elimina o debilita una obligación previamente establecida",
+    French: "Supprime ou affaiblit une obligation précédemment énoncée",
+    German: "Entfernt oder schwächt eine zuvor festgelegte Verpflichtung",
+    Russian: "Удаляет или ослабляет ранее установленное обязательство",
+    "Chinese (Simplified)": "移除或削弱先前规定的义务",
+    Hebrew: "מסיר או מחליש חובה שנקבעה קודם לכן",
   },
 };
 
