@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/select";
 
 type ShiftKey = "all" | "modality" | "action_domain" | "threshold" | "actor_power" | "obligation" | "scope" | "enforcement";
-type LangKey = "en" | "es" | "fr" | "de" | "ru" | "zh" | "he";
+type LangKey = "en" | "es" | "ar" | "so" | "uk" | "ht" | "zh" | "ru" | "fr" | "pt" | "prs" | "ps" | "vi" | "ko" | "tl" | "ur" | "bn" | "pa" | "am" | "fa";
+
+const RTL_LANGS: LangKey[] = ["ar", "fa", "ur", "prs", "ps"];
 
 const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
   { value: "all", label: "All shifts" },
@@ -25,20 +27,47 @@ const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
 const LANG_OPTIONS: { value: LangKey; label: string }[] = [
   { value: "en", label: "English" },
   { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
+  { value: "ar", label: "Arabic" },
+  { value: "so", label: "Somali" },
+  { value: "uk", label: "Ukrainian" },
+  { value: "ht", label: "Haitian Creole" },
+  { value: "zh", label: "Mandarin Chinese" },
   { value: "ru", label: "Russian" },
-  { value: "zh", label: "Chinese (Simplified)" },
-  { value: "he", label: "Hebrew" },
+  { value: "fr", label: "French" },
+  { value: "pt", label: "Portuguese" },
+  { value: "prs", label: "Dari" },
+  { value: "ps", label: "Pashto" },
+  { value: "vi", label: "Vietnamese" },
+  { value: "ko", label: "Korean" },
+  { value: "tl", label: "Tagalog" },
+  { value: "ur", label: "Urdu" },
+  { value: "bn", label: "Bengali" },
+  { value: "pa", label: "Punjabi" },
+  { value: "am", label: "Amharic" },
+  { value: "fa", label: "Farsi / Persian" },
 ];
+
+type LangText = Partial<Record<LangKey, string>> & { en: string };
+
+/** Look up text for a language, falling back to English */
+function lt(map: LangText, lang: LangKey): string {
+  return map[lang] ?? map.en;
+}
 
 interface DemoEntry {
   category: string;
   detail: string;
-  effect: Record<LangKey, string>;
+  effect: LangText;
 }
 
-const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; operationalEffect: Record<LangKey, string>; changes: DemoEntry[] }>> = {
+interface DemoData {
+  original: string;
+  revised: string;
+  operationalEffect: LangText;
+  changes: DemoEntry[];
+}
+
+const DEMO_DATA: Partial<Record<ShiftKey, DemoData>> = {
   modality: {
     original: "The contractor shall complete all safety inspections before occupancy is granted.",
     revised: "The contractor may complete safety inspections before occupancy is granted.",
@@ -46,13 +75,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "Mandatory safety inspections become optional. The contractor now has discretion over whether inspections occur before occupancy, removing a previously binding requirement.",
       es: "Las inspecciones de seguridad obligatorias se vuelven opcionales. El contratista ahora tiene discreción sobre si las inspecciones ocurren antes de la ocupación, eliminando un requisito previamente vinculante.",
       fr: "Les inspections de sécurité obligatoires deviennent facultatives. L'entrepreneur a désormais le pouvoir discrétionnaire de décider si les inspections ont lieu avant l'occupation, supprimant une exigence auparavant contraignante.",
-      de: "Pflicht-Sicherheitsinspektionen werden optional. Der Auftragnehmer hat nun Ermessensspielraum, ob Inspektionen vor der Belegung stattfinden, wodurch eine zuvor verbindliche Anforderung entfällt.",
       zh: "强制性安全检查变为可选。承包商现在可以自行决定是否在入住前进行检查，取消了之前的强制性要求。",
-      he: "בדיקות בטיחות חובה הופכות לאופציונליות. לקבלן יש כעת שיקול דעת אם הבדיקות יתקיימו לפני האכלוס, מה שמסיר דרישה שהייתה מחייבת בעבר.",
       ru: "Обязательные проверки безопасности становятся необязательными. Подрядчик теперь сам решает, проводить ли проверки до заселения, устраняя ранее обязательное требование.",
+      ar: "تصبح عمليات التفتيش الإلزامية اختيارية. أصبح للمقاول حرية التصرف في إجراء عمليات التفتيش قبل الإشغال.",
     },
     changes: [
-      { category: "Modality Shift", detail: '"shall complete" → "may complete"', effect: { en: "Binding duty weakened to permission", es: "Deber vinculante debilitado a permiso", fr: "Devoir contraignant affaibli en permission", de: "Verbindliche Pflicht zu Erlaubnis abgeschwächt", zh: "约束性义务弱化为许可", he: "חובה מחייבת הוחלשה להרשאה", ru: "Обязывающая обязанность ослаблена до разрешения" } },
+      { category: "Modality Shift", detail: '"shall complete" → "may complete"', effect: { en: "Binding duty weakened to permission", es: "Deber vinculante debilitado a permiso", fr: "Devoir contraignant affaibli en permission", zh: "约束性义务弱化为许可", ru: "Обязывающая обязанность ослаблена до разрешения", ar: "واجب ملزم تم إضعافه إلى إذن" } },
     ],
   },
   action_domain: {
@@ -62,13 +90,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "The required action shifts from 'investigate' to 'review,' a significantly less rigorous process. The fixed 10-day timeline is removed, and referral for further evaluation is discretionary.",
       es: "La acción requerida cambia de 'investigar' a 'revisar', un proceso significativamente menos riguroso. Se elimina el plazo fijo de 10 días y la derivación para evaluación adicional es discrecional.",
       fr: "L'action requise passe de 'enquêter' à 'examiner', un processus nettement moins rigoureux. Le délai fixe de 10 jours est supprimé et le renvoi pour évaluation complémentaire est discrétionnaire.",
-      de: "Die erforderliche Maßnahme ändert sich von 'untersuchen' zu 'prüfen', einem deutlich weniger strengen Verfahren. Die feste 10-Tage-Frist entfällt und die Weiterleitung zur weiteren Bewertung ist ermessensabhängig.",
-      zh: "所需行动从\u2018调查\u2019转变为\u2018审查\u2019，这是一个显著不那么严格的过程。固定的10天时限被取消，转交进一步评估是自由裁量的。",
-      he: "הפעולה הנדרשת משתנה מ'חקירה' ל'סקירה', תהליך פחות קפדני בהרבה. לוח הזמנים הקבוע של 10 ימים מוסר, וההפניה להערכה נוספת היא לפי שיקול דעת.",
+      zh: "所需行动从'调查'转变为'审查'，这是一个显著不那么严格的过程。固定的10天时限被取消，转交进一步评估是自由裁量的。",
       ru: "Требуемое действие меняется с 'расследовать' на 'рассмотреть' — значительно менее строгий процесс. Фиксированный 10-дневный срок отменён, а направление на дополнительную оценку является дискреционным.",
+      ar: "يتحول الإجراء المطلوب من 'التحقيق' إلى 'المراجعة'، وهي عملية أقل صرامة بشكل ملحوظ. تم إلغاء الجدول الزمني الثابت البالغ 10 أيام.",
     },
     changes: [
-      { category: "Action Domain Shift", detail: '"investigate" → "review … may refer"', effect: { en: "Rigorous investigation replaced with lighter review", es: "Investigación rigurosa reemplazada por revisión más ligera", fr: "Enquête rigoureuse remplacée par un examen plus léger", de: "Gründliche Untersuchung durch leichtere Prüfung ersetzt", zh: "严格调查被较轻的审查取代", he: "חקירה קפדנית הוחלפה בסקירה קלה יותר", ru: "Тщательное расследование заменено более лёгким рассмотрением" } },
+      { category: "Action Domain Shift", detail: '"investigate" → "review … may refer"', effect: { en: "Rigorous investigation replaced with lighter review", es: "Investigación rigurosa reemplazada por revisión más ligera", fr: "Enquête rigoureuse remplacée par un examen plus léger", zh: "严格调查被较轻的审查取代", ru: "Тщательное расследование заменено более лёгким рассмотрением", ar: "تم استبدال التحقيق الصارم بمراجعة أخف" } },
     ],
   },
   actor_power: {
@@ -78,13 +105,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "Approval authority shifts from an independent review board to the project director — a party with a potential conflict of interest. Independent oversight is eliminated.",
       es: "La autoridad de aprobación pasa de una junta de revisión independiente al director del proyecto, una parte con un posible conflicto de intereses. Se elimina la supervisión independiente.",
       fr: "L'autorité d'approbation passe d'un comité de révision indépendant au directeur de projet — une partie potentiellement en conflit d'intérêts. La supervision indépendante est éliminée.",
-      de: "Die Genehmigungsbefugnis verlagert sich von einem unabhängigen Prüfungsausschuss auf den Projektleiter — eine Partei mit potenziellem Interessenkonflikt. Die unabhängige Aufsicht entfällt.",
       zh: "审批权从独立审查委员会转移到项目主管——一个可能存在利益冲突的一方。独立监督被取消。",
-      he: "סמכות האישור עוברת מוועדת ביקורת עצמאית למנהל הפרויקט — גורם עם ניגוד עניינים פוטנציאלי. הפיקוח העצמאי מבוטל.",
       ru: "Полномочия по утверждению переходят от независимого наблюдательного совета к руководителю проекта — стороне с потенциальным конфликтом интересов. Независимый надзор устраняется.",
+      ar: "تنتقل سلطة الموافقة من مجلس مراجعة مستقل إلى مدير المشروع — طرف لديه تضارب محتمل في المصالح.",
     },
     changes: [
-      { category: "Actor Power Shift", detail: '"independent review board shall" → "project director may"', effect: { en: "Independent oversight replaced by internal discretion", es: "Supervisión independiente reemplazada por discreción interna", fr: "Surveillance indépendante remplacée par discrétion interne", de: "Unabhängige Aufsicht durch internes Ermessen ersetzt", zh: "独立监督被内部自由裁量取代", he: "פיקוח עצמאי הוחלף בשיקול דעת פנימי", ru: "Независимый надзор заменён внутренним усмотрением" } },
+      { category: "Actor Power Shift", detail: '"independent review board shall" → "project director may"', effect: { en: "Independent oversight replaced by internal discretion", es: "Supervisión independiente reemplazada por discreción interna", fr: "Surveillance indépendante remplacée par discrétion interne", zh: "独立监督被内部自由裁量取代", ru: "Независимый надзор заменён внутренним усмотрением", ar: "تم استبدال الرقابة المستقلة بالسلطة التقديرية الداخلية" } },
     ],
   },
   all: {
@@ -94,16 +120,15 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "Health insurance is no longer guaranteed. The employer can now decide whether to offer it. Coverage no longer extends to all full-time employees — only those deemed eligible. The fixed 30-day deadline no longer applies.",
       es: "El seguro de salud ya no está garantizado. El empleador ahora puede decidir si lo ofrece. La cobertura ya no se extiende a todos los empleados a tiempo completo, solo a los considerados elegibles. El plazo fijo de 30 días ya no aplica.",
       fr: "L'assurance maladie n'est plus garantie. L'employeur peut désormais décider s'il la propose. La couverture ne s'étend plus à tous les employés à temps plein — uniquement à ceux jugés éligibles. Le délai fixe de 30 jours ne s'applique plus.",
-      de: "Die Krankenversicherung ist nicht mehr garantiert. Der Arbeitgeber kann nun entscheiden, ob er sie anbietet. Der Versicherungsschutz erstreckt sich nicht mehr auf alle Vollzeitbeschäftigten — nur auf als berechtigt eingestufte Mitarbeiter. Die feste 30-Tage-Frist gilt nicht mehr.",
       zh: "健康保险不再有保障。雇主现在可以决定是否提供。覆盖范围不再延伸至所有全职员工——仅限于被认为符合条件的人。30天的固定期限不再适用。",
-      he: "ביטוח הבריאות אינו מובטח עוד. המעסיק יכול כעת להחליט אם להציע אותו. הכיסוי אינו חל עוד על כל העובדים במשרה מלאה — רק על מי שנחשב זכאי. המועד הקבוע של 30 יום אינו חל עוד.",
       ru: "Медицинское страхование больше не гарантировано. Работодатель теперь может решать, предоставлять ли его. Покрытие больше не распространяется на всех штатных сотрудников — только на тех, кто признан имеющим право. Фиксированный 30-дневный срок больше не применяется.",
+      ar: "لم يعد التأمين الصحي مضموناً. يمكن لصاحب العمل الآن أن يقرر ما إذا كان سيقدمه. لم تعد التغطية تشمل جميع الموظفين بدوام كامل — فقط من يُعتبرون مؤهلين.",
     },
     changes: [
-      { category: "Modality Shift", detail: '"shall provide" → "may provide"', effect: { en: "Mandatory obligation weakened to discretionary", es: "Obligación obligatoria debilitada a discrecional", fr: "Obligation impérative affaiblie en discrétionnaire", de: "Verbindliche Pflicht zu Ermessensentscheidung abgeschwächt", zh: "强制性义务弱化为自由裁量", he: "חובה מחייבת הוחלשה לשיקול דעת", ru: "Обязательное обязательство ослаблено до дискреционного" } },
-      { category: "Scope Change", detail: '"all full-time employees" → "eligible employees"', effect: { en: "Coverage narrowed to a subset", es: "Cobertura reducida a un subgrupo", fr: "Couverture réduite à un sous-ensemble", de: "Deckung auf eine Teilgruppe eingeschränkt", zh: "覆盖范围缩小到一个子集", he: "הכיסוי צומצם לתת-קבוצה", ru: "Покрытие сужено до подгруппы" } },
-      { category: "Threshold Shift", detail: '"within 30 days" → "within a reasonable timeframe"', effect: { en: "Fixed deadline replaced with subjective standard", es: "Plazo fijo reemplazado por estándar subjetivo", fr: "Délai fixe remplacé par un critère subjectif", de: "Feste Frist durch subjektiven Maßstab ersetzt", zh: "固定期限被主观标准取代", he: "מועד קבוע הוחלף בסטנדרט סובייקטיבי", ru: "Фиксированный срок заменён субъективным стандартом" } },
-      { category: "Obligation Removal", detail: "Mandatory duty weakened to discretionary", effect: { en: "Core obligation effectively removed", es: "Obligación esencial efectivamente eliminada", fr: "Obligation fondamentale effectivement supprimée", de: "Kernpflicht faktisch aufgehoben", zh: "核心义务实际上已取消", he: "חובה מרכזית הוסרה למעשה", ru: "Основное обязательство фактически устранено" } },
+      { category: "Modality Shift", detail: '"shall provide" → "may provide"', effect: { en: "Mandatory obligation weakened to discretionary", es: "Obligación obligatoria debilitada a discrecional", fr: "Obligation impérative affaiblie en discrétionnaire", zh: "强制性义务弱化为自由裁量", ru: "Обязательное обязательство ослаблено до дискреционного", ar: "تم إضعاف الالتزام الإلزامي إلى تقديري" } },
+      { category: "Scope Change", detail: '"all full-time employees" → "eligible employees"', effect: { en: "Coverage narrowed to a subset", es: "Cobertura reducida a un subgrupo", fr: "Couverture réduite à un sous-ensemble", zh: "覆盖范围缩小到一个子集", ru: "Покрытие сужено до подгруппы", ar: "تم تضييق التغطية إلى مجموعة فرعية" } },
+      { category: "Threshold Shift", detail: '"within 30 days" → "within a reasonable timeframe"', effect: { en: "Fixed deadline replaced with subjective standard", es: "Plazo fijo reemplazado por estándar subjetivo", fr: "Délai fixe remplacé par un critère subjectif", zh: "固定期限被主观标准取代", ru: "Фиксированный срок заменён субъективным стандартом", ar: "تم استبدال الموعد النهائي الثابت بمعيار شخصي" } },
+      { category: "Obligation Removal", detail: "Mandatory duty weakened to discretionary", effect: { en: "Core obligation effectively removed", es: "Obligación esencial efectivamente eliminada", fr: "Obligation fondamentale effectivement supprimée", zh: "核心义务实际上已取消", ru: "Основное обязательство фактически устранено", ar: "تمت إزالة الالتزام الأساسي فعلياً" } },
     ],
   },
   threshold: {
@@ -113,13 +138,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "Payment deadline extended from 15 to 45 days. A written exception clause allows further extension at the provider's discretion.",
       es: "El plazo de pago se extiende de 15 a 45 días. Una cláusula de excepción escrita permite una extensión adicional a discreción del proveedor.",
       fr: "Le délai de paiement est prolongé de 15 à 45 jours. Une clause d'exception écrite permet une prolongation supplémentaire à la discrétion du prestataire.",
-      de: "Die Zahlungsfrist wurde von 15 auf 45 Tage verlängert. Eine schriftliche Ausnahmeklausel ermöglicht eine weitere Verlängerung nach Ermessen des Anbieters.",
       zh: "付款期限从15天延长至45天。书面例外条款允许供应商酌情进一步延长。",
-      he: "מועד התשלום הוארך מ-15 ל-45 יום. סעיף חריג בכתב מאפשר הארכה נוספת לפי שיקול דעת הספק.",
       ru: "Срок оплаты увеличен с 15 до 45 дней. Письменная оговорка позволяет дальнейшее продление по усмотрению поставщика.",
+      ar: "تم تمديد الموعد النهائي للدفع من 15 إلى 45 يوماً. يسمح شرط الاستثناء الكتابي بمزيد من التمديد.",
     },
     changes: [
-      { category: "Threshold Shift", detail: '"within 15 days" → "within 45 days"', effect: { en: "Payment window tripled", es: "Ventana de pago triplicada", fr: "Fenêtre de paiement triplée", de: "Zahlungsfenster verdreifacht", zh: "付款窗口增加了三倍", he: "חלון התשלום שולש", ru: "Окно оплаты утроено" } },
+      { category: "Threshold Shift", detail: '"within 15 days" → "within 45 days"', effect: { en: "Payment window tripled", es: "Ventana de pago triplicada", fr: "Fenêtre de paiement triplée", zh: "付款窗口增加了三倍", ru: "Окно оплаты утроено", ar: "تضاعفت نافذة الدفع ثلاث مرات" } },
     ],
   },
   obligation: {
@@ -129,13 +153,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "Filing an appeal changes from mandatory to optional. The deadline doubles from 30 to 60 days.",
       es: "Presentar una apelación cambia de obligatorio a opcional. El plazo se duplica de 30 a 60 días.",
       fr: "Le dépôt d'un appel passe d'obligatoire à facultatif. Le délai double, passant de 30 à 60 jours.",
-      de: "Die Einlegung einer Berufung ändert sich von verpflichtend zu optional. Die Frist verdoppelt sich von 30 auf 60 Tage.",
       zh: "提起上诉从强制变为可选。期限从30天增加到60天。",
-      he: "הגשת ערעור משתנה מחובה לאופציונלית. המועד מוכפל מ-30 ל-60 יום.",
       ru: "Подача апелляции меняется с обязательной на необязательную. Срок удваивается с 30 до 60 дней.",
+      ar: "يتحول تقديم الاستئناف من إلزامي إلى اختياري. يتضاعف الموعد النهائي من 30 إلى 60 يوماً.",
     },
     changes: [
-      { category: "Obligation Removal", detail: '"shall be filed" → "may be filed"', effect: { en: "Mandatory filing weakened to optional", es: "Presentación obligatoria debilitada a opcional", fr: "Dépôt obligatoire affaibli en facultatif", de: "Pflichteinreichung zu optional abgeschwächt", zh: "强制提交弱化为可选", he: "הגשה חובה הוחלשה לאופציונלית", ru: "Обязательная подача ослаблена до необязательной" } },
+      { category: "Obligation Removal", detail: '"shall be filed" → "may be filed"', effect: { en: "Mandatory filing weakened to optional", es: "Presentación obligatoria debilitada a opcional", fr: "Dépôt obligatoire affaibli en facultatif", zh: "强制提交弱化为可选", ru: "Обязательная подача ослаблена до необязательной", ar: "تم إضعاف التقديم الإلزامي إلى اختياري" } },
     ],
   },
   scope: {
@@ -145,13 +168,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "Coverage narrows from all diagnostic imaging to only certain procedures deemed medically necessary. Discretion is introduced where none existed.",
       es: "La cobertura se reduce de todas las imágenes diagnósticas a solo ciertos procedimientos considerados médicamente necesarios. Se introduce discreción donde no existía.",
       fr: "La couverture se réduit de toute l'imagerie diagnostique à certaines procédures jugées médicalement nécessaires. Un pouvoir discrétionnaire est introduit là où il n'existait pas.",
-      de: "Die Deckung verengt sich von der gesamten diagnostischen Bildgebung auf bestimmte als medizinisch notwendig erachtete Verfahren. Ermessensspielraum wird eingeführt, wo keiner bestand.",
       zh: "覆盖范围从所有诊断影像缩小到仅某些被认为医学上必要的程序。引入了之前不存在的自由裁量权。",
-      he: "הכיסוי מצטמצם מכל הדימות האבחנתי לנהלים מסוימים בלבד הנחשבים נחוצים רפואית. שיקול דעת מוכנס היכן שלא היה קיים.",
       ru: "Покрытие сужается от всей диагностической визуализации до определённых процедур, признанных медицински необходимыми. Вводится усмотрение там, где его не было.",
+      ar: "تضيق التغطية من جميع التصوير التشخيصي إلى إجراءات معينة فقط تُعتبر ضرورية طبياً.",
     },
     changes: [
-      { category: "Scope Change", detail: '"all diagnostic imaging" → "certain diagnostic imaging procedures"', effect: { en: "Broad coverage narrowed to selective subset", es: "Cobertura amplia reducida a subgrupo selectivo", fr: "Couverture large réduite à un sous-ensemble sélectif", de: "Breite Deckung auf selektive Teilmenge eingeschränkt", zh: "广泛覆盖缩小到选择性子集", he: "כיסוי רחב צומצם לתת-קבוצה סלקטיבית", ru: "Широкое покрытие сужено до избранной подгруппы" } },
+      { category: "Scope Change", detail: '"all diagnostic imaging" → "certain diagnostic imaging procedures"', effect: { en: "Broad coverage narrowed to selective subset", es: "Cobertura amplia reducida a subgrupo selectivo", fr: "Couverture large réduite à un sous-ensemble sélectif", zh: "广泛覆盖缩小到选择性子集", ru: "Широкое покрытие сужено до избранной подгруппы", ar: "تم تضييق التغطية الواسعة إلى مجموعة فرعية انتقائية" } },
     ],
   },
   enforcement: {
@@ -161,13 +183,12 @@ const DEMO_DATA: Partial<Record<ShiftKey, { original: string; revised: string; o
       en: "The fixed annual deadline is removed. Publication frequency and timing become discretionary. The public loses a guaranteed reporting schedule.",
       es: "Se elimina el plazo anual fijo. La frecuencia y el momento de publicación se vuelven discrecionales. El público pierde un calendario de informes garantizado.",
       fr: "Le délai annuel fixe est supprimé. La fréquence et le calendrier de publication deviennent discrétionnaires. Le public perd un calendrier de rapports garanti.",
-      de: "Die feste jährliche Frist wird aufgehoben. Veröffentlichungshäufigkeit und -zeitpunkt werden ermessensabhängig. Die Öffentlichkeit verliert einen garantierten Berichtszeitplan.",
       zh: "固定的年度截止日期被取消。发布频率和时间变为自由裁量。公众失去了有保障的报告时间表。",
-      he: "המועד השנתי הקבוע מוסר. תדירות ועיתוי הפרסום הופכים לשיקול דעת. הציבור מאבד לוח זמנים מובטח לדיווח.",
       ru: "Фиксированный годовой срок отменён. Частота и сроки публикации становятся дискреционными. Общественность теряет гарантированный график отчётности.",
+      ar: "تم إلغاء الموعد النهائي السنوي الثابت. تصبح وتيرة النشر وتوقيته تقديرية.",
     },
     changes: [
-      { category: "Enforcement Modification", detail: '"shall publish an annual report by March 1" → "may publish periodic reports as it deems appropriate"', effect: { en: "Enforceable deadline replaced with open-ended discretion", es: "Plazo ejecutable reemplazado por discreción abierta", fr: "Délai exécutoire remplacé par un pouvoir discrétionnaire illimité", de: "Durchsetzbare Frist durch unbegrenztes Ermessen ersetzt", zh: "可执行的截止日期被开放式自由裁量取代", he: "מועד אכיף הוחלף בשיקול דעת פתוח", ru: "Исполнимый срок заменён неограниченным усмотрением" } },
+      { category: "Enforcement Modification", detail: '"shall publish an annual report by March 1" → "may publish periodic reports as it deems appropriate"', effect: { en: "Enforceable deadline replaced with open-ended discretion", es: "Plazo ejecutable reemplazado por discreción abierta", fr: "Délai exécutoire remplacé par un pouvoir discrétionnaire illimité", zh: "可执行的截止日期被开放式自由裁量取代", ru: "Исполнимый срок заменён неограниченным усмотрением", ar: "تم استبدال الموعد النهائي القابل للتنفيذ بسلطة تقديرية مفتوحة" } },
     ],
   },
 };
@@ -185,7 +206,7 @@ const Landing = () => {
   }, []);
 
   const demo = useMemo(() => DEMO_DATA[shift] ?? DEMO_DATA["all"]!, [shift]);
-  const isRtl = lang === "he";
+  const isRtl = RTL_LANGS.includes(lang);
 
   return (
     <div className="min-h-dvh bg-background p-6 md:p-10 max-w-3xl mx-auto">
@@ -278,7 +299,7 @@ const Landing = () => {
           <div className="border-t border-border pt-4">
             <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Operational Effect</span>
             <span className={`text-foreground leading-[1.8] block ${isRtl ? "text-right" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
-              {demo.operationalEffect[lang]}
+              {lt(demo.operationalEffect, lang)}
             </span>
           </div>
         </div>
@@ -301,7 +322,7 @@ const Landing = () => {
                   <span className="font-medium">{c.category}</span> — {c.detail}
                   <br />
                   <span className={`text-muted-foreground text-xs ${isRtl ? "text-right block" : ""}`} dir={isRtl ? "rtl" : "ltr"}>
-                    {c.effect[lang]}
+                    {lt(c.effect, lang)}
                   </span>
                 </span>
               </li>
