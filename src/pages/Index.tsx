@@ -228,9 +228,9 @@ const Index = () => {
         />
       </div>
 
-      {/* Scope + Language selectors above Analyze */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="flex-1">
+      {/* Control group — stacked, matching Example section */}
+      <div className="space-y-3 mb-4">
+        <div>
           <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
             {t(uiLang, "scopeLabel")}
           </label>
@@ -247,7 +247,7 @@ const Index = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex-1">
+        <div>
           <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
             {t(uiLang, "explanationLanguage")}
           </label>
