@@ -105,7 +105,21 @@ export type TranslationKey =
   | "scopeChangeExplanation"
   | "thresholdShiftExplanation"
   | "actionDomainShiftExplanation"
-  | "obligationRemovalExplanation";
+  | "obligationRemovalExplanation"
+  | "evidenceRetrieval"
+  | "retrievingEvidence"
+  | "verifySource"
+  | "evidenceFound"
+  | "evidenceNotFound"
+  | "evidenceNotRequired"
+  | "evidenceSnippet"
+  | "evidenceSource"
+  | "evidenceSection"
+  | "evidenceComparison"
+  | "comparisonMatch"
+  | "comparisonPartial"
+  | "comparisonUnclear"
+  | "noSourceFound";
 
 type LangMap = Partial<Record<UILanguage, string>> & { English: string };
 
@@ -493,6 +507,104 @@ const translations: Record<TranslationKey, LangMap> = {
     Arabic: "يزيل أو يضعف التزامًا سابقًا",
     Somali: "Wuxuu ka saaraa ama daciifiyaa waajib horey loo sheegay",
     Ukrainian: "Знімає або послаблює раніше визначене зобов'язання",
+  },
+  evidenceRetrieval: {
+    English: "Evidence Verification",
+    Spanish: "Verificación de evidencia",
+    Arabic: "التحقق من الأدلة",
+    Somali: "Xaqiijinta caddaynta",
+    Ukrainian: "Перевірка доказів",
+  },
+  retrievingEvidence: {
+    English: "Retrieving evidence…",
+    Spanish: "Recuperando evidencia…",
+    Arabic: "جارٍ استرجاع الأدلة…",
+    Somali: "Caddaynta la soo celiyey…",
+    Ukrainian: "Отримання доказів…",
+  },
+  verifySource: {
+    English: "Verify Sources",
+    Spanish: "Verificar fuentes",
+    Arabic: "تحقق من المصادر",
+    Somali: "Xaqiiji ilaha",
+    Ukrainian: "Перевірити джерела",
+  },
+  evidenceFound: {
+    English: "Evidence found",
+    Spanish: "Evidencia encontrada",
+    Arabic: "تم العثور على دليل",
+    Somali: "Caddayn la helay",
+    Ukrainian: "Докази знайдено",
+  },
+  evidenceNotFound: {
+    English: "No source found",
+    Spanish: "No se encontró fuente",
+    Arabic: "لم يتم العثور على مصدر",
+    Somali: "Isha lama helin",
+    Ukrainian: "Джерело не знайдено",
+  },
+  evidenceNotRequired: {
+    English: "Verification not required",
+    Spanish: "Verificación no requerida",
+    Arabic: "التحقق غير مطلوب",
+    Somali: "Xaqiijinta looma baahna",
+    Ukrainian: "Перевірка не потрібна",
+  },
+  evidenceSnippet: {
+    English: "Source snippet",
+    Spanish: "Fragmento de la fuente",
+    Arabic: "مقتطف من المصدر",
+    Somali: "Qayb ka mid ah isha",
+    Ukrainian: "Фрагмент джерела",
+  },
+  evidenceSource: {
+    English: "Source",
+    Spanish: "Fuente",
+    Arabic: "مصدر",
+    Somali: "Isha",
+    Ukrainian: "Джерело",
+  },
+  evidenceSection: {
+    English: "Section",
+    Spanish: "Sección",
+    Arabic: "قسم",
+    Somali: "Qaybta",
+    Ukrainian: "Розділ",
+  },
+  evidenceComparison: {
+    English: "Match quality",
+    Spanish: "Calidad de coincidencia",
+    Arabic: "جودة المطابقة",
+    Somali: "Tayada u dhiganka",
+    Ukrainian: "Якість відповідності",
+  },
+  comparisonMatch: {
+    English: "Direct match",
+    Spanish: "Coincidencia directa",
+    Arabic: "تطابق مباشر",
+    Somali: "U dhigma toos",
+    Ukrainian: "Пряма відповідність",
+  },
+  comparisonPartial: {
+    English: "Partial match",
+    Spanish: "Coincidencia parcial",
+    Arabic: "تطابق جزئي",
+    Somali: "U dhigma qayb ahaan",
+    Ukrainian: "Часткова відповідність",
+  },
+  comparisonUnclear: {
+    English: "Unclear",
+    Spanish: "No claro",
+    Arabic: "غير واضح",
+    Somali: "Aan caddayn",
+    Ukrainian: "Незрозуміло",
+  },
+  noSourceFound: {
+    English: "No source found — do not rely on this claim without independent verification.",
+    Spanish: "No se encontró fuente — no confíe en esta afirmación sin verificación independiente.",
+    Arabic: "لم يتم العثور على مصدر — لا تعتمد على هذا الادعاء دون تحقق مستقل.",
+    Somali: "Isha lama helin — ha ku tiirsanin sheegashadaan iyada oo aan xaqiijin madaxbanaan la samayn.",
+    Ukrainian: "Джерело не знайдено — не покладайтеся на це твердження без незалежної перевірки.",
   },
 };
 
