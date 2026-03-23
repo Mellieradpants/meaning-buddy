@@ -11,6 +11,13 @@ import {
 import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, isRtlLanguage, langToCode, type UILanguage, type TranslationKey } from "@/lib/uiTranslations";
 import { classifySourceText, type ClassifiedResult } from "@/lib/classifier";
 import { type CategoryKey } from "@/lib/taxonomy";
+import {
+  shouldRetrieveEvidence,
+  extractVerifiableClaims,
+  type ClaimEvidence,
+  type EvidenceResult,
+  type EvidenceComparison,
+} from "@/lib/evidenceRetrieval";
 
 const CATEGORY_TRANSLATION_KEY: Record<CategoryKey, TranslationKey> = {
   modality_shift: "modalityShift",
@@ -28,6 +35,12 @@ const CATEGORY_EXPLANATION_KEY: Record<CategoryKey, TranslationKey> = {
   threshold_shift: "thresholdShiftExplanation",
   action_domain_shift: "actionDomainShiftExplanation",
   obligation_removal: "obligationRemovalExplanation",
+};
+
+const COMPARISON_KEY: Record<EvidenceComparison, TranslationKey> = {
+  match: "comparisonMatch",
+  partial: "comparisonPartial",
+  unclear: "comparisonUnclear",
 };
 
 type ShiftFilter = "all" | CategoryKey;
@@ -66,11 +79,95 @@ const Index = () => {
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
 
+  // Evidence retrieval state
+  const [evidence, setEvidence] = useState<EvidenceResult | null>(null);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [userRequestedEvidence, setUserRequestedEvidence] = useState(false);
+
   const isRtl = isRtlLanguage(uiLang);
 
   const handleUILangChange = (lang: UILanguage) => {
     setUiLang(lang);
     storeUILanguage(lang);
+  };
+
+  const retrieveEvidence = async (
+    sourceText: string,
+    classifiedResults: ClassifiedResult[],
+    userRequested: boolean
+  ) => {
+    const trigger = shouldRetrieveEvidence(sourceText, classifiedResults, userRequested);
+    if (!trigger.shouldRetrieve) {
+      setEvidence({
+        claims: classifiedResults.flatMap((g) =>
+          g.matches.map((m) => ({
+            claim: m,
+            category: g.category,
+            sourceClass: "general_reference" as const,
+            evidenceStatus: "not_required" as const,
+            sources: [],
+            evidenceTrace: [],
+          }))
+        ),
+        retrievalTriggered: false,
+        triggerReason: trigger.reason,
+      });
+      return;
+    }
+
+    setEvidenceLoading(true);
+    try {
+      const claims = extractVerifiableClaims(sourceText, classifiedResults);
+      if (claims.length === 0) {
+        setEvidence({
+          claims: [],
+          retrievalTriggered: true,
+          triggerReason: trigger.reason,
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("retrieve-evidence", {
+        body: { claims, sourceText: sourceText.slice(0, 3000) },
+      });
+
+      if (error || data?.error) {
+        console.error("Evidence retrieval error:", error || data?.error);
+        toast.error("Evidence retrieval failed.");
+        return;
+      }
+
+      const claimResults: any[] = data?.claimResults || [];
+      const evidenceClaims: ClaimEvidence[] = claims.map((c, i) => {
+        const r = claimResults.find((cr: any) => cr.claimIndex === i);
+        return {
+          claim: c.claim,
+          category: c.category,
+          sourceClass: c.sourceClass,
+          evidenceStatus: r?.evidenceStatus || "not_found",
+          sources: (r?.sources || []).map((s: any) => ({
+            sourceName: s.sourceName || "",
+            link: s.link || "",
+            snippet: s.snippet || "",
+            section: s.section,
+            timestamp: s.timestamp,
+          })),
+          evidenceTrace: r?.sources?.map((s: any) => ({
+            claimText: c.claim,
+            retrievedSnippet: s.snippet || "",
+            comparison: r?.comparison || "unclear",
+          })) || [],
+        };
+      });
+
+      setEvidence({
+        claims: evidenceClaims,
+        retrievalTriggered: true,
+        triggerReason: trigger.reason,
+      });
+    } finally {
+      setEvidenceLoading(false);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -87,7 +184,9 @@ const Index = () => {
     setLoading(true);
     setResult(null);
     setClassified(null);
+    setEvidence(null);
     setShiftFilter("all");
+    setUserRequestedEvidence(false);
 
     // Run local classification immediately
     const scopeResults = classifySourceText(text);
@@ -113,6 +212,9 @@ const Index = () => {
       setResult(data as AnalysisResult);
       setClassified(scopeResults);
 
+      // Conditionally trigger evidence retrieval
+      retrieveEvidence(text, scopeResults, false);
+
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
@@ -123,6 +225,13 @@ const Index = () => {
     }
   };
 
+  const handleVerifySources = () => {
+    if (classified && text.trim()) {
+      setUserRequestedEvidence(true);
+      retrieveEvidence(text, classified, true);
+    }
+  };
+
   const handleClear = () => {
     requestIdRef.current++;
     abortRef.current?.abort();
@@ -130,8 +239,11 @@ const Index = () => {
     setText("");
     setResult(null);
     setClassified(null);
+    setEvidence(null);
     setLoading(false);
+    setEvidenceLoading(false);
     setShiftFilter("all");
+    setUserRequestedEvidence(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -184,6 +296,22 @@ const Index = () => {
         parts.push("");
       }
     }
+    // Evidence section
+    if (evidence && evidence.retrievalTriggered && evidence.claims.length > 0) {
+      parts.push(`## ${t(uiLang, "evidenceRetrieval")}`, "");
+      for (const claim of evidence.claims) {
+        parts.push(`### ${claim.claim}`);
+        parts.push(`Status: ${claim.evidenceStatus}`);
+        for (const src of claim.sources) {
+          parts.push(`- ${t(uiLang, "evidenceSource")}: ${src.sourceName}`);
+          if (src.link) parts.push(`  Link: ${src.link}`);
+          parts.push(`  ${t(uiLang, "evidenceSnippet")}: "${src.snippet}"`);
+          if (src.section) parts.push(`  ${t(uiLang, "evidenceSection")}: ${src.section}`);
+          if (src.timestamp) parts.push(`  Date: ${src.timestamp}`);
+        }
+        parts.push("");
+      }
+    }
     return parts.join("\n");
   };
 
@@ -200,6 +328,30 @@ const Index = () => {
     a.download = "meaning-buddy-analysis.md";
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const comparisonBadgeClass = (comp: EvidenceComparison) => {
+    switch (comp) {
+      case "match":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
+      case "partial":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800";
+      case "unclear":
+        return "bg-muted text-muted-foreground border-border";
+    }
+  };
+
+  const statusIcon = (status: string) => {
+    switch (status) {
+      case "found":
+        return "✓";
+      case "not_found":
+        return "✗";
+      case "not_required":
+        return "—";
+      default:
+        return "?";
+    }
   };
 
   return (
@@ -393,6 +545,130 @@ const Index = () => {
           {showScope && classified && classified.length === 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
               <p className="text-sm text-muted-foreground">{t(uiLang, "noChangesDetected")}</p>
+            </div>
+          )}
+
+          {/* Evidence Verification Section */}
+          {showScope && (
+            <div className="rounded-lg border border-border bg-card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {t(uiLang, "evidenceRetrieval")}
+                </span>
+                {/* Manual verify button — shown when retrieval wasn't auto-triggered */}
+                {!evidence?.retrievalTriggered && !evidenceLoading && classified && classified.length > 0 && (
+                  <button
+                    onClick={handleVerifySources}
+                    className="text-xs font-medium px-3 py-1.5 rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-accent transition-colors"
+                  >
+                    {t(uiLang, "verifySource")}
+                  </button>
+                )}
+              </div>
+
+              {/* Evidence loading */}
+              {evidenceLoading && (
+                <div className="space-y-3 animate-pulse">
+                  <div className="h-3 w-2/3 rounded bg-muted" />
+                  <div className="h-3 w-1/2 rounded bg-muted" />
+                  <div className="h-3 w-3/4 rounded bg-muted" />
+                  <p className="text-xs text-muted-foreground mt-2">{t(uiLang, "retrievingEvidence")}</p>
+                </div>
+              )}
+
+              {/* Evidence not triggered */}
+              {!evidenceLoading && evidence && !evidence.retrievalTriggered && (
+                <p className="text-xs text-muted-foreground">
+                  {t(uiLang, "evidenceNotRequired")}
+                </p>
+              )}
+
+              {/* Evidence results */}
+              {!evidenceLoading && evidence && evidence.retrievalTriggered && evidence.claims.length > 0 && (
+                <ul className="space-y-4">
+                  {evidence.claims.map((claim, i) => (
+                    <li key={i} className="border-t border-border pt-3 first:border-t-0 first:pt-0">
+                      {/* Claim text */}
+                      <div className="flex items-start gap-2 mb-2">
+                        <span className={`text-xs font-mono mt-0.5 ${
+                          claim.evidenceStatus === "found" ? "text-green-600 dark:text-green-400" :
+                          claim.evidenceStatus === "not_found" ? "text-destructive" : "text-muted-foreground"
+                        }`}>
+                          {statusIcon(claim.evidenceStatus)}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground break-words">
+                            {claim.claim}
+                          </p>
+                          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                            {t(uiLang, CATEGORY_TRANSLATION_KEY[claim.category])} · {claim.sourceClass.replace(/_/g, " ")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Sources */}
+                      {claim.evidenceStatus === "found" && claim.sources.length > 0 && (
+                        <div className="ml-5 space-y-2">
+                          {claim.sources.map((src, si) => (
+                            <div key={si} className="rounded border border-border bg-muted/50 p-3 text-xs space-y-1.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold text-foreground">{src.sourceName}</span>
+                                {src.section && (
+                                  <span className="text-muted-foreground">· {t(uiLang, "evidenceSection")}: {src.section}</span>
+                                )}
+                                {src.timestamp && (
+                                  <span className="text-muted-foreground">· {src.timestamp}</span>
+                                )}
+                              </div>
+                              {src.link && (
+                                <a
+                                  href={src.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline break-all block"
+                                >
+                                  {src.link}
+                                </a>
+                              )}
+                              <div>
+                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-0.5">
+                                  {t(uiLang, "evidenceSnippet")}
+                                </span>
+                                <blockquote className="border-l-2 border-primary/30 pl-2 text-foreground italic break-words">
+                                  "{src.snippet}"
+                                </blockquote>
+                              </div>
+                            </div>
+                          ))}
+                          {/* Comparison badge */}
+                          {claim.evidenceTrace.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                                {t(uiLang, "evidenceComparison")}:
+                              </span>
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold border ${comparisonBadgeClass(claim.evidenceTrace[0].comparison)}`}>
+                                {t(uiLang, COMPARISON_KEY[claim.evidenceTrace[0].comparison])}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Not found */}
+                      {claim.evidenceStatus === "not_found" && (
+                        <p className="ml-5 text-xs text-muted-foreground italic">
+                          {t(uiLang, "noSourceFound")}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* No claims to verify */}
+              {!evidenceLoading && evidence && evidence.retrievalTriggered && evidence.claims.length === 0 && (
+                <p className="text-xs text-muted-foreground">{t(uiLang, "noChangesDetected")}</p>
+              )}
             </div>
           )}
 
