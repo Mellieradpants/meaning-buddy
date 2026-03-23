@@ -105,7 +105,21 @@ export type TranslationKey =
   | "scopeChangeExplanation"
   | "thresholdShiftExplanation"
   | "actionDomainShiftExplanation"
-  | "obligationRemovalExplanation";
+  | "obligationRemovalExplanation"
+  | "evidenceRetrieval"
+  | "retrievingEvidence"
+  | "verifySource"
+  | "evidenceFound"
+  | "evidenceNotFound"
+  | "evidenceNotRequired"
+  | "evidenceSnippet"
+  | "evidenceSource"
+  | "evidenceSection"
+  | "evidenceComparison"
+  | "comparisonMatch"
+  | "comparisonPartial"
+  | "comparisonUnclear"
+  | "noSourceFound";
 
 type LangMap = Partial<Record<UILanguage, string>> & { English: string };
 
