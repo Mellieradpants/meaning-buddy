@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, isRtlLanguage, langToCode, type UILanguage, type TranslationKey } from "@/lib/uiTranslations";
+import { SHIFT_OPTIONS as SHARED_SHIFT_OPTIONS } from "@/lib/sharedConfig";
 import { classifySourceText, type ClassifiedResult } from "@/lib/classifier";
 import { type CategoryKey } from "@/lib/taxonomy";
 import {
