@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { t, UI_LANGUAGES, getStoredUILanguage, storeUILanguage, isRtlLanguage, langToCode, type UILanguage, type TranslationKey } from "@/lib/uiTranslations";
+import { SHIFT_OPTIONS as SHARED_SHIFT_OPTIONS } from "@/lib/sharedConfig";
 import { classifySourceText, type ClassifiedResult } from "@/lib/classifier";
 import { type CategoryKey } from "@/lib/taxonomy";
 import {
@@ -44,23 +45,8 @@ const COMPARISON_KEY: Record<EvidenceComparison, TranslationKey> = {
 };
 
 type ShiftFilter = "all" | CategoryKey;
-type ScopeMode = "full" | "meaning_only" | "operational_effect_only";
 
-const SHIFT_OPTIONS: { value: ShiftFilter; key: TranslationKey | null }[] = [
-  { value: "all", key: null },
-  { value: "modality_shift", key: "modalityShift" },
-  { value: "scope_change", key: "scopeChange" },
-  { value: "threshold_shift", key: "thresholdShift" },
-  { value: "actor_power_shift", key: "actorPowerShift" },
-  { value: "action_domain_shift", key: "actionDomainShift" },
-  { value: "obligation_removal", key: "obligationRemoval" },
-];
-
-const SCOPE_OPTIONS: { value: ScopeMode; key: TranslationKey }[] = [
-  { value: "full", key: "scopeFull" },
-  { value: "meaning_only", key: "scopeMeaningOnly" },
-  { value: "operational_effect_only", key: "scopeOperationalOnly" },
-];
+const SHIFT_FILTER_OPTIONS = SHARED_SHIFT_OPTIONS;
 
 interface AnalysisResult {
   plainLanguageMeaning: string;
@@ -74,7 +60,6 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [uiLang, setUiLang] = useState<UILanguage>(getStoredUILanguage);
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("all");
-  const [scope, setScope] = useState<ScopeMode>("full");
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
@@ -253,9 +238,8 @@ const Index = () => {
     return classified.filter((g) => g.category === shiftFilter);
   }, [classified, shiftFilter]);
 
-  const showMeaning = scope === "full" || scope === "meaning_only";
-  const showEffect = scope === "full" || scope === "operational_effect_only";
-  const showScope = scope === "full";
+  const showMeaning = true;
+  const showEffect = true;
 
   // Ctrl+Enter shortcut
   useEffect(() => {
@@ -285,7 +269,7 @@ const Index = () => {
     if (result && showEffect) {
       parts.push(`## ${t(uiLang, "operationalEffect")}`, "", result.operationalEffect, "");
     }
-    if (showScope && filteredClassified && filteredClassified.length > 0) {
+    if (filteredClassified && filteredClassified.length > 0) {
       parts.push(`## ${t(uiLang, "detectedChanges")}`, "");
       for (const group of filteredClassified) {
         const label = t(uiLang, CATEGORY_TRANSLATION_KEY[group.category]);
@@ -384,16 +368,16 @@ const Index = () => {
       <div className="space-y-3 mb-4">
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-            {t(uiLang, "scopeLabel")}
+            {t(uiLang, "shift")}
           </label>
-          <Select value={scope} onValueChange={(v) => setScope(v as ScopeMode)}>
+          <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
             <SelectTrigger className="w-full bg-card text-foreground text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SCOPE_OPTIONS.map((o) => (
+              {SHIFT_FILTER_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
-                  {t(uiLang, o.key)}
+                  {o.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -483,27 +467,9 @@ const Index = () => {
             )}
           </div>
 
-          {/* Detected Changes — only in full scope mode */}
-          {showScope && classified && classified.length > 0 && (
+          {/* Detected Changes */}
+          {classified && classified.length > 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
-              {/* Shift filter */}
-              <div className="mb-4 max-w-xs">
-                <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                  {t(uiLang, "shift")}
-                </label>
-                <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
-                  <SelectTrigger className="w-full bg-card text-foreground text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SHIFT_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.key ? t(uiLang, o.key) : t(uiLang, "allShifts")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* Detected changes label */}
               <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
@@ -542,14 +508,14 @@ const Index = () => {
             </div>
           )}
 
-          {showScope && classified && classified.length === 0 && (
+          {classified && classified.length === 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
               <p className="text-sm text-muted-foreground">{t(uiLang, "noChangesDetected")}</p>
             </div>
           )}
 
           {/* Evidence Verification Section */}
-          {showScope && (
+          {true && (
             <div className="rounded-lg border border-border bg-card p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">
