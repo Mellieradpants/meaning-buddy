@@ -89,7 +89,7 @@ export type TranslationKey =
   | "noChangesDetected"
   | "shift"
   | "allShifts"
-  | "explanationLanguage"
+  | "outputLanguage"
   | "scopeLabel"
   | "scopeFull"
   | "scopeMeaningOnly"
