@@ -139,6 +139,7 @@ const DEMO_DATA: Partial<Record<ShiftKey, DemoData>> = {
       { category: "Scope Change", detail: '"all diagnostic imaging" → "certain diagnostic imaging procedures"', effect: { en: "Broad coverage narrowed to selective subset", es: "Cobertura amplia reducida a subgrupo selectivo", fr: "Couverture large réduite à un sous-ensemble sélectif", zh: "广泛覆盖缩小到选择性子集", ru: "Широкое покрытие сужено до избранной подгруппы", ar: "تم تضييق التغطية الواسعة إلى مجموعة فرعية انتقائية" } },
     ],
   },
+};
 
 const Landing = () => {
   const navigate = useNavigate();
