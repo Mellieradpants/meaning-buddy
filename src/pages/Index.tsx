@@ -269,7 +269,7 @@ const Index = () => {
     if (result && showEffect) {
       parts.push(`## ${t(uiLang, "operationalEffect")}`, "", result.operationalEffect, "");
     }
-    if (showScope && filteredClassified && filteredClassified.length > 0) {
+    if (filteredClassified && filteredClassified.length > 0) {
       parts.push(`## ${t(uiLang, "detectedChanges")}`, "");
       for (const group of filteredClassified) {
         const label = t(uiLang, CATEGORY_TRANSLATION_KEY[group.category]);
@@ -468,7 +468,7 @@ const Index = () => {
           </div>
 
           {/* Detected Changes — only in full scope mode */}
-          {showScope && classified && classified.length > 0 && (
+          {classified {showScope && classified && classified.length > 0 && ({showScope && classified && classified.length > 0 && ( classified.length > 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
               {/* Shift filter */}
               <div className="mb-4 max-w-xs">
@@ -526,14 +526,14 @@ const Index = () => {
             </div>
           )}
 
-          {showScope && classified && classified.length === 0 && (
+          {classified && classified.length === 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
               <p className="text-sm text-muted-foreground">{t(uiLang, "noChangesDetected")}</p>
             </div>
           )}
 
           {/* Evidence Verification Section */}
-          {showScope && (
+          {(
             <div className="rounded-lg border border-border bg-card p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">
