@@ -45,23 +45,8 @@ const COMPARISON_KEY: Record<EvidenceComparison, TranslationKey> = {
 };
 
 type ShiftFilter = "all" | CategoryKey;
-type ScopeMode = "full" | "meaning_only" | "operational_effect_only";
 
-const SHIFT_OPTIONS: { value: ShiftFilter; key: TranslationKey | null }[] = [
-  { value: "all", key: null },
-  { value: "modality_shift", key: "modalityShift" },
-  { value: "scope_change", key: "scopeChange" },
-  { value: "threshold_shift", key: "thresholdShift" },
-  { value: "actor_power_shift", key: "actorPowerShift" },
-  { value: "action_domain_shift", key: "actionDomainShift" },
-  { value: "obligation_removal", key: "obligationRemoval" },
-];
-
-const SCOPE_OPTIONS: { value: ScopeMode; key: TranslationKey }[] = [
-  { value: "full", key: "scopeFull" },
-  { value: "meaning_only", key: "scopeMeaningOnly" },
-  { value: "operational_effect_only", key: "scopeOperationalOnly" },
-];
+const SHIFT_FILTER_OPTIONS = SHARED_SHIFT_OPTIONS;
 
 interface AnalysisResult {
   plainLanguageMeaning: string;
