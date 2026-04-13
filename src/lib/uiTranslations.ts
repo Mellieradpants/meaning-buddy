@@ -89,7 +89,7 @@ export type TranslationKey =
   | "noChangesDetected"
   | "shift"
   | "allShifts"
-  | "explanationLanguage"
+  | "outputLanguage"
   | "scopeLabel"
   | "scopeFull"
   | "scopeMeaningOnly"
@@ -340,20 +340,20 @@ const translations: Record<TranslationKey, LangMap> = {
     Somali: "Dhammaan beddelashada",
     Ukrainian: "Усі зміщення",
   },
-  explanationLanguage: {
-    English: "Explanation language",
-    Spanish: "Idioma de explicación",
-    Arabic: "لغة الشرح",
-    Somali: "Luuqadda sharaxaadda",
-    Ukrainian: "Мова пояснення",
-    "Mandarin Chinese": "解释语言",
-    Russian: "Язык объяснения",
-    French: "Langue d'explication",
-    Portuguese: "Idioma de explicação",
-    Vietnamese: "Ngôn ngữ giải thích",
-    Korean: "설명 언어",
-    Urdu: "وضاحت کی زبان",
-    "Farsi / Persian": "زبان توضیح",
+  outputLanguage: {
+    English: "Output language",
+    Spanish: "Idioma de salida",
+    Arabic: "لغة الإخراج",
+    Somali: "Luuqadda wax soo saarka",
+    Ukrainian: "Мова виведення",
+    "Mandarin Chinese": "输出语言",
+    Russian: "Язык вывода",
+    French: "Langue de sortie",
+    Portuguese: "Idioma de saída",
+    Vietnamese: "Ngôn ngữ đầu ra",
+    Korean: "출력 언어",
+    Urdu: "آؤٹ پٹ زبان",
+    "Farsi / Persian": "زبان خروجی",
   },
   scopeLabel: {
     English: "Scope",

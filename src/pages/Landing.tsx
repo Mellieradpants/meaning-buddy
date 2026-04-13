@@ -8,44 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type ShiftKey = "all" | "modality" | "action_domain" | "threshold" | "actor_power" | "obligation" | "scope" | "enforcement";
-type LangKey = "en" | "es" | "ar" | "so" | "uk" | "ht" | "zh" | "ru" | "fr" | "pt" | "prs" | "ps" | "vi" | "ko" | "tl" | "ur" | "bn" | "pa" | "am" | "fa";
-
-const RTL_LANGS: LangKey[] = ["ar", "fa", "ur", "prs", "ps"];
-
-const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
-  { value: "all", label: "All shifts" },
-  { value: "modality", label: "Modality Shift" },
-  { value: "action_domain", label: "Action Domain Shift" },
-  { value: "threshold", label: "Threshold / Standard Shift" },
-  { value: "actor_power", label: "Actor Power Shift" },
-  { value: "obligation", label: "Obligation Removal" },
-  { value: "scope", label: "Scope Change" },
-  { value: "enforcement", label: "Enforcement Modification" },
-];
-
-const LANG_OPTIONS: { value: LangKey; label: string }[] = [
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-  { value: "ar", label: "Arabic" },
-  { value: "so", label: "Somali" },
-  { value: "uk", label: "Ukrainian" },
-  { value: "ht", label: "Haitian Creole" },
-  { value: "zh", label: "Mandarin Chinese" },
-  { value: "ru", label: "Russian" },
-  { value: "fr", label: "French" },
-  { value: "pt", label: "Portuguese" },
-  { value: "prs", label: "Dari" },
-  { value: "ps", label: "Pashto" },
-  { value: "vi", label: "Vietnamese" },
-  { value: "ko", label: "Korean" },
-  { value: "tl", label: "Tagalog" },
-  { value: "ur", label: "Urdu" },
-  { value: "bn", label: "Bengali" },
-  { value: "pa", label: "Punjabi" },
-  { value: "am", label: "Amharic" },
-  { value: "fa", label: "Farsi / Persian" },
-];
+import { SHIFT_OPTIONS, LANG_OPTIONS, RTL_LANGS, type ShiftKey, type LangKey } from "@/lib/sharedConfig";
 
 type LangText = Partial<Record<LangKey, string>> & { en: string };
 
@@ -176,21 +139,6 @@ const DEMO_DATA: Partial<Record<ShiftKey, DemoData>> = {
       { category: "Scope Change", detail: '"all diagnostic imaging" → "certain diagnostic imaging procedures"', effect: { en: "Broad coverage narrowed to selective subset", es: "Cobertura amplia reducida a subgrupo selectivo", fr: "Couverture large réduite à un sous-ensemble sélectif", zh: "广泛覆盖缩小到选择性子集", ru: "Широкое покрытие сужено до избранной подгруппы", ar: "تم تضييق التغطية الواسعة إلى مجموعة فرعية انتقائية" } },
     ],
   },
-  enforcement: {
-    original: "The Department shall publish an annual environmental impact report by March 1 of each year.",
-    revised: "The Department may publish periodic environmental impact reports as it deems appropriate.",
-    operationalEffect: {
-      en: "The fixed annual deadline is removed. Publication frequency and timing become discretionary. The public loses a guaranteed reporting schedule.",
-      es: "Se elimina el plazo anual fijo. La frecuencia y el momento de publicación se vuelven discrecionales. El público pierde un calendario de informes garantizado.",
-      fr: "Le délai annuel fixe est supprimé. La fréquence et le calendrier de publication deviennent discrétionnaires. Le public perd un calendrier de rapports garanti.",
-      zh: "固定的年度截止日期被取消。发布频率和时间变为自由裁量。公众失去了有保障的报告时间表。",
-      ru: "Фиксированный годовой срок отменён. Частота и сроки публикации становятся дискреционными. Общественность теряет гарантированный график отчётности.",
-      ar: "تم إلغاء الموعد النهائي السنوي الثابت. تصبح وتيرة النشر وتوقيته تقديرية.",
-    },
-    changes: [
-      { category: "Enforcement Modification", detail: '"shall publish an annual report by March 1" → "may publish periodic reports as it deems appropriate"', effect: { en: "Enforceable deadline replaced with open-ended discretion", es: "Plazo ejecutable reemplazado por discreción abierta", fr: "Délai exécutoire remplacé par un pouvoir discrétionnaire illimité", zh: "可执行的截止日期被开放式自由裁量取代", ru: "Исполнимый срок заменён неограниченным усмотрением", ar: "تم استبدال الموعد النهائي القابل للتنفيذ بسلطة تقديرية مفتوحة" } },
-    ],
-  },
 };
 
 const Landing = () => {
@@ -272,7 +220,7 @@ const Landing = () => {
             </Select>
           </div>
           <div className="flex-1">
-            <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Explanation language</label>
+            <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Output language</label>
             <Select value={lang} onValueChange={(v) => setLang(v as LangKey)}>
               <SelectTrigger className="w-full bg-card text-foreground text-sm">
                 <SelectValue />
