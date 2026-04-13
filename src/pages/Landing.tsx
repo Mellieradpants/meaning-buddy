@@ -220,7 +220,7 @@ const Landing = () => {
             </Select>
           </div>
           <div className="flex-1">
-            <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Explanation language</label>
+            <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Output language</label>
             <Select value={lang} onValueChange={(v) => setLang(v as LangKey)}>
               <SelectTrigger className="w-full bg-card text-foreground text-sm">
                 <SelectValue />
