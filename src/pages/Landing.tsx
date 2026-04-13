@@ -8,44 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type ShiftKey = "all" | "modality" | "action_domain" | "threshold" | "actor_power" | "obligation" | "scope" | "enforcement";
-type LangKey = "en" | "es" | "ar" | "so" | "uk" | "ht" | "zh" | "ru" | "fr" | "pt" | "prs" | "ps" | "vi" | "ko" | "tl" | "ur" | "bn" | "pa" | "am" | "fa";
-
-const RTL_LANGS: LangKey[] = ["ar", "fa", "ur", "prs", "ps"];
-
-const SHIFT_OPTIONS: { value: ShiftKey; label: string }[] = [
-  { value: "all", label: "All shifts" },
-  { value: "modality", label: "Modality Shift" },
-  { value: "action_domain", label: "Action Domain Shift" },
-  { value: "threshold", label: "Threshold / Standard Shift" },
-  { value: "actor_power", label: "Actor Power Shift" },
-  { value: "obligation", label: "Obligation Removal" },
-  { value: "scope", label: "Scope Change" },
-  { value: "enforcement", label: "Enforcement Modification" },
-];
-
-const LANG_OPTIONS: { value: LangKey; label: string }[] = [
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-  { value: "ar", label: "Arabic" },
-  { value: "so", label: "Somali" },
-  { value: "uk", label: "Ukrainian" },
-  { value: "ht", label: "Haitian Creole" },
-  { value: "zh", label: "Mandarin Chinese" },
-  { value: "ru", label: "Russian" },
-  { value: "fr", label: "French" },
-  { value: "pt", label: "Portuguese" },
-  { value: "prs", label: "Dari" },
-  { value: "ps", label: "Pashto" },
-  { value: "vi", label: "Vietnamese" },
-  { value: "ko", label: "Korean" },
-  { value: "tl", label: "Tagalog" },
-  { value: "ur", label: "Urdu" },
-  { value: "bn", label: "Bengali" },
-  { value: "pa", label: "Punjabi" },
-  { value: "am", label: "Amharic" },
-  { value: "fa", label: "Farsi / Persian" },
-];
+import { SHIFT_OPTIONS, LANG_OPTIONS, RTL_LANGS, type ShiftKey, type LangKey } from "@/lib/sharedConfig";
 
 type LangText = Partial<Record<LangKey, string>> & { en: string };
 
