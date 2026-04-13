@@ -467,27 +467,9 @@ const Index = () => {
             )}
           </div>
 
-          {/* Detected Changes — only in full scope mode */}
-          {classified {showScope && classified && classified.length > 0 && ({showScope && classified && classified.length > 0 && ( classified.length > 0 && (
+          {/* Detected Changes */}
+          {classified && classified.length > 0 && (
             <div className="rounded-lg border border-border bg-card p-5">
-              {/* Shift filter */}
-              <div className="mb-4 max-w-xs">
-                <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                  {t(uiLang, "shift")}
-                </label>
-                <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
-                  <SelectTrigger className="w-full bg-card text-foreground text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SHIFT_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.key ? t(uiLang, o.key) : t(uiLang, "allShifts")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* Detected changes label */}
               <span className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
