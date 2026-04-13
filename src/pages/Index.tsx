@@ -238,9 +238,8 @@ const Index = () => {
     return classified.filter((g) => g.category === shiftFilter);
   }, [classified, shiftFilter]);
 
-  const showMeaning = scope === "full" || scope === "meaning_only";
-  const showEffect = scope === "full" || scope === "operational_effect_only";
-  const showScope = scope === "full";
+  const showMeaning = true;
+  const showEffect = true;
 
   // Ctrl+Enter shortcut
   useEffect(() => {
@@ -369,16 +368,16 @@ const Index = () => {
       <div className="space-y-3 mb-4">
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-            {t(uiLang, "scopeLabel")}
+            {t(uiLang, "shift")}
           </label>
-          <Select value={scope} onValueChange={(v) => setScope(v as ScopeMode)}>
+          <Select value={shiftFilter} onValueChange={(v) => setShiftFilter(v as ShiftFilter)}>
             <SelectTrigger className="w-full bg-card text-foreground text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SCOPE_OPTIONS.map((o) => (
+              {SHIFT_FILTER_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
-                  {t(uiLang, o.key)}
+                  {o.label}
                 </SelectItem>
               ))}
             </SelectContent>
