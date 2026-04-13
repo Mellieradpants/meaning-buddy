@@ -515,7 +515,7 @@ const Index = () => {
           )}
 
           {/* Evidence Verification Section */}
-          {(
+          {true && (
             <div className="rounded-lg border border-border bg-card p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">
