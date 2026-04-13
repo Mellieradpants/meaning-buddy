@@ -401,7 +401,7 @@ const Index = () => {
         </div>
         <div>
           <label className="block text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-            {t(uiLang, "explanationLanguage")}
+            {t(uiLang, "outputLanguage")}
           </label>
           <Select value={uiLang} onValueChange={(v) => handleUILangChange(v as UILanguage)}>
             <SelectTrigger className="w-full bg-card text-foreground text-sm">
