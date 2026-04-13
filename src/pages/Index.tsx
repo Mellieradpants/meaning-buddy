@@ -60,7 +60,6 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [uiLang, setUiLang] = useState<UILanguage>(getStoredUILanguage);
   const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("all");
-  const [shiftFilter, setShiftFilter] = useState<ShiftFilter>("all");
   const resultsRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
